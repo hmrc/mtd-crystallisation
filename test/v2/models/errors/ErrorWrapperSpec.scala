@@ -62,7 +62,7 @@ class ErrorWrapperSpec extends UnitSpec {
       Some (
         Seq(
           NinoFormatError,
-          MissingStartDateError
+          InvalidCalcIdError
         )
       )
     )
@@ -78,8 +78,8 @@ class ErrorWrapperSpec extends UnitSpec {
         |         "message": "The NINO format is invalid"
         |       },
         |       {
-        |         "code": "MISSING_START_DATE",
-        |         "message": "Missing account period start date"
+        |         "code": "FORMAT_CALCID",
+        |         "message": "The provided calculationId is invalid"
         |       }
         |   ]
         |}

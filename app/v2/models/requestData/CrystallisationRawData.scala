@@ -14,14 +14,8 @@
  * limitations under the License.
  */
 
-package v2.models
+package v2.models.requestData
 
-import v2.models.auth.UserDetails
-import v2.models.errors.Error
+import play.api.mvc.AnyContentAsJson
 
-package object outcomes {
-
-  type AuthOutcome = Either[Error, UserDetails]
-  type MtdIdLookupOutcome = Either[Error, String]
-
-}
+case class CrystallisationRawData(nino: String, body: AnyContentAsJson) extends InputData

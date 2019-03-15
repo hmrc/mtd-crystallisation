@@ -14,14 +14,12 @@
  * limitations under the License.
  */
 
-package v2.models
+package v2.models.domain
 
-import v2.models.auth.UserDetails
-import v2.models.errors.Error
+import play.api.libs.json.{Json, Reads}
 
-package object outcomes {
+case class CrystallisationRequest(calculationId: String)
 
-  type AuthOutcome = Either[Error, UserDetails]
-  type MtdIdLookupOutcome = Either[Error, String]
-
+object CrystallisationRequest {
+  implicit val reads: Reads[CrystallisationRequest] = Json.reads[CrystallisationRequest]
 }
