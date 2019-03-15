@@ -24,10 +24,10 @@ object InvalidTaxYearError extends Error("FORMAT_TAX_YEAR", "The provided tax ye
 object InvalidCalcIdError extends Error("FORMAT_CALCID", "The provided calculationId is invalid")
 
 // Backend Response Errors
-object NotFoundError extends Error("MATCHING_RESOURCE_NOT_FOUND", "The remote endpoint has indicated that no calculation exists for the calculationId or the calculationId does not relate to an intent-to-crystallise calculation")
-object IncomeSourcesChangedError extends Error("RULE_INCOME_SOURCES_CHANGED", "The remote endpoint has indicated Income Sources changed - please recalculate before crystallising")
-object RecentSubmissionsExistError extends Error("RULE_RECENT_SUBMISSIONS_EXIST", "The remote endpoint has indicated more recent submissions exist - please recalculate before crystallising")
-object ResidencyChangedError extends Error("RULE_RESIDENCY_CHANGED", "The remote endpoint has indicated Residency changed - please recalculate before crystallising")
+object NotFoundError extends Error("MATCHING_RESOURCE_NOT_FOUND", "The remote endpoint has indicated that no intent-to-crystallise calculation exists for the calculationId")
+object IncomeSourcesChangedError extends Error("RULE_INCOME_SOURCES_CHANGED", "The remote endpoint has indicated changed information for income sources.  Recalculate before crystallising")
+object RecentSubmissionsExistError extends Error("RULE_RECENT_SUBMISSIONS_EXIST", "The remote endpoint has indicated more recent submissions exist.  Recalculate before crystallising")
+object ResidencyChangedError extends Error("RULE_RESIDENCY_CHANGED", "The remote endpoint has indicated a change in residency.  Recalculate before crystallising")
 object FinalDeclarationReceivedError extends Error("RULE_FINAL_DECLARATION_RECEIVED", "The remote endpoint has indicated that final declaration has already been received")
 object DownstreamError extends Error("INTERNAL_SERVER_ERROR", "An internal server error occurred")
 object BadRequestError extends Error("INVALID_REQUEST", "Invalid request")
