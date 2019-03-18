@@ -16,9 +16,15 @@
 
 package v2.models.errors
 
-sealed trait DesError
+import play.api.libs.functional.syntax._
+import play.api.libs.json._
 
-case class SingleError(error: MtdError) extends DesError
-case class MultipleErrors(errors: Seq[MtdError]) extends DesError
-case class BvrErrors(errors: Seq[MtdError]) extends DesError
-case class GenericError(error: MtdError) extends DesError
+case class Error(code: String, message: String)
+
+object Error {
+  implicit val writes: Writes[Error] = Json.writes[Error]
+  implicit val reads: Reads[Error] = (
+    (__ \ "code").read[String] and
+      (__ \ "reason").read[String]
+    ) (Error.apply _)
+}
