@@ -21,7 +21,6 @@ import play.api.http.Status._
 import play.api.libs.json.Reads
 import uk.gov.hmrc.http.{HttpReads, HttpResponse}
 import v2.connectors.DesConnectorOutcome
-import v2.connectors.httpparsers.HttpParser
 import v2.models.errors.{DownstreamError, OutboundError}
 import v2.models.outcomes.DesResponse
 
