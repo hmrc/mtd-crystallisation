@@ -14,8 +14,10 @@
  * limitations under the License.
  */
 
-package v2.models.requestData
+package v2.controllers.requestParsers.validators
 
-import play.api.mvc.AnyContentAsJson
+package object validations {
 
-case class CrystallisationRawData(nino: String, taxYear: String, body: AnyContentAsJson) extends InputData
+  val NoValidationErrors = List()
+
+}

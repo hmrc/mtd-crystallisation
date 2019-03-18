@@ -14,8 +14,21 @@
  * limitations under the License.
  */
 
-package v2.models.requestData
+package v2.controllers.requestParsers.validators.validations
 
+import play.api.libs.json._
 import play.api.mvc.AnyContentAsJson
+import v2.models.errors.Error
 
-case class CrystallisationRawData(nino: String, taxYear: String, body: AnyContentAsJson) extends InputData
+object JsonFormatValidation {
+
+  def validate[A](data: AnyContentAsJson, error: Error)(implicit reads: Reads[A]): List[Error] = {
+
+    data.json.validate[A] match {
+      case JsSuccess(_, _) => NoValidationErrors
+      case _ => List(error)
+    }
+
+  }
+
+}

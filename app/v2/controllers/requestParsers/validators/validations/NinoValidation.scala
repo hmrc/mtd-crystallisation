@@ -14,8 +14,18 @@
  * limitations under the License.
  */
 
-package v2.models.requestData
+package v2.controllers.requestParsers.validators.validations
 
-import play.api.mvc.AnyContentAsJson
+import uk.gov.hmrc.domain.Nino
+import v2.models.errors.{Error, NinoFormatError}
 
-case class CrystallisationRawData(nino: String, taxYear: String, body: AnyContentAsJson) extends InputData
+object NinoValidation {
+
+  private val ninoRegex =
+    "^([ACEHJLMOPRSWXY][A-CEGHJ-NPR-TW-Z]|B[A-CEHJ-NPR-TW-Z]|G[ACEGHJ-NPR-TW-Z]|" +
+      "[KT][A-CEGHJ-MPR-TW-Z]|N[A-CEGHJL-NPR-SW-Z]|Z[A-CEGHJ-NPR-TW-Y])[0-9]{6}[A-D ]?$"
+
+  def validate(nino: String): List[Error] = {
+    if (Nino.isValid(nino) && nino.matches(ninoRegex)) NoValidationErrors else List(NinoFormatError)
+  }
+}

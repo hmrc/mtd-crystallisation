@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-package v2.models.requestData
+package v2.controllers.requestParsers.validators.validations
 
-import play.api.mvc.AnyContentAsJson
-
-case class CrystallisationRawData(nino: String, taxYear: String, body: AnyContentAsJson) extends InputData
+trait Validation

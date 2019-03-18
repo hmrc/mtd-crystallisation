@@ -14,8 +14,26 @@
  * limitations under the License.
  */
 
-package v2.models.requestData
+package v2.controllers.requestParsers.validators
 
-import play.api.mvc.AnyContentAsJson
+import v2.models.errors.Error
+import v2.models.requestData.InputData
 
-case class CrystallisationRawData(nino: String, taxYear: String, body: AnyContentAsJson) extends InputData
+trait Validator[A <: InputData] {
+
+
+  type ValidationLevel[T] = T => List[Error]
+
+  def validate(data: A): List[Error]
+
+  def run(validationSet: List[A => List[List[Error]]], data: A): List[Error] = {
+
+    validationSet match {
+      case Nil => List()
+      case thisLevel :: remainingLevels => thisLevel(data).flatten match {
+        case x if x.isEmpty => run(remainingLevels, data)
+        case x if x.nonEmpty => x
+      }
+    }
+  }
+}
