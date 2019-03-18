@@ -22,6 +22,5 @@ import v2.models.errors.Error
 package object outcomes {
 
   type AuthOutcome = Either[Error, UserDetails]
-  type MtdIdLookupOutcome = Either[Error, String]
 
 }

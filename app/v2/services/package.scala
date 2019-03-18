@@ -14,20 +14,11 @@
  * limitations under the License.
  */
 
-package v2.mocks
+package v2
 
-import v2.config.AppConfig
-import org.scalamock.handlers.CallHandler
-import org.scalamock.scalatest.MockFactory
+import v2.models.errors.ErrorWrapper
+import v2.models.outcomes.DesResponse
 
-trait MockAppConfig extends MockFactory {
-
-  val mockAppConfig: AppConfig = mock[AppConfig]
-
-  object MockedAppConfig {
-    def desBaseUrl: CallHandler[String] = (mockAppConfig.desBaseUrl _: () => String).expects()
-    def desToken: CallHandler[String] = (mockAppConfig.desToken _).expects()
-    def desEnvironment: CallHandler[String] = (mockAppConfig.desEnv _).expects()
-    def mtdIdBaseUrl: CallHandler[String] = (mockAppConfig.mtdIdBaseUrl _: () => String).expects()
-  }
+package object services {
+  type CrystallisationOutcome = Either[ErrorWrapper, DesResponse[String]]
 }

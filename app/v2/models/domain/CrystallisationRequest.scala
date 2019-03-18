@@ -16,7 +16,7 @@
 
 package v2.models.domain
 
-import play.api.libs.json.{Json, Reads}
+import play.api.libs.json.{Json, Reads, Writes}
 
 case class CrystallisationRequest(calculationId: String)
 
