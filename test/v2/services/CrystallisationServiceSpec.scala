@@ -41,7 +41,7 @@ class CrystallisationServiceSpec extends ServiceSpec {
   "createCrystallisation" when {
     "valid data is passed" should {
       "return a successful response with the correct correlationId" in new Test {
-        val expected = Right(DesResponse(correlationId, None))
+        val expected = Right(DesResponse(correlationId, ()))
 
         MockedDesConnector.createCrystallisation(request).returns(Future.successful(expected))
 
@@ -67,7 +67,7 @@ class CrystallisationServiceSpec extends ServiceSpec {
       case (k, v) =>
         s"a $k error is received from the connector" should {
           s"return a $v MTD error" in new Test {
-            val desResponse = DesResponse(correlationId, Some(SingleError(Error(k, "MESSAGE"))))
+            val desResponse = DesResponse(correlationId, SingleError(Error(k, "MESSAGE")))
             val expected = Left(ErrorWrapper(Some(correlationId), v, None))
 
             MockedDesConnector.createCrystallisation(request).returns(Future.successful(Left(desResponse)))
@@ -81,7 +81,7 @@ class CrystallisationServiceSpec extends ServiceSpec {
 
     "multiple errors are received from the connector" should {
       "return multiple MTD errors" in new Test {
-        val desResponse = DesResponse(correlationId, Some(MultipleErrors(Seq(Error("INVALID_IDVALUE", "MESSAGE"), Error("INVALID_TAXYEAR", "MESSAGE")))))
+        val desResponse = DesResponse(correlationId, MultipleErrors(Seq(Error("INVALID_IDVALUE", "MESSAGE"), Error("INVALID_TAXYEAR", "MESSAGE"))))
         val expected = Left(ErrorWrapper(Some(correlationId), BadRequestError, Some(Seq(NinoFormatError, InvalidTaxYearError))))
 
         MockedDesConnector.createCrystallisation(request).returns(Future.successful(Left(desResponse)))
@@ -94,7 +94,7 @@ class CrystallisationServiceSpec extends ServiceSpec {
 
     "one of multiple errors received from the connector is mapped to a DownstreamError" should {
       "return a single DownstreamError" in new Test {
-        val desResponse = DesResponse(correlationId, Some(MultipleErrors(Seq(Error("INVALID_IDTYPE", "MESSAGE"), Error("INVALID_TAXYEAR", "MESSAGE")))))
+        val desResponse = DesResponse(correlationId, MultipleErrors(Seq(Error("INVALID_IDTYPE", "MESSAGE"), Error("INVALID_TAXYEAR", "MESSAGE"))))
         val expected = Left(ErrorWrapper(Some(correlationId), DownstreamError, None))
 
         MockedDesConnector.createCrystallisation(request).returns(Future.successful(Left(desResponse)))
@@ -107,7 +107,7 @@ class CrystallisationServiceSpec extends ServiceSpec {
 
     "the connector returns an OutboundError" should {
       "return an OutboundError" in new Test {
-        val desResponse = DesResponse(correlationId, Some(OutboundError(DownstreamError)))
+        val desResponse = DesResponse(correlationId, OutboundError(DownstreamError))
         val expected = Left(ErrorWrapper(Some(correlationId), DownstreamError, None))
 
         MockedDesConnector.createCrystallisation(request).returns(Future.successful(Left(desResponse)))
@@ -120,7 +120,7 @@ class CrystallisationServiceSpec extends ServiceSpec {
 
     "the connector returns an unexpected error" should {
       "return a single DownstreamError" in new Test {
-        val desResponse = DesResponse(correlationId, Some(SingleError(Error("INVALID EXAMPLE", "MESSAGE"))))
+        val desResponse = DesResponse(correlationId, SingleError(Error("INVALID EXAMPLE", "MESSAGE")))
         val expected = Left(ErrorWrapper(Some(correlationId), DownstreamError, None))
 
         MockedDesConnector.createCrystallisation(request).returns(Future.successful(Left(desResponse)))

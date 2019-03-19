@@ -54,7 +54,7 @@ trait DesServiceSupport {
 
     case Right(desResponse) => success(desResponse)
 
-    case Left(DesResponse(correlationId, Some(MultipleErrors(errors)))) =>
+    case Left(DesResponse(correlationId, MultipleErrors(errors))) =>
       val mtdErrors = errors.map(error => errorMap(error.code))
       if (mtdErrors.contains(DownstreamError)) {
         logger.info(s"[$serviceName] [$endpointName] [CorrelationId - $correlationId]" +
@@ -64,8 +64,8 @@ trait DesServiceSupport {
         Left(ErrorWrapper(Some(correlationId), BadRequestError, Some(mtdErrors)))
       }
 
-    case Left(DesResponse(correlationId, Some(SingleError(error))))   => Left(ErrorWrapper(Some(correlationId), errorMap(error.code), None))
-    case Left(DesResponse(correlationId, Some(OutboundError(error)))) => Left(ErrorWrapper(Some(correlationId), error, None))
+    case Left(DesResponse(correlationId, SingleError(error)))   => Left(ErrorWrapper(Some(correlationId), errorMap(error.code), None))
+    case Left(DesResponse(correlationId, OutboundError(error))) => Left(ErrorWrapper(Some(correlationId), error, None))
   }
 
 

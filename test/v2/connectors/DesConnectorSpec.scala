@@ -44,7 +44,7 @@ class DesConnectorSpec extends ConnectorSpec {
   "createCrystallisation" when {
     "a valid request is supplied" should {
       "return a successful response with the correct correlationId" in new Test {
-        val expected = Right(DesResponse(correlationId, None))
+        val expected = Right(DesResponse(correlationId, ()))
 
         MockedHttpClient.postEmpty(s"$baseUrl/income-tax/calculation/nino/$nino/$taxYear/$calcId/crystallise")
           .returns(Future.successful(expected))
@@ -57,7 +57,7 @@ class DesConnectorSpec extends ConnectorSpec {
 
     "a request returning a single error" should {
       "return an unsuccessful response with the correct correlationId and a single error" in new Test {
-        val expected = Left(DesResponse(correlationId, Some(SingleError(RecentSubmissionsExistError))))
+        val expected = Left(DesResponse(correlationId, SingleError(RecentSubmissionsExistError)))
 
         MockedHttpClient.postEmpty(s"$baseUrl/income-tax/calculation/nino/$nino/$taxYear/$calcId/crystallise")
           .returns(Future.successful(expected))
@@ -70,7 +70,7 @@ class DesConnectorSpec extends ConnectorSpec {
 
     "a request returning multiple errors" should {
       "return an unsuccessful response with the correct correlationId and multiple errors" in new Test {
-        val expected = Left(DesResponse(correlationId, Some(MultipleErrors(Seq(RecentSubmissionsExistError, ResidencyChangedError)))))
+        val expected = Left(DesResponse(correlationId, MultipleErrors(Seq(RecentSubmissionsExistError, ResidencyChangedError))))
 
         MockedHttpClient.postEmpty(s"$baseUrl/income-tax/calculation/nino/$nino/$taxYear/$calcId/crystallise")
           .returns(Future.successful(expected))

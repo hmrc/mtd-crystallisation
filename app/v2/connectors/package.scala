@@ -25,5 +25,5 @@ package object connectors {
 
   type DesConnectorOutcome[A] = Either[DesResponse[DesError], DesResponse[A]]
 
-  type CreateCrystallisationConnectorOutcome = DesConnectorOutcome[String]
+  type CreateCrystallisationConnectorOutcome = DesConnectorOutcome[Unit]
 }

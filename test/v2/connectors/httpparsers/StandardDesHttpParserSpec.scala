@@ -33,14 +33,14 @@ class StandardDesHttpParserSpec extends UnitSpec {
 
   import v2.connectors.httpparsers.StandardDesHttpParser._
 
-  val httpReads: HttpReads[DesConnectorOutcome[String]] = implicitly
+  val httpReads: HttpReads[DesConnectorOutcome[Unit]] = implicitly
 
   "The generic HTTP parser" when {
     "receiving a 204 response" should {
       "return a Right DesResponse with the correct correlationId and no responseData" in {
         val httpResponse = HttpResponse(NO_CONTENT, responseHeaders = Map("CorrelationId" -> Seq(correlationId)))
 
-        getResult(httpResponse) shouldBe Right(DesResponse(correlationId, None))
+        getResult(httpResponse) shouldBe Right(DesResponse(correlationId, ()))
       }
     }
 
@@ -59,7 +59,7 @@ class StandardDesHttpParserSpec extends UnitSpec {
 
             val httpResponse = HttpResponse(responseCode, Some(singleErrorJson), Map("CorrelationId" -> Seq(correlationId)))
 
-            getResult(httpResponse) shouldBe Left(DesResponse(correlationId, Some(SingleError(Error("CODE", "MESSAGE")))))
+            getResult(httpResponse) shouldBe Left(DesResponse(correlationId, SingleError(Error("CODE", "MESSAGE"))))
           }
 
           "be able to parse multiple errors" in {
@@ -83,7 +83,7 @@ class StandardDesHttpParserSpec extends UnitSpec {
             val httpResponse = HttpResponse(responseCode, Some(multipleErrorsJson), Map("CorrelationId" -> Seq(correlationId)))
 
             getResult(httpResponse) shouldBe {
-              Left(DesResponse(correlationId, Some(MultipleErrors(Seq(Error("CODE 1", "MESSAGE 1"), Error("CODE 2", "MESSAGE 2"))))))
+              Left(DesResponse(correlationId, MultipleErrors(Seq(Error("CODE 1", "MESSAGE 1"), Error("CODE 2", "MESSAGE 2")))))
             }
           }
 
@@ -99,7 +99,7 @@ class StandardDesHttpParserSpec extends UnitSpec {
 
             val httpResponse = HttpResponse(responseCode, Some(singleErrorJson), Map("CorrelationId" -> Seq(correlationId)))
 
-            getResult(httpResponse) shouldBe Left(DesResponse(correlationId, Some(OutboundError(DownstreamError))))
+            getResult(httpResponse) shouldBe Left(DesResponse(correlationId, OutboundError(DownstreamError)))
           }
         }
     )
@@ -119,7 +119,7 @@ class StandardDesHttpParserSpec extends UnitSpec {
 
             val httpResponse = HttpResponse(responseCode, Some(singleErrorJson), Map("CorrelationId" -> Seq(correlationId)))
 
-            getResult(httpResponse) shouldBe Left(DesResponse(correlationId, Some(OutboundError(DownstreamError))))
+            getResult(httpResponse) shouldBe Left(DesResponse(correlationId, OutboundError(DownstreamError)))
           }
 
           "return an outbound error when the error returned doesn't match the Error model" in {
@@ -134,7 +134,7 @@ class StandardDesHttpParserSpec extends UnitSpec {
 
             val httpResponse = HttpResponse(responseCode, Some(singleErrorJson), Map("CorrelationId" -> Seq(correlationId)))
 
-            getResult(httpResponse) shouldBe Left(DesResponse(correlationId, Some(OutboundError(DownstreamError))))
+            getResult(httpResponse) shouldBe Left(DesResponse(correlationId, OutboundError(DownstreamError)))
           }
         }
     )
@@ -153,7 +153,7 @@ class StandardDesHttpParserSpec extends UnitSpec {
 
         val httpResponse = HttpResponse(responseCode, Some(singleErrorJson), Map("CorrelationId" -> Seq(correlationId)))
 
-        getResult(httpResponse) shouldBe Left(DesResponse(correlationId, Some(OutboundError(DownstreamError))))
+        getResult(httpResponse) shouldBe Left(DesResponse(correlationId, OutboundError(DownstreamError)))
       }
 
       "return an outbound error when the error returned doesn't match the Error model" in {
@@ -168,10 +168,10 @@ class StandardDesHttpParserSpec extends UnitSpec {
 
         val httpResponse = HttpResponse(responseCode, Some(singleErrorJson), Map("CorrelationId" -> Seq(correlationId)))
 
-        getResult(httpResponse) shouldBe Left(DesResponse(correlationId, Some(OutboundError(DownstreamError))))
+        getResult(httpResponse) shouldBe Left(DesResponse(correlationId, OutboundError(DownstreamError)))
       }
     }
   }
 
-  private lazy val getResult: HttpResponse => DesConnectorOutcome[String] = httpResponse => httpReads.read(method, url, httpResponse)
+  private lazy val getResult: HttpResponse => DesConnectorOutcome[Unit] = httpResponse => httpReads.read(method, url, httpResponse)
 }

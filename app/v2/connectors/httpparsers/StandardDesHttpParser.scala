@@ -18,7 +18,6 @@ package v2.connectors.httpparsers
 
 import play.api.Logger
 import play.api.http.Status._
-import play.api.libs.json.Reads
 import uk.gov.hmrc.http.{HttpReads, HttpResponse}
 import v2.connectors.DesConnectorOutcome
 import v2.models.errors.{DownstreamError, OutboundError}
@@ -29,11 +28,10 @@ object StandardDesHttpParser extends HttpParser {
 
   val logger = Logger(getClass)
 
-  implicit def reads[A: Reads]: HttpReads[DesConnectorOutcome[A]] =
-
-    new HttpReads[DesConnectorOutcome[A]] {
-
-      override def read(method: String, url: String, response: HttpResponse): DesConnectorOutcome[A] = {
+  // Return Right[DesResponse[Unit]] as success response has no body - no need to assign it a value
+  implicit val readsEmpty: HttpReads[DesConnectorOutcome[Unit]] =
+    new HttpReads[DesConnectorOutcome[Unit]] {
+      override def read(method: String, url: String, response: HttpResponse): DesConnectorOutcome[Unit] = {
         val correlationId = retrieveCorrelationId(response)
 
         if (response.status != NO_CONTENT) {
@@ -46,10 +44,10 @@ object StandardDesHttpParser extends HttpParser {
           case NO_CONTENT =>
             logger.info("[StandardDesHttpParser][read] - " +
               s"Success response received from DES with correlationId: $correlationId when calling $url")
-            Right(DesResponse(correlationId, None))
-          case BAD_REQUEST | NOT_FOUND | FORBIDDEN => Left(DesResponse(correlationId, Some(parseErrors(response))))
-          case INTERNAL_SERVER_ERROR | SERVICE_UNAVAILABLE => Left(DesResponse(correlationId, Some(OutboundError(DownstreamError))))
-          case _ => Left(DesResponse(correlationId, Some(OutboundError(DownstreamError))))
+            Right(DesResponse(correlationId, ()))
+          case BAD_REQUEST | NOT_FOUND | FORBIDDEN => Left(DesResponse(correlationId, parseErrors(response)))
+          case INTERNAL_SERVER_ERROR | SERVICE_UNAVAILABLE => Left(DesResponse(correlationId, OutboundError(DownstreamError)))
+          case _ => Left(DesResponse(correlationId, OutboundError(DownstreamError)))
         }
       }
     }

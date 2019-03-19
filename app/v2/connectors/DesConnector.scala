@@ -46,7 +46,7 @@ class DesConnector @Inject()(http: HttpClient, appConfig: AppConfig) {
 
     val url = s"${appConfig.desBaseUrl}/income-tax/calculation/nino/$nino/$taxYear/$calcId/crystallise"
 
-    http.POSTEmpty(url)(StandardDesHttpParser.reads[String], desHeaderCarrier, implicitly)
+    http.POSTEmpty(url)(StandardDesHttpParser.readsEmpty, desHeaderCarrier, implicitly)
   }
 
 }
