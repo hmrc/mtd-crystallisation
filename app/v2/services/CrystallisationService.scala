@@ -52,7 +52,7 @@ class CrystallisationService @Inject()(connector: DesConnector) extends DesServi
     "SERVER_ERROR" -> DownstreamError,
     "SERVICE_UNAVAILABLE" -> DownstreamError
   ).withDefault { error =>
-    logger.info(s"[SavingsAccountsService] [create] - No mapping found for error code $error")
+    logger.info(s"[CrystallisationService] [createCrystallisation] - No mapping found for error code $error")
     DownstreamError
   }
 }

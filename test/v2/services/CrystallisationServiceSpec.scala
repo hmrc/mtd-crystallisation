@@ -29,7 +29,7 @@ class CrystallisationServiceSpec extends ServiceSpec {
 
   val correlationId = "a1e8057e-fbbc-47a8-a8b4-78d9f015c253"
 
-  val taxYear = DesTaxYear("2017-18")
+  val taxYear = DesTaxYear("2018")
   val nino = Nino("AA123456A")
   val calcId = "041f7e4d-87b9-4d4a-a296-3cfbdf92f7e2"
 
