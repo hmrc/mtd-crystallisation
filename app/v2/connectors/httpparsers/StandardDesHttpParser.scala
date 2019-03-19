@@ -35,14 +35,14 @@ object StandardDesHttpParser extends HttpParser {
         val correlationId = retrieveCorrelationId(response)
 
         if (response.status != NO_CONTENT) {
-          logger.info("[StandardDesHttpParser][read] - " +
+          logger.info("[StandardDesHttpParser][readsEmpty] - " +
             s"Error response received from DES with status: ${response.status} and body\n" +
             s"${response.body} and correlationId: $correlationId when calling $url")
         }
 
         response.status match {
           case NO_CONTENT =>
-            logger.info("[StandardDesHttpParser][read] - " +
+            logger.info("[StandardDesHttpParser][readsEmpty] - " +
               s"Success response received from DES with correlationId: $correlationId when calling $url")
             Right(DesResponse(correlationId, ()))
           case BAD_REQUEST | NOT_FOUND | FORBIDDEN => Left(DesResponse(correlationId, parseErrors(response)))
