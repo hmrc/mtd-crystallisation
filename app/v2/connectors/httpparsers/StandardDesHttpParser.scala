@@ -18,11 +18,11 @@ package v2.connectors.httpparsers
 
 import play.api.Logger
 import play.api.http.Status._
-import uk.gov.hmrc.http.{HttpReads, HttpResponse}
+import play.api.libs.json.Reads
+import uk.gov.hmrc.http.{ HttpReads, HttpResponse }
 import v2.connectors.DesConnectorOutcome
-import v2.models.errors.{DownstreamError, OutboundError}
+import v2.models.errors.{ DownstreamError, OutboundError }
 import v2.models.outcomes.DesResponse
-
 
 object StandardDesHttpParser extends HttpParser {
 
@@ -35,20 +35,55 @@ object StandardDesHttpParser extends HttpParser {
         val correlationId = retrieveCorrelationId(response)
 
         if (response.status != NO_CONTENT) {
-          logger.info("[StandardDesHttpParser][readsEmpty] - " +
-            s"Error response received from DES with status: ${response.status} and body\n" +
-            s"${response.body} and correlationId: $correlationId when calling $url")
+          logger.info(
+            "[StandardDesHttpParser][readsEmpty] - " +
+              s"Error response received from DES with status: ${response.status} and body\n" +
+              s"${response.body} and correlationId: $correlationId when calling $url")
         }
 
         response.status match {
           case NO_CONTENT =>
-            logger.info("[StandardDesHttpParser][readsEmpty] - " +
-              s"Success response received from DES with correlationId: $correlationId when calling $url")
+            logger.info(
+              "[StandardDesHttpParser][readsEmpty] - " +
+                s"Success response received from DES with correlationId: $correlationId when calling $url")
             Right(DesResponse(correlationId, ()))
-          case BAD_REQUEST | NOT_FOUND | FORBIDDEN | CONFLICT => Left(DesResponse(correlationId, parseErrors(response)))
+          case BAD_REQUEST | NOT_FOUND | FORBIDDEN         => Left(DesResponse(correlationId, parseErrors(response)))
           case INTERNAL_SERVER_ERROR | SERVICE_UNAVAILABLE => Left(DesResponse(correlationId, OutboundError(DownstreamError)))
-          case _ => Left(DesResponse(correlationId, OutboundError(DownstreamError)))
+          case _                                           => Left(DesResponse(correlationId, OutboundError(DownstreamError)))
         }
       }
+    }
+
+  implicit def reads[A: Reads]: HttpReads[DesConnectorOutcome[A]] =
+    new HttpReads[DesConnectorOutcome[A]] {
+
+      override def read(method: String, url: String, response: HttpResponse): DesConnectorOutcome[A] = {
+        val correlationId = retrieveCorrelationId(response)
+
+        if (response.status != OK) {
+          logger.info(
+            "[StandardDesHttpParser][read] - " +
+              s"Error response received from DES with status: ${response.status} and body\n" +
+              s"${response.body} and correlationId: $correlationId when calling $url")
+        }
+
+        response.status match {
+          case OK =>
+            logger.info(
+              "[StandardDesHttpParser][read] - " +
+                s"Success response received from DES with correlationId: $correlationId when calling $url")
+            parseResponse(correlationId, response)
+          case BAD_REQUEST | NOT_FOUND | FORBIDDEN | CONFLICT => Left(DesResponse(correlationId, parseErrors(response)))
+          case INTERNAL_SERVER_ERROR | SERVICE_UNAVAILABLE    => Left(DesResponse(correlationId, OutboundError(DownstreamError)))
+          case _                                              => Left(DesResponse(correlationId, OutboundError(DownstreamError)))
+        }
+      }
+
+      private def parseResponse(correlationId: String, response: HttpResponse): DesConnectorOutcome[A] =
+        response.validateJson[A] match {
+          case Some(ref) => Right(DesResponse(correlationId, ref))
+
+          case None => Left(DesResponse(correlationId, OutboundError(DownstreamError)))
+        }
     }
 }
