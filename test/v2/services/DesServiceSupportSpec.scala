@@ -19,6 +19,7 @@ import support.UnitSpec
 import v2.models.errors._
 import v2.models.outcomes.DesResponse
 import cats.syntax.either._
+import v2.connectors.DesConnectorOutcome
 
 class DesServiceSupportSpec extends UnitSpec with DesServiceSupport {
 
@@ -71,60 +72,10 @@ class DesServiceSupportSpec extends UnitSpec with DesServiceSupport {
       }
     }
 
-    "des returns an error outcome" when {
-      "a single error" must {
-        "use the error mapping and return a single mtd error" in {
-          val singleErrorResponse = DesResponse(correlationId, SingleError(desError1)).asLeft
+    "des returns an error" when {
+      singleErrorBehaveCorrectly(mapToVendor(ep, desToMtdErrorMap)(mapToUpperCase))
 
-          mapToVendor(ep, desToMtdErrorMap)(mapToUpperCase)(singleErrorResponse) shouldBe
-            ErrorWrapper(Some(correlationId), error1, None).asLeft
-        }
-      }
-
-      "a single unmapped error" must {
-        "map to a DownstreamError" in {
-          val singleErrorResponse = DesResponse(correlationId, SingleError(desErrorUnmapped)).asLeft
-
-          mapToVendor(ep, desToMtdErrorMap)(mapToUpperCase)(singleErrorResponse) shouldBe
-            ErrorWrapper(Some(correlationId), DownstreamError, None).asLeft
-        }
-      }
-
-      "an OutboundError" must {
-        "return the error inside the OutboundError (regardless of mapping)" in {
-          val outboundErrorResponse = DesResponse(correlationId, OutboundError(desError1)).asLeft
-
-          mapToVendor(ep, desToMtdErrorMap)(mapToUpperCase)(outboundErrorResponse) shouldBe
-            ErrorWrapper(Some(correlationId), desError1, None).asLeft
-        }
-      }
-
-      "multiple errors" must {
-        "use the error mapping for each and return multiple mtd errors" in {
-          val multipleErrorResponse = DesResponse(correlationId, MultipleErrors(Seq(desError1, desError2))).asLeft
-
-          mapToVendor(ep, desToMtdErrorMap)(mapToUpperCase)(multipleErrorResponse) shouldBe
-            ErrorWrapper(Some(correlationId), BadRequestError, Some(Seq(error1, error2))).asLeft
-        }
-
-        "one of the mtd errors is a DownstreamError" must {
-          "return a single DownstreamError" in {
-            val multipleErrorResponse = DesResponse(correlationId, MultipleErrors(Seq(desError1, desError3))).asLeft
-
-            mapToVendor(ep, desToMtdErrorMap)(mapToUpperCase)(multipleErrorResponse) shouldBe
-              ErrorWrapper(Some(correlationId), DownstreamError, None).asLeft
-          }
-        }
-
-        "one of the mtd errors is a unmapped" must {
-          "return a single DownstreamError" in {
-            val multipleErrorResponse = DesResponse(correlationId, MultipleErrors(Seq(desError1, desErrorUnmapped))).asLeft
-
-            mapToVendor(ep, desToMtdErrorMap)(mapToUpperCase)(multipleErrorResponse) shouldBe
-              ErrorWrapper(Some(correlationId), DownstreamError, None).asLeft
-          }
-        }
-      }
+      multipleErrorsBehaveCorrectly(mapToVendor(ep, desToMtdErrorMap)(mapToUpperCase))
     }
   }
 
@@ -140,58 +91,66 @@ class DesServiceSupportSpec extends UnitSpec with DesServiceSupport {
       }
     }
 
-    "des returns an error outcome" when {
-      "a single error" must {
-        "use the error mapping and return a single mtd error" in {
-          val singleErrorResponse = DesResponse(correlationId, SingleError(desError1)).asLeft
+    "des returns an error" when {
+      singleErrorBehaveCorrectly(mapToVendorDirect(ep, desToMtdErrorMap))
 
-          mapToVendorDirect(ep, desToMtdErrorMap)(singleErrorResponse) shouldBe
-            ErrorWrapper(Some(correlationId), error1, None).asLeft
-        }
+      multipleErrorsBehaveCorrectly(mapToVendorDirect(ep, desToMtdErrorMap))
+    }
+  }
+
+  private def singleErrorBehaveCorrectly(handler: DesConnectorOutcome[D] => VendorOutcome[D]): Unit = {
+    "a single error" must {
+      "use the error mapping and return a single mtd error" in {
+        val singleErrorResponse = DesResponse(correlationId, SingleError(desError1)).asLeft
+
+        handler(singleErrorResponse) shouldBe
+          ErrorWrapper(Some(correlationId), error1, None).asLeft
+      }
+    }
+
+    "a single unmapped error" must {
+      "map to a DownstreamError" in {
+        val singleErrorResponse = DesResponse(correlationId, SingleError(desErrorUnmapped)).asLeft
+
+        handler(singleErrorResponse) shouldBe
+          ErrorWrapper(Some(correlationId), DownstreamError, None).asLeft
+      }
+    }
+
+    "an OutboundError" must {
+      "return the error inside the OutboundError (regardless of mapping)" in {
+        val outboundErrorResponse = DesResponse(correlationId, OutboundError(desError1)).asLeft
+
+        handler(outboundErrorResponse) shouldBe
+          ErrorWrapper(Some(correlationId), desError1, None).asLeft
+      }
+    }
+  }
+
+  private def multipleErrorsBehaveCorrectly(handler: DesConnectorOutcome[D] => VendorOutcome[D]): Unit = {
+    "multiple errors" must {
+      "use the error mapping for each and return multiple mtd errors" in {
+        val multipleErrorResponse = DesResponse(correlationId, MultipleErrors(Seq(desError1, desError2))).asLeft
+
+        handler(multipleErrorResponse) shouldBe
+          ErrorWrapper(Some(correlationId), BadRequestError, Some(Seq(error1, error2))).asLeft
       }
 
-      "a single unmapped error" must {
-        "map to a DownstreamError" in {
-          val singleErrorResponse = DesResponse(correlationId, SingleError(desErrorUnmapped)).asLeft
+      "one of the mtd errors is a DownstreamError" must {
+        "return a single DownstreamError" in {
+          val multipleErrorResponse = DesResponse(correlationId, MultipleErrors(Seq(desError1, desError3))).asLeft
 
-          mapToVendorDirect(ep, desToMtdErrorMap)(singleErrorResponse) shouldBe
+          handler(multipleErrorResponse) shouldBe
             ErrorWrapper(Some(correlationId), DownstreamError, None).asLeft
         }
       }
 
-      "an OutboundError" must {
-        "return the error inside the OutboundError (regardless of mapping)" in {
-          val outboundErrorResponse = DesResponse(correlationId, OutboundError(desError1)).asLeft
+      "one of the mtd errors is a unmapped" must {
+        "return a single DownstreamError" in {
+          val multipleErrorResponse = DesResponse(correlationId, MultipleErrors(Seq(desError1, desErrorUnmapped))).asLeft
 
-          mapToVendorDirect(ep, desToMtdErrorMap)(outboundErrorResponse) shouldBe
-            ErrorWrapper(Some(correlationId), desError1, None).asLeft
-        }
-      }
-
-      "multiple errors" must {
-        "use the error mapping for each and return multiple mtd errors" in {
-          val multipleErrorResponse = DesResponse(correlationId, MultipleErrors(Seq(desError1, desError2))).asLeft
-
-          mapToVendorDirect(ep, desToMtdErrorMap)(multipleErrorResponse) shouldBe
-            ErrorWrapper(Some(correlationId), BadRequestError, Some(Seq(error1, error2))).asLeft
-        }
-
-        "one of the mtd errors is a DownstreamError" must {
-          "return a single DownstreamError" in {
-            val multipleErrorResponse = DesResponse(correlationId, MultipleErrors(Seq(desError1, desError3))).asLeft
-
-            mapToVendorDirect(ep, desToMtdErrorMap)(multipleErrorResponse) shouldBe
-              ErrorWrapper(Some(correlationId), DownstreamError, None).asLeft
-          }
-        }
-
-        "one of the mtd errors is a unmapped" must {
-          "return a single DownstreamError" in {
-            val multipleErrorResponse = DesResponse(correlationId, MultipleErrors(Seq(desError1, desErrorUnmapped))).asLeft
-
-            mapToVendorDirect(ep, desToMtdErrorMap)(multipleErrorResponse) shouldBe
-              ErrorWrapper(Some(correlationId), DownstreamError, None).asLeft
-          }
+          handler(multipleErrorResponse) shouldBe
+            ErrorWrapper(Some(correlationId), DownstreamError, None).asLeft
         }
       }
     }

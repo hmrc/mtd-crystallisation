@@ -51,20 +51,21 @@ class CrystallisationServiceSpec extends ServiceSpec {
       }
     }
 
-    Map(
-      "???" -> ???
-    ).foreach {
-      case (k, v) =>
-        s"a $k error is received from the connector" should {
-          s"return a $v MTD error" in new Test {
-            MockedDesConnector
-              .performIntentToCrystallise(request)
-              .returns(Future.successful(Left(DesResponse(correlationId, SingleError(Error(k, "MESSAGE"))))))
-
-            await(service.performIntentToCrystallise(request)) shouldBe Left(ErrorWrapper(Some(correlationId), v, None))
-          }
-        }
-    }
+    "implement error mapping tet" in { fail }
+//    Map(
+//      "???" -> ???
+//    ).foreach {
+//      case (k, v) =>
+//        s"a $k error is received from the connector" should {
+//          s"return a $v MTD error" in new Test {
+//            MockedDesConnector
+//              .performIntentToCrystallise(request)
+//              .returns(Future.successful(Left(DesResponse(correlationId, SingleError(Error(k, "MESSAGE"))))))
+//
+//            await(service.performIntentToCrystallise(request)) shouldBe Left(ErrorWrapper(Some(correlationId), v, None))
+//          }
+//        }
+//    }
 
     "multi error tests" should {
       "work" in {
