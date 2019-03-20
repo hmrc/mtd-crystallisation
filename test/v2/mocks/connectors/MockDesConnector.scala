@@ -14,20 +14,23 @@
  * limitations under the License.
  */
 
-package v2.mocks
+package v2.mocks.connectors
 
-import v2.config.AppConfig
 import org.scalamock.handlers.CallHandler
 import org.scalamock.scalatest.MockFactory
+import uk.gov.hmrc.http.HeaderCarrier
+import v2.connectors.{CreateCrystallisationConnectorOutcome, DesConnector}
+import v2.models.requestData.CrystallisationRequestData
 
-trait MockAppConfig extends MockFactory {
+import scala.concurrent.{ExecutionContext, Future}
 
-  val mockAppConfig: AppConfig = mock[AppConfig]
+trait MockDesConnector extends MockFactory {
+  val connector: DesConnector = mock[DesConnector]
 
-  object MockedAppConfig {
-    def desBaseUrl: CallHandler[String] = (mockAppConfig.desBaseUrl _: () => String).expects()
-    def desToken: CallHandler[String] = (mockAppConfig.desToken _).expects()
-    def desEnvironment: CallHandler[String] = (mockAppConfig.desEnv _).expects()
-    def mtdIdBaseUrl: CallHandler[String] = (mockAppConfig.mtdIdBaseUrl _: () => String).expects()
+  object MockedDesConnector {
+    def createCrystallisation(crystallisationRequestData: CrystallisationRequestData): CallHandler[Future[CreateCrystallisationConnectorOutcome]] = {
+      (connector.createCrystallisation(_: CrystallisationRequestData)(_: HeaderCarrier, _: ExecutionContext))
+        .expects(crystallisationRequestData, *, *)
+    }
   }
 }
