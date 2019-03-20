@@ -21,9 +21,6 @@ import support.UnitSpec
 import v2.models.errors._
 import v2.models.requestData.CrystallisationRawData
 
-/**
-  * Tests for [[CrystallisationValidator]]
-  */
 class CrystallisationValidatorSpec extends UnitSpec {
 
   private val validNino = "AA123456A"
@@ -65,7 +62,6 @@ class CrystallisationValidatorSpec extends UnitSpec {
                         validator.validate(
                           CrystallisationRawData(validNino, "2016-17",  body(validJson))) shouldBe
                             List(RuleTaxYearNotSupportedError)
-        fail("is this validation reqd - remove validation if not?")
       }
     }
 

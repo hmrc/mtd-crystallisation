@@ -19,9 +19,9 @@ package v2.controllers.requestParsers.validators.validations
 import v2.models.errors.Error
 
 trait RegexValidation {
-  def regexFormat: String
+  val regexFormat: String
 
-  def error: Error
+  val error: Error
 
   def validate(value: String): List[Error] =
     RegexValidation.validate(error, value, regexFormat)

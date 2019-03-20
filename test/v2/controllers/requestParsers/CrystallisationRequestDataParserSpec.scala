@@ -24,9 +24,6 @@ import v2.models.domain.CrystallisationRequest
 import v2.models.errors._
 import v2.models.requestData.{CrystallisationRawData, CrystallisationRequestData, DesTaxYear}
 
-/**
-  * Tests for [[CrystallisationRequestDataParser]]
-  */
 class CrystallisationRequestDataParserSpec extends UnitSpec {
   val nino = "AA123456B"
   val taxYear = "2017-18"
