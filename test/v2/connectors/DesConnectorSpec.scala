@@ -82,12 +82,11 @@ class DesConnectorSpec extends ConnectorSpec {
     }
   }
 
-  private lazy val getResult: DesConnector => CreateCrystallisationConnectorOutcome = connector => {
+  private def getResult(connector: DesConnector): CreateCrystallisationConnectorOutcome =
     await(connector.createCrystallisation(CrystallisationRequestData(
       nino = nino,
       desTaxYear = taxYear,
       crystallisation = CrystallisationRequest(calcId)
     )))
-  }
 
 }
