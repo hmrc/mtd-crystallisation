@@ -30,8 +30,8 @@ class CrystallisationRequestDataParser @Inject()(validator: CrystallisationValid
       case Nil =>
         //Validation passed.  Request data is ok to transform.
         Right(CrystallisationRequestData(Nino(data.nino), DesTaxYear.fromMtd(data.taxYear), data.body.json.as[CrystallisationRequest]))
-      case err :: Nil => Left(ErrorWrapper(err, None))
-      case errs => Left(ErrorWrapper(BadRequestError, Some(errs)))
+      case err :: Nil => Left(ErrorWrapper(None, err, None))
+      case errs => Left(ErrorWrapper(None, BadRequestError, Some(errs)))
     }
   }
 

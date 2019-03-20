@@ -62,7 +62,7 @@ class CrystallisationRequestDataParserSpec extends UnitSpec {
           .returns(List(NinoFormatError))
 
         parser.parseRequest(inputData) shouldBe
-          Left(ErrorWrapper(NinoFormatError, None))
+          Left(ErrorWrapper(None, NinoFormatError, None))
       }
 
       "multiple validation errors occur" in new Test {
@@ -70,7 +70,7 @@ class CrystallisationRequestDataParserSpec extends UnitSpec {
           .returns(List(NinoFormatError, InvalidCalcIdError))
 
         parser.parseRequest(inputData) shouldBe
-          Left(ErrorWrapper(BadRequestError, Some(Seq(NinoFormatError, InvalidCalcIdError))))
+          Left(ErrorWrapper(None, BadRequestError, Some(Seq(NinoFormatError, InvalidCalcIdError))))
       }
     }
   }

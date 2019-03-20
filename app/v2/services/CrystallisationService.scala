@@ -42,7 +42,7 @@ class CrystallisationService @Inject()(connector: DesConnector) extends DesServi
   private def desErrorToMtdErrorCreate: Map[String, Error] = Map(
     "INVALID_IDTYPE" -> DownstreamError,
     "INVALID_IDVALUE" -> NinoFormatError,
-    "INVALID_TAXYEAR" -> InvalidTaxYearError,
+    "INVALID_TAXYEAR" -> TaxYearFormatError,
     "INVALID_CALCID" -> InvalidCalcIdError,
     "NOT_FOUND" -> NotFoundError,
     "INCOME_SOURCES_CHANGED" -> IncomeSourcesChangedError,
