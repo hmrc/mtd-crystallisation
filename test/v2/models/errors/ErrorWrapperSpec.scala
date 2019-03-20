@@ -30,7 +30,7 @@ class ErrorWrapperSpec extends UnitSpec {
       """
         |{
         |   "code": "FORMAT_NINO",
-        |   "message": "The NINO format is invalid"
+        |   "message": "The provided NINO is invalid"
         |}
       """.stripMargin
     )
@@ -47,7 +47,7 @@ class ErrorWrapperSpec extends UnitSpec {
       """
         |{
         |   "code": "FORMAT_NINO",
-        |   "message": "The NINO format is invalid"
+        |   "message": "The provided NINO is invalid"
         |}
       """.stripMargin
     )
@@ -75,7 +75,7 @@ class ErrorWrapperSpec extends UnitSpec {
         |   "errors": [
         |       {
         |         "code": "FORMAT_NINO",
-        |         "message": "The NINO format is invalid"
+        |         "message": "The provided NINO is invalid"
         |       },
         |       {
         |         "code": "FORMAT_CALCID",

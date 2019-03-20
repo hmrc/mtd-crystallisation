@@ -1,1 +1,3 @@
 GET        /sample/:nino        v2.controllers.SampleController.doSomething(nino:String)
+
+POST       /ni/:nino/:taxYear/crystallisation                  v2.controllers.CrystallisationController.create(nino: String, taxYear: String)
