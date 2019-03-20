@@ -54,7 +54,7 @@ class CrystallisationServiceSpec extends ServiceSpec {
     Map(
       "INVALID_IDTYPE" -> DownstreamError,
       "INVALID_IDVALUE" -> NinoFormatError,
-      "INVALID_TAXYEAR" -> InvalidTaxYearError,
+      "INVALID_TAXYEAR" -> TaxYearFormatError,
       "INVALID_CALCID" -> InvalidCalcIdError,
       "NOT_FOUND" -> NotFoundError,
       "INCOME_SOURCES_CHANGED" -> IncomeSourcesChangedError,
@@ -82,7 +82,7 @@ class CrystallisationServiceSpec extends ServiceSpec {
     "multiple errors are received from the connector" should {
       "return multiple MTD errors" in new Test {
         val desResponse = DesResponse(correlationId, MultipleErrors(Seq(Error("INVALID_IDVALUE", "MESSAGE"), Error("INVALID_TAXYEAR", "MESSAGE"))))
-        val expected = Left(ErrorWrapper(Some(correlationId), BadRequestError, Some(Seq(NinoFormatError, InvalidTaxYearError))))
+        val expected = Left(ErrorWrapper(Some(correlationId), BadRequestError, Some(Seq(NinoFormatError, TaxYearFormatError))))
 
         MockedDesConnector.createCrystallisation(request).returns(Future.successful(Left(desResponse)))
 

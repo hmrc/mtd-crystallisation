@@ -17,18 +17,22 @@
 package v2.models.errors
 
 // Nino Errors
-object NinoFormatError extends Error("FORMAT_NINO", "The NINO format is invalid")
+object NinoFormatError extends Error("FORMAT_NINO", "The provided NINO is invalid")
 
 // MTD Errors
-object InvalidTaxYearError extends Error("FORMAT_TAX_YEAR", "The provided tax year is invalid")
+object TaxYearFormatError extends Error("FORMAT_TAX_YEAR", "The provided tax year is invalid")
 object InvalidCalcIdError extends Error("FORMAT_CALCID", "The provided calculationId is invalid")
 
-// Backend Response Errors
-object NotFoundError extends Error("MATCHING_RESOURCE_NOT_FOUND", "The remote endpoint has indicated that no intent-to-crystallise calculation exists for the calculationId")
-object IncomeSourcesChangedError extends Error("RULE_INCOME_SOURCES_CHANGED", "The remote endpoint has indicated changed information for income sources.  Recalculate before crystallising")
-object RecentSubmissionsExistError extends Error("RULE_RECENT_SUBMISSIONS_EXIST", "The remote endpoint has indicated more recent submissions exist.  Recalculate before crystallising")
-object ResidencyChangedError extends Error("RULE_RESIDENCY_CHANGED", "The remote endpoint has indicated a change in residency.  Recalculate before crystallising")
-object FinalDeclarationReceivedError extends Error("RULE_FINAL_DECLARATION_RECEIVED", "The remote endpoint has indicated that final declaration has already been received")
+// Rule Errors
+object RuleTaxYearNotSupportedError extends Error("RULE_TAX_YEAR_NOT_SUPPORTED", "Tax year not supported, because it precedes the earliest allowable tax year")
+object RuleIncorrectOrEmptyBodyError extends Error("RULE_INCORRECT_OR_EMPTY_BODY_SUBMITTED", "An empty or non-matching body was submitted")
+object IncomeSourcesChangedError extends Error("RULE_INCOME_SOURCES_CHANGED", "Income sources data has changed. Perform intent to crystallise")
+object RecentSubmissionsExistError extends Error("RULE_RECENT_SUBMISSIONS_EXIST", "More recent submissions exist. Perform intent to crystallise")
+object ResidencyChangedError extends Error("RULE_RESIDENCY_CHANGED", "Residency has changed. Perform intent to crystallise")
+object FinalDeclarationReceivedError extends Error("RULE_FINAL_DECLARATION_RECEIVED", "Crystallisation declaration has already been received")
+
+//Standard Errors
+object NotFoundError extends Error("MATCHING_RESOURCE_NOT_FOUND", "Matching resource not found")
 object DownstreamError extends Error("INTERNAL_SERVER_ERROR", "An internal server error occurred")
 object BadRequestError extends Error("INVALID_REQUEST", "Invalid request")
 object ServiceUnavailableError extends Error("SERVICE_UNAVAILABLE", "Internal server error")

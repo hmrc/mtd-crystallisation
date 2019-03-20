@@ -14,8 +14,19 @@
  * limitations under the License.
  */
 
-package v2.models.requestData
+package v2.controllers.requestParsers.validators.validations
 
-import play.api.mvc.AnyContentAsJson
+import v2.config.FixedConfig
+import v2.models.errors.Error
+import v2.models.requestData.DesTaxYear
 
-case class CrystallisationRawData(nino: String, taxYear: String, body: AnyContentAsJson) extends InputData
+object MtdTaxYearValidation extends FixedConfig {
+
+  // @param taxYear In format YYYY-YY
+  def validate(taxYear: String, error: Error): List[Error] = {
+
+    val desTaxYear = Integer.parseInt(DesTaxYear.fromMtd(taxYear).value)
+
+    if (desTaxYear >= minimumTaxYear) NoValidationErrors else List(error)
+  }
+}

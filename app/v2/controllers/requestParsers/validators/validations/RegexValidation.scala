@@ -14,8 +14,22 @@
  * limitations under the License.
  */
 
-package v2.models.requestData
+package v2.controllers.requestParsers.validators.validations
 
-import play.api.mvc.AnyContentAsJson
+import v2.models.errors.Error
 
-case class CrystallisationRawData(nino: String, taxYear: String, body: AnyContentAsJson) extends InputData
+trait RegexValidation {
+  val regexFormat: String
+
+  val error: Error
+
+  def validate(value: String): List[Error] =
+    RegexValidation.validate(error, value, regexFormat)
+}
+
+object RegexValidation {
+
+  def validate(error: Error, value: String, regexFormat: String): List[Error] = {
+    if (value.matches(regexFormat)) NoValidationErrors else List(error)
+  }
+}

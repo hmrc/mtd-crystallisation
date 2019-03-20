@@ -13,9 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package v2.controllers.requestParsers.validators.validations
 
-package v2.models.requestData
+import v2.models.errors.{Error, InvalidCalcIdError}
 
-import play.api.mvc.AnyContentAsJson
 
-case class CrystallisationRawData(nino: String, taxYear: String, body: AnyContentAsJson) extends InputData
+object CalculationIdValidation extends RegexValidation {
+  override val regexFormat: String = "^[0-9]{8}$|^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+
+  override val error: Error = InvalidCalcIdError
+}
