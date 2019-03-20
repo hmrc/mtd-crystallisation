@@ -17,7 +17,7 @@
 package v2.models.errors
 
 // Nino Errors
-object NinoFormatError extends Error("FORMAT_NINO", "The NINO format is invalid")
+object NinoFormatError extends Error("FORMAT_NINO", "The provided NINO is invalid")
 
 // MTD Errors
 object TaxYearFormatError extends Error("FORMAT_TAX_YEAR", "The provided tax year is invalid")
@@ -26,10 +26,10 @@ object InvalidCalcIdError extends Error("FORMAT_CALCID", "The provided calculati
 // Rule Errors
 object RuleTaxYearNotSupportedError extends Error("RULE_TAX_YEAR_NOT_SUPPORTED", "Tax year not supported, because it precedes the earliest allowable tax year")
 object RuleIncorrectOrEmptyBodyError extends Error("RULE_INCORRECT_OR_EMPTY_BODY_SUBMITTED", "An empty or non-matching body was submitted")
-object IncomeSourcesChangedError extends Error("RULE_INCOME_SOURCES_CHANGED", "The remote endpoint has indicated changed information for income sources.  Recalculate before crystallising")
-object RecentSubmissionsExistError extends Error("RULE_RECENT_SUBMISSIONS_EXIST", "The remote endpoint has indicated more recent submissions exist.  Recalculate before crystallising")
-object ResidencyChangedError extends Error("RULE_RESIDENCY_CHANGED", "The remote endpoint has indicated a change in residency.  Recalculate before crystallising")
-object FinalDeclarationReceivedError extends Error("RULE_FINAL_DECLARATION_RECEIVED", "The remote endpoint has indicated that final declaration has already been received")
+object IncomeSourcesChangedError extends Error("RULE_INCOME_SOURCES_CHANGED", "Income sources data has changed. Perform intent to crystallise")
+object RecentSubmissionsExistError extends Error("RULE_RECENT_SUBMISSIONS_EXIST", "More recent submissions exist. Perform intent to crystallise")
+object ResidencyChangedError extends Error("RULE_RESIDENCY_CHANGED", "Residency has changed. Perform intent to crystallise")
+object FinalDeclarationReceivedError extends Error("RULE_FINAL_DECLARATION_RECEIVED", "Crystallisation declaration has already been received")
 
 //Standard Errors
 object NotFoundError extends Error("MATCHING_RESOURCE_NOT_FOUND", "Matching resource not found")
