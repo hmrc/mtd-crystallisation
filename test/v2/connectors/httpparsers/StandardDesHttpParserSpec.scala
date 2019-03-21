@@ -44,7 +44,7 @@ class StandardDesHttpParserSpec extends UnitSpec {
       }
     }
 
-    Seq(BAD_REQUEST, NOT_FOUND, FORBIDDEN).foreach(
+    Seq(BAD_REQUEST, NOT_FOUND, FORBIDDEN, CONFLICT).foreach(
       responseCode =>
         s"receiving a $responseCode response" should {
           "be able to parse a single error" in {

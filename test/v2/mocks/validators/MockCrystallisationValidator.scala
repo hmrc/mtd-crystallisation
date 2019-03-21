@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package v2.mocks.validators
 
 import org.scalamock.handlers.CallHandler1
@@ -25,7 +26,7 @@ class MockCrystallisationValidator extends MockFactory{
 
   val mockValidator: CrystallisationValidator = mock[CrystallisationValidator]
 
-  object MockedCreateSavingsAccountValidator {
+  object MockCrystallisationValidator {
     def validate(data: CrystallisationRawData): CallHandler1[CrystallisationRawData, List[Error]] = {
       (mockValidator.validate(_: CrystallisationRawData))
         .expects(data)

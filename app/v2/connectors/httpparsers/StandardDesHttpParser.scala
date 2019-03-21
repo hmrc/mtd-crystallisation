@@ -45,7 +45,7 @@ object StandardDesHttpParser extends HttpParser {
             logger.info("[StandardDesHttpParser][readsEmpty] - " +
               s"Success response received from DES with correlationId: $correlationId when calling $url")
             Right(DesResponse(correlationId, ()))
-          case BAD_REQUEST | NOT_FOUND | FORBIDDEN => Left(DesResponse(correlationId, parseErrors(response)))
+          case BAD_REQUEST | NOT_FOUND | FORBIDDEN | CONFLICT => Left(DesResponse(correlationId, parseErrors(response)))
           case INTERNAL_SERVER_ERROR | SERVICE_UNAVAILABLE => Left(DesResponse(correlationId, OutboundError(DownstreamError)))
           case _ => Left(DesResponse(correlationId, OutboundError(DownstreamError)))
         }

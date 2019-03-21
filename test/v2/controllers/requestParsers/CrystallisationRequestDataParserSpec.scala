@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package v2.controllers.requestParsers
 
 import play.api.libs.json.Json
@@ -46,9 +47,9 @@ class CrystallisationRequestDataParserSpec extends UnitSpec {
 
   "parse" should {
 
-    "return a retrieve savings account request object" when {
+    "return a retrieve crystallisation request object" when {
       "valid request data is supplied" in new Test {
-        MockedCreateSavingsAccountValidator.validate(inputData).returns(Nil)
+        MockCrystallisationValidator.validate(inputData).returns(Nil)
 
         parser.parseRequest(inputData) shouldBe
           Right(CrystallisationRequestData(Nino(nino), DesTaxYear("2018"), CrystallisationRequest(calcId)))
@@ -58,7 +59,7 @@ class CrystallisationRequestDataParserSpec extends UnitSpec {
     "return an ErrorWrapper" when {
 
       "a single validation error occurs" in new Test {
-        MockedCreateSavingsAccountValidator.validate(inputData)
+        MockCrystallisationValidator.validate(inputData)
           .returns(List(NinoFormatError))
 
         parser.parseRequest(inputData) shouldBe
@@ -66,7 +67,7 @@ class CrystallisationRequestDataParserSpec extends UnitSpec {
       }
 
       "multiple validation errors occur" in new Test {
-        MockedCreateSavingsAccountValidator.validate(inputData)
+        MockCrystallisationValidator.validate(inputData)
           .returns(List(NinoFormatError, InvalidCalcIdError))
 
         parser.parseRequest(inputData) shouldBe

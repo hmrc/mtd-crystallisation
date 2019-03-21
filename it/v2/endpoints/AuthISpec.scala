@@ -18,20 +18,32 @@ package v2.endpoints
 
 import com.github.tomakehurst.wiremock.stubbing.StubMapping
 import play.api.http.Status
+import play.api.libs.json.Json
 import play.api.libs.ws.{WSRequest, WSResponse}
 import support.IntegrationBaseSpec
-import v2.stubs.{AuditStub, AuthStub, MtdIdLookupStub}
+import v2.models.requestData.DesTaxYear
+import v2.stubs.{AuditStub, AuthStub, DesStub, MtdIdLookupStub}
 
 class AuthISpec extends IntegrationBaseSpec {
 
   private trait Test {
-    val nino: String
+    val nino = "AA123456A"
+    val taxYear = "2017-18"
+    val calcId = "041f7e4d-87b9-4d4a-a296-3cfbdf92f7e2"
+    val correlationId = "X-123"
+
+    val requestJson: String =
+      s"""
+         |{
+         |"calculationId": "$calcId"
+         |}
+    """.stripMargin
 
     def setupStubs(): StubMapping
 
     def request(): WSRequest = {
       setupStubs()
-      buildRequest(s"/2.0/sample/$nino")
+      buildRequest(s"/2.0/ni/$nino/$taxYear/crystallisation")
     }
   }
 
@@ -47,24 +59,23 @@ class AuthISpec extends IntegrationBaseSpec {
           MtdIdLookupStub.internalServerError(nino)
         }
 
-        val response: WSResponse = await(request().get())
+        val response: WSResponse = await(request().post(Json.parse(requestJson)))
         response.status shouldBe Status.INTERNAL_SERVER_ERROR
       }
     }
 
     "an MTD ID is successfully retrieve from the NINO and the user is authorised" should {
 
-      "return 200" in new Test {
-        override val nino: String = "AA123456A"
-
+      "return 204" in new Test {
         override def setupStubs(): StubMapping = {
           AuditStub.audit()
-          MtdIdLookupStub.ninoFound(nino)
           AuthStub.authorised()
+          MtdIdLookupStub.ninoFound(nino)
+          DesStub.createSuccess(nino, DesTaxYear.fromMtd(taxYear).toString, calcId)
         }
 
-        val response: WSResponse = await(request().get())
-        response.status shouldBe Status.OK
+        val response: WSResponse = await(request().post(Json.parse(requestJson)))
+        response.status shouldBe Status.NO_CONTENT
       }
     }
 
@@ -79,7 +90,7 @@ class AuthISpec extends IntegrationBaseSpec {
           AuthStub.unauthorisedNotLoggedIn()
         }
 
-        val response: WSResponse = await(request().get())
+        val response: WSResponse = await(request().post(Json.parse(requestJson)))
         response.status shouldBe Status.FORBIDDEN
       }
     }
@@ -95,7 +106,7 @@ class AuthISpec extends IntegrationBaseSpec {
           AuthStub.unauthorisedOther()
         }
 
-        val response: WSResponse = await(request().get())
+        val response: WSResponse = await(request().post(Json.parse(requestJson)))
         response.status shouldBe Status.FORBIDDEN
       }
     }
