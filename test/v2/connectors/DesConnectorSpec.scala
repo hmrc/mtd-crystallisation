@@ -22,7 +22,7 @@ import v2.models.des.DesCalculationIdResponse
 import v2.models.domain.CrystallisationRequest
 import v2.models.errors._
 import v2.models.outcomes.DesResponse
-import v2.models.requestData.{ CrystallisationRequestData, DesTaxYear, IntentToCrystalliseRawData, IntentToCrystalliseRequestData }
+import v2.models.requestData.{ CrystallisationRequestData, DesTaxYear, IntentToCrystalliseRequestData }
 
 import scala.concurrent.Future
 

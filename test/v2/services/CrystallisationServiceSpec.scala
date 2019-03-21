@@ -51,26 +51,25 @@ class CrystallisationServiceSpec extends ServiceSpec {
       }
     }
 
-    "implement error mapping tet" in { fail }
-//    Map(
-//      "???" -> ???
-//    ).foreach {
-//      case (k, v) =>
-//        s"a $k error is received from the connector" should {
-//          s"return a $v MTD error" in new Test {
-//            MockedDesConnector
-//              .performIntentToCrystallise(request)
-//              .returns(Future.successful(Left(DesResponse(correlationId, SingleError(Error(k, "MESSAGE"))))))
-//
-//            await(service.performIntentToCrystallise(request)) shouldBe Left(ErrorWrapper(Some(correlationId), v, None))
-//          }
-//        }
-//    }
+    Map(
+      "INVALID_NINO"            -> NinoFormatError,
+      "INVALID_TAX_YEAR"        -> TaxYearFormatError,
+      "INVALID_TAX_CRYSTALLISE" -> DownstreamError,
+      "NO_SUBMISSION_EXIST"     -> NoSubmissionsExistError,
+      "CONFLICT"                -> FinalDeclarationReceivedError,
+      "SERVER_ERROR"            -> DownstreamError,
+      "SERVICE_UNAVAILABLE"     -> DownstreamError
+    ).foreach {
+      case (k, v) =>
+        s"a $k error is received from the connector" should {
+          s"return a $v MTD error" in new Test {
+            MockedDesConnector
+              .performIntentToCrystallise(request)
+              .returns(Future.successful(Left(DesResponse(correlationId, SingleError(Error(k, "MESSAGE"))))))
 
-    "multi error tests" should {
-      "work" in {
-        fail("can't we generalize")
-      }
+            await(service.performIntentToCrystallise(request)) shouldBe Left(ErrorWrapper(Some(correlationId), v, None))
+          }
+        }
     }
   }
 

@@ -38,7 +38,7 @@ object ResidencyChangedError extends Error("RULE_RESIDENCY_CHANGED", "Residency 
 
 object FinalDeclarationReceivedError extends Error("RULE_FINAL_DECLARATION_RECEIVED", "Crystallisation declaration has already been received")
 
-object NoSubmissionsExistError extends Error("RULE_NO_SUBMISSIONS_EXIST", "XXXXXX ERROR MESSAGE REQD XXXX")
+object NoSubmissionsExistError extends Error("RULE_NO_SUBMISSIONS_EXIST", "No income submissions exist")
 
 //Standard Errors
 object NotFoundError extends Error("MATCHING_RESOURCE_NOT_FOUND", "Matching resource not found")

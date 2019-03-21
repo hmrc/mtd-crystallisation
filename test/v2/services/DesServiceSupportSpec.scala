@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package v2.services
 
 import support.UnitSpec
@@ -43,7 +44,7 @@ class DesServiceSupportSpec extends UnitSpec with DesServiceSupport {
     case "DES_CODE_DOWNSTREAM" => DownstreamError
   }
 
-  val mapToError: DesResponse[D] => Either[ErrorWrapper, DesResponse[D]] = { desResponse: DesResponse[D] =>
+  val mapToError: DesResponse[D] => Either[ErrorWrapper, DesResponse[D]] = { _: DesResponse[D] =>
     ErrorWrapper(Some(correlationId), error1, None).asLeft[DesResponse[V]]
   }
 
