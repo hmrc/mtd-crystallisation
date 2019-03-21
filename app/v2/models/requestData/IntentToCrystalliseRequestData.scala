@@ -13,8 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package v2.models.requestData
 
 import uk.gov.hmrc.domain.Nino
 
-class IntentToCrystalliseRequestData(nino: Nino, desTaxYear: DesTaxYear)
+case class IntentToCrystalliseRequestData(nino: Nino, desTaxYear: DesTaxYear)
