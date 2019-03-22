@@ -31,6 +31,8 @@ object RecentSubmissionsExistError extends Error("RULE_RECENT_SUBMISSIONS_EXIST"
 object ResidencyChangedError extends Error("RULE_RESIDENCY_CHANGED", "Residency has changed. Perform intent to crystallise")
 object FinalDeclarationReceivedError extends Error("RULE_FINAL_DECLARATION_RECEIVED", "Crystallisation declaration has already been received")
 
+object NoSubmissionExistError extends Error("RULE_NO_SUBMISSION_EXIST", "No income submissions exist")
+
 //Standard Errors
 object NotFoundError extends Error("MATCHING_RESOURCE_NOT_FOUND", "Matching resource not found")
 object DownstreamError extends Error("INTERNAL_SERVER_ERROR", "An internal server error occurred")
