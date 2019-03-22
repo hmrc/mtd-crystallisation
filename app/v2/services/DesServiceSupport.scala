@@ -18,7 +18,7 @@ package v2.services
 
 import play.api.Logger
 import v2.connectors.DesConnectorOutcome
-import v2.models.errors.{BadRequestError, DownstreamError, Error, ErrorWrapper, MultipleErrors, OutboundError, SingleError}
+import v2.models.errors.{ BadRequestError, DownstreamError, Error, ErrorWrapper, MultipleErrors, OutboundError, SingleError }
 import v2.models.outcomes.DesResponse
 
 trait DesServiceSupport {
@@ -30,7 +30,7 @@ trait DesServiceSupport {
 
   protected val logger: Logger = Logger(this.getClass)
 
-  private type VendorOutcome[T] = Either[ErrorWrapper, DesResponse[T]]
+  protected type VendorOutcome[T] = Either[ErrorWrapper, DesResponse[T]]
 
   /**
     * Gets a function to map DES response outcomes from DES to vendor outcomes.
@@ -42,32 +42,42 @@ trait DesServiceSupport {
     * use mapToVendorDirect
     *
     * @param endpointName endpoint name for logging
-    * @param errorMap     mapping for error codes
+    * @param errorMap     mapping from DES error codes to vendor (MTD) errors
     * @param success      mapping for a success DES response
     * @tparam D the DES response domain object type
     * @tparam V the vendor response domain object type
     * @return the function to map outcomes
     */
-  final def mapToVendor[D, V](endpointName: String,
-                              errorMap: String => Error)(
-                               success: DesResponse[D] => VendorOutcome[V]): DesConnectorOutcome[D] => VendorOutcome[V] = {
+  final def mapToVendor[D, V](endpointName: String, errorMap: PartialFunction[String, Error])(success: DesResponse[D] => VendorOutcome[V])(
+      desOutcome: DesConnectorOutcome[D]): VendorOutcome[V] = {
 
-    case Right(desResponse) => success(desResponse)
+    lazy val defaultErrorMapping: String => Error = { code =>
+      logger.info(s"[$serviceName] [$endpointName] - No mapping found for error code $code")
+      DownstreamError
+    }
 
-    case Left(DesResponse(correlationId, MultipleErrors(errors))) =>
-      val mtdErrors = errors.map(error => errorMap(error.code))
-      if (mtdErrors.contains(DownstreamError)) {
-        logger.info(s"[$serviceName] [$endpointName] [CorrelationId - $correlationId]" +
-          s" - downstream returned ${errors.map(_.code).mkString(",")}. Revert to ISE")
-        Left(ErrorWrapper(Some(correlationId), DownstreamError, None))
-      } else {
-        Left(ErrorWrapper(Some(correlationId), BadRequestError, Some(mtdErrors)))
-      }
+    desOutcome match {
+      case Right(desResponse) => success(desResponse)
 
-    case Left(DesResponse(correlationId, SingleError(error)))   => Left(ErrorWrapper(Some(correlationId), errorMap(error.code), None))
-    case Left(DesResponse(correlationId, OutboundError(error))) => Left(ErrorWrapper(Some(correlationId), error, None))
+      case Left(DesResponse(correlationId, MultipleErrors(errors))) =>
+        val mtdErrors = errors.map(error => errorMap.applyOrElse(error.code, defaultErrorMapping))
+
+        if (mtdErrors.contains(DownstreamError)) {
+          logger.info(
+            s"[$serviceName] [$endpointName] [CorrelationId - $correlationId]" +
+              s" - downstream returned ${errors.map(_.code).mkString(",")}. Revert to ISE")
+          Left(ErrorWrapper(Some(correlationId), DownstreamError, None))
+        } else {
+          Left(ErrorWrapper(Some(correlationId), BadRequestError, Some(mtdErrors)))
+        }
+
+      case Left(DesResponse(correlationId, SingleError(error))) =>
+        Left(ErrorWrapper(Some(correlationId), errorMap.applyOrElse(error.code, defaultErrorMapping), None))
+
+      case Left(DesResponse(correlationId, OutboundError(error))) =>
+        Left(ErrorWrapper(Some(correlationId), error, None))
+    }
   }
-
 
   /**
     * Gets a function to map DES response outcomes from DES to vendor outcomes.
@@ -78,14 +88,14 @@ trait DesServiceSupport {
     * mapped directly to vendor outcomes unchanged.
     *
     * @param endpointName endpoint name for logging
-    * @param errorMap     mapping for error codes
+    * @param errorMap     mapping from DES error codes to vendor (MTD) errors
     * @tparam D the DES response domain object type
     * @return the function to map outcomes
     */
-  final def mapToVendorDirect[D](endpointName: String,
-                                 errorMap: String => Error): DesConnectorOutcome[D] => VendorOutcome[D] =
-    mapToVendor(endpointName, errorMap) {
-      desResponse => Right(DesResponse(desResponse.correlationId, desResponse.responseData))
-    }
+  final def mapToVendorDirect[D](endpointName: String, errorMap: PartialFunction[String, Error])(
+      desOutcome: DesConnectorOutcome[D]): VendorOutcome[D] =
+    mapToVendor[D, D](endpointName, errorMap) { desResponse =>
+      Right(DesResponse(desResponse.correlationId, desResponse.responseData))
+    }(desOutcome)
 
 }
