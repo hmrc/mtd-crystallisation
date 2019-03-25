@@ -45,7 +45,7 @@ object StandardDesHttpParser extends HttpParser {
         doRead(OK, url, response) { correlationId =>
           response.validateJson[A] match {
             case Some(ref) => Right(DesResponse(correlationId, ref))
-            case None      => Left(DesResponse(correlationId, OutboundError(DownstreamError)))
+            case None => Left(DesResponse(correlationId, OutboundError(DownstreamError)))
           }
         }
     }
