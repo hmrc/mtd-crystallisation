@@ -16,6 +16,7 @@
 
 package v2.controllers
 
+import org.omg.CosNaming.NamingContextPackage.NotEmpty
 import play.api.libs.json.Json
 import play.api.mvc.Result
 import uk.gov.hmrc.domain.Nino
@@ -70,6 +71,8 @@ class IntentToCrystalliseControllerSpec extends ControllerBaseSpec
 
         val result: Future[Result] = controller.intentToCrystallise(nino, taxYear)(fakeRequest)
         status(result) shouldBe SEE_OTHER
+        header("Location", result).isEmpty shouldBe false
+        header("Location", result) shouldBe Some(s"self-assessment/ni/$nino/calculations/$calculationId")
       }
     }
 
