@@ -82,7 +82,7 @@ class IntentToCrystalliseISpec extends IntegrationBaseSpec {
 
     "return 403 (Forbidden)" when {
       createErrorTest(Status.FORBIDDEN, "NO_SUBMISSION_EXIST", Status.FORBIDDEN, NoSubmissionsExistError)
-      createErrorTest(Status.CONFLICT, "FINAL_DECLARATION_RECEIVED", Status.FORBIDDEN, FinalDeclarationReceivedError)
+      createErrorTest(Status.CONFLICT, "CONFLICT", Status.FORBIDDEN, FinalDeclarationReceivedError)
     }
 
     def createErrorTest(desStatus: Int, desCode: String, expectedStatus: Int, expectedBody: Error): Unit = {

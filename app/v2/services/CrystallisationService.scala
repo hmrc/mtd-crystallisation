@@ -54,7 +54,6 @@ class CrystallisationService @Inject()(connector: DesConnector) extends DesServi
       "INVALID_TAX_CRYSTALLISE"    -> DownstreamError,
       "INVALID_REQUEST"            -> DownstreamError,
       "NO_SUBMISSION_EXIST"        -> NoSubmissionsExistError,
-      "FINAL_DECLARATION_RECEIVED" -> FinalDeclarationReceivedError,
       "CONFLICT"                   -> FinalDeclarationReceivedError,
       "SERVER_ERROR"               -> DownstreamError,
       "SERVICE_UNAVAILABLE"        -> DownstreamError
