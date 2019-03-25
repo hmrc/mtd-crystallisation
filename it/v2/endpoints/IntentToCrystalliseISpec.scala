@@ -19,19 +19,19 @@ package v2.endpoints
 import com.github.tomakehurst.wiremock.stubbing.StubMapping
 import play.api.http.Status
 import play.api.libs.json.Json
-import play.api.libs.ws.{EmptyBody, WSRequest, WSResponse}
+import play.api.libs.ws.{ EmptyBody, WSRequest, WSResponse }
 import support.IntegrationBaseSpec
 import v2.models.errors._
 import v2.models.requestData.DesTaxYear
-import v2.stubs.{AuditStub, AuthStub, DesStub, MtdIdLookupStub}
+import v2.stubs.{ AuditStub, AuthStub, DesStub, MtdIdLookupStub }
 
 class IntentToCrystalliseISpec extends IntegrationBaseSpec {
 
   private trait Test {
 
-    val nino = "AA123456A"
-    val taxYear = "2017-18"
-    val calcId = "041f7e4d-87b9-4d4a-a296-3cfbdf92f7e2"
+    val nino          = "AA123456A"
+    val taxYear       = "2017-18"
+    val calcId        = "041f7e4d-87b9-4d4a-a296-3cfbdf92f7e2"
     val correlationId = "X-123"
 
     def setupStubs(): StubMapping
@@ -63,7 +63,7 @@ class IntentToCrystalliseISpec extends IntegrationBaseSpec {
 
         val response: WSResponse = await(request().post(EmptyBody))
         response.status shouldBe Status.SEE_OTHER
-        response.header("Location") shouldBe Some(s"self-assessment/ni/$nino/calculations/$calcId")
+        response.header("Location") shouldBe Some(s"/self-assessment/ni/$nino/calculations/$calcId")
       }
     }
 
@@ -92,7 +92,7 @@ class IntentToCrystalliseISpec extends IntegrationBaseSpec {
           AuditStub.audit()
           AuthStub.authorised()
           MtdIdLookupStub.ninoFound(nino)
-          DesStub.intentToError(nino,  DesTaxYear.fromMtd(taxYear).toString, desStatus, errorBody(desCode))
+          DesStub.intentToError(nino, DesTaxYear.fromMtd(taxYear).toString, desStatus, errorBody(desCode))
         }
 
         val response: WSResponse = await(request().post(EmptyBody))
@@ -103,14 +103,14 @@ class IntentToCrystalliseISpec extends IntegrationBaseSpec {
 
     "return 400 (Bad Request)" when {
       createRequestValidationErrorTest("AA1123A", "2017-18", Status.BAD_REQUEST, NinoFormatError)
-      createRequestValidationErrorTest("AA123456A","20177", Status.BAD_REQUEST, TaxYearFormatError)
-      createRequestValidationErrorTest("AA123456A","2015-16", Status.BAD_REQUEST, RuleTaxYearNotSupportedError)
+      createRequestValidationErrorTest("AA123456A", "20177", Status.BAD_REQUEST, TaxYearFormatError)
+      createRequestValidationErrorTest("AA123456A", "2015-16", Status.BAD_REQUEST, RuleTaxYearNotSupportedError)
     }
 
     def createRequestValidationErrorTest(requestNino: String, requestTaxYear: String, expectedStatus: Int, expectedBody: Error): Unit = {
       s"validation fails with ${expectedBody.code} error" in new IntentToCrystalliseTest {
 
-        override val nino: String = requestNino
+        override val nino: String    = requestNino
         override val taxYear: String = requestTaxYear
 
         override def setupStubs(): StubMapping = {

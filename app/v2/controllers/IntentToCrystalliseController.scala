@@ -18,68 +18,71 @@ package v2.controllers
 
 import java.util.UUID
 
-import javax.inject.{Inject, Singleton}
+import javax.inject.{ Inject, Singleton }
 import play.api.Logger
 import play.api.libs.json.Json
-import play.api.mvc.{Action, AnyContent, ControllerComponents}
+import play.api.mvc.{ Action, AnyContent, ControllerComponents }
 import v2.controllers.requestParsers.IntentToCrystalliseRequestDataParser
 import v2.models.errors._
 import v2.models.requestData.IntentToCrystalliseRawData
-import v2.services.{CrystallisationService, EnrolmentsAuthService, MtdIdLookupService}
+import v2.services.{ CrystallisationService, EnrolmentsAuthService, MtdIdLookupService }
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
 @Singleton
-class IntentToCrystalliseController  @Inject()(val authService: EnrolmentsAuthService,
-                                               val lookupService: MtdIdLookupService,
-                                               intentToCrystalliseRequestDataParser: IntentToCrystalliseRequestDataParser,
-                                               crystallisationService: CrystallisationService,
-                                               cc: ControllerComponents) extends AuthorisedController(cc) {
+class IntentToCrystalliseController @Inject()(val authService: EnrolmentsAuthService,
+                                              val lookupService: MtdIdLookupService,
+                                              intentToCrystalliseRequestDataParser: IntentToCrystalliseRequestDataParser,
+                                              crystallisationService: CrystallisationService,
+                                              cc: ControllerComponents)
+    extends AuthorisedController(cc) {
 
   val logger: Logger = Logger(this.getClass)
 
-  def intentToCrystallise(nino: String, taxYear: String): Action[AnyContent] = authorisedAction(nino).async { implicit request =>
-    intentToCrystalliseRequestDataParser.parseRequest(IntentToCrystalliseRawData(nino, taxYear)) match {
-      case Right(intentToCrystalliseRequestData) => crystallisationService.performIntentToCrystallise(intentToCrystalliseRequestData). map {
-        case Right(desResponse) =>
-          logger.info(s"[IntentToCrystalliseController][intentToCrystallise] - Success response received with CorrelationId: ${desResponse.correlationId}")
-          val url = s"self-assessment/ni/$nino/calculations/${desResponse.responseData}"
-          SeeOther(url).withHeaders(LOCATION -> url, "X-CorrelationId" -> desResponse.correlationId)
+  def intentToCrystallise(nino: String, taxYear: String): Action[AnyContent] =
+    authorisedAction(nino).async { implicit request =>
+      intentToCrystalliseRequestDataParser.parseRequest(IntentToCrystalliseRawData(nino, taxYear)) match {
+        case Right(intentToCrystalliseRequestData) =>
+          crystallisationService.performIntentToCrystallise(intentToCrystalliseRequestData).map {
+            case Right(desResponse) =>
+              logger.info(
+                s"[IntentToCrystalliseController][intentToCrystallise] - Success response received with CorrelationId: ${desResponse.correlationId}")
+              val url = s"/self-assessment/ni/$nino/calculations/${desResponse.responseData}"
+              SeeOther(url).withHeaders(LOCATION -> url, "X-CorrelationId" -> desResponse.correlationId)
+            case Left(errorWrapper) =>
+              val correlationId = getCorrelationId(errorWrapper)
+              val result        = processError(errorWrapper).withHeaders("X-CorrelationId" -> correlationId)
+              result
+          }
         case Left(errorWrapper) =>
           val correlationId = getCorrelationId(errorWrapper)
-          val result = processError(errorWrapper).withHeaders("X-CorrelationId" -> correlationId)
-          result
+          val result        = processError(errorWrapper).withHeaders("X-CorrelationId" -> correlationId)
+          Future.successful(result)
       }
-      case Left(errorWrapper) =>
-        val correlationId = getCorrelationId(errorWrapper)
-        val result = processError(errorWrapper).withHeaders("X-CorrelationId" -> correlationId)
-        Future.successful(result)
     }
-  }
 
   private def processError(errorWrapper: ErrorWrapper) = {
     errorWrapper.error match {
-      case BadRequestError
-           | NinoFormatError
-           | TaxYearFormatError
-           | RuleTaxYearNotSupportedError => BadRequest(Json.toJson(errorWrapper))
-      case NoSubmissionsExistError
-           | FinalDeclarationReceivedError => Forbidden(Json.toJson(errorWrapper))
-      case NotFoundError => NotFound(Json.toJson(errorWrapper))
-      case DownstreamError => InternalServerError(Json.toJson(errorWrapper))
+      case BadRequestError | NinoFormatError | TaxYearFormatError | RuleTaxYearNotSupportedError => BadRequest(Json.toJson(errorWrapper))
+      case NoSubmissionsExistError | FinalDeclarationReceivedError                               => Forbidden(Json.toJson(errorWrapper))
+      case NotFoundError                                                                         => NotFound(Json.toJson(errorWrapper))
+      case DownstreamError                                                                       => InternalServerError(Json.toJson(errorWrapper))
     }
   }
 
   private def getCorrelationId(errorWrapper: ErrorWrapper): String = {
     errorWrapper.correlationId match {
-      case Some(correlationId) => logger.info("[IntentToCrystalliseController][getCorrelationId] - " +
-        s"Error received from DES ${Json.toJson(errorWrapper)} with CorrelationId: $correlationId")
+      case Some(correlationId) =>
+        logger.info(
+          "[IntentToCrystalliseController][getCorrelationId] - " +
+            s"Error received from DES ${Json.toJson(errorWrapper)} with CorrelationId: $correlationId")
         correlationId
       case None =>
         val correlationId = UUID.randomUUID().toString
-        logger.info("[IntentToCrystalliseController][getCorrelationId] - " +
-          s"Validation error: ${Json.toJson(errorWrapper)} with CorrelationId: $correlationId")
+        logger.info(
+          "[IntentToCrystalliseController][getCorrelationId] - " +
+            s"Validation error: ${Json.toJson(errorWrapper)} with CorrelationId: $correlationId")
         correlationId
     }
   }
