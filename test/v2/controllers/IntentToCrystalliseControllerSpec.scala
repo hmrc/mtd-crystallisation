@@ -21,8 +21,9 @@ import play.api.mvc.Result
 import uk.gov.hmrc.domain.Nino
 import uk.gov.hmrc.http.HeaderCarrier
 import v2.mocks.requestParsers.MockIntentToCrystalliseRequestDataParser
-import v2.mocks.services.{MockEnrolmentsAuthService, MockMtdIdLookupService}
+import v2.mocks.services.{MockCrystallisationService, MockEnrolmentsAuthService, MockMtdIdLookupService}
 import v2.models.errors._
+import v2.models.outcomes.DesResponse
 import v2.models.requestData.{DesTaxYear, IntentToCrystalliseRawData, IntentToCrystalliseRequestData}
 
 import scala.concurrent.Future
@@ -30,7 +31,8 @@ import scala.concurrent.Future
 class IntentToCrystalliseControllerSpec extends ControllerBaseSpec
   with MockEnrolmentsAuthService
   with MockMtdIdLookupService
-  with MockIntentToCrystalliseRequestDataParser {
+  with MockIntentToCrystalliseRequestDataParser
+  with MockCrystallisationService {
 
   trait Test {
     val hc = HeaderCarrier()
@@ -39,6 +41,7 @@ class IntentToCrystalliseControllerSpec extends ControllerBaseSpec
       authService = mockEnrolmentsAuthService,
       lookupService = mockMtdIdLookupService,
       intentToCrystalliseRequestDataParser = mockIntentToCrystalliseRequestDataParser,
+      crystallisationService = mockCrystallisationService,
       cc = cc
     )
 
@@ -49,19 +52,23 @@ class IntentToCrystalliseControllerSpec extends ControllerBaseSpec
   private val nino = "AA123456A"
   private val taxYear = "2017-18"
   private val correlationId = "X-123"
+  private val calculationId = "041f7e4d-87b9-4d4a-a296-3cfbdf92f7e2"
 
-  val intentToCrystalliseRequestData = IntentToCrystalliseRequestData(Nino(nino), DesTaxYear.fromMtd(taxYear))
+  private val intentToCrystalliseRequestData = IntentToCrystalliseRequestData(Nino(nino), DesTaxYear.fromMtd(taxYear))
 
-  val intentToCrystalliseRawData = IntentToCrystalliseRawData(nino, taxYear)
+  private val intentToCrystalliseRawData = IntentToCrystalliseRawData(nino, taxYear)
 
-  "create" should {
+  "intentToCrystallise" should {
     "return 303" when {
       "a valid details is supplied" in new Test {
 
         MockIntentToCrystalliseRequestDataParser.parse(intentToCrystalliseRawData)
           .returns(Right(intentToCrystalliseRequestData))
 
-        val result: Future[Result] = controller.create(nino, taxYear)(fakeRequest)
+        MockCrystallisationService.intent(intentToCrystalliseRequestData)
+          .returns(Future.successful(Right(DesResponse(correlationId, calculationId))))
+
+        val result: Future[Result] = controller.intentToCrystallise(nino, taxYear)(fakeRequest)
         status(result) shouldBe SEE_OTHER
       }
     }
@@ -72,7 +79,7 @@ class IntentToCrystalliseControllerSpec extends ControllerBaseSpec
         MockIntentToCrystalliseRequestDataParser.parse(intentToCrystalliseRawData)
           .returns(Left(ErrorWrapper(None, NinoFormatError, None)))
 
-        val result: Future[Result] = controller.create(nino, taxYear)(fakeRequest)
+        val result: Future[Result] = controller.intentToCrystallise(nino, taxYear)(fakeRequest)
         status(result) shouldBe BAD_REQUEST
         contentAsJson(result) shouldBe Json.toJson(ErrorWrapper(None, NinoFormatError, None))
       }
@@ -83,7 +90,7 @@ class IntentToCrystalliseControllerSpec extends ControllerBaseSpec
         MockIntentToCrystalliseRequestDataParser.parse(intentToCrystalliseRawData)
           .returns(Left(ErrorWrapper(None, BadRequestError, Some(Seq(NinoFormatError, TaxYearFormatError)))))
 
-        val result: Future[Result] = controller.create(nino, taxYear)(fakeRequest)
+        val result: Future[Result] = controller.intentToCrystallise(nino, taxYear)(fakeRequest)
 
         status(result) shouldBe BAD_REQUEST
         contentAsJson(result) shouldBe Json.toJson(ErrorWrapper(None, BadRequestError, Some(Seq(NinoFormatError, TaxYearFormatError))))
@@ -91,7 +98,7 @@ class IntentToCrystalliseControllerSpec extends ControllerBaseSpec
       }
     }
 
-    "return a 400 Bad Request with a single error" when {
+    "return 400 Bad Request with a single error" when {
 
       val badRequestErrorsFromParser = List(
         BadRequestError,
@@ -100,7 +107,14 @@ class IntentToCrystalliseControllerSpec extends ControllerBaseSpec
         RuleTaxYearNotSupportedError
       )
 
+      val badRequestErrorsFromService = List(
+        NinoFormatError,
+        TaxYearFormatError,
+        BadRequestError
+      )
+
       badRequestErrorsFromParser.foreach(errorsFromCreateParserTester(_, BAD_REQUEST))
+      badRequestErrorsFromService.foreach(errorsFromCreateServiceTester(_, BAD_REQUEST))
     }
 
     "return a 500 Internal Server Error with a single error" when {
@@ -110,6 +124,28 @@ class IntentToCrystalliseControllerSpec extends ControllerBaseSpec
       )
 
       internalServerErrorErrors.foreach(errorsFromCreateParserTester(_, INTERNAL_SERVER_ERROR))
+      internalServerErrorErrors.foreach(errorsFromCreateServiceTester(_, INTERNAL_SERVER_ERROR))
+    }
+
+    "return a 404 Not Found Error" when {
+
+      val notFoundErrors = List(
+        NotFoundError
+      )
+
+      notFoundErrors.foreach(errorsFromCreateServiceTester(_, NOT_FOUND))
+
+    }
+
+    "return a 403 Forbidden Error" when {
+
+      val forbiddenErrors = List(
+        NoSubmissionsExistError,
+        FinalDeclarationReceivedError
+      )
+
+      forbiddenErrors.foreach(errorsFromCreateServiceTester(_, FORBIDDEN))
+
     }
 
     def errorsFromCreateParserTester(error: Error, expectedStatus: Int): Unit = {
@@ -118,7 +154,24 @@ class IntentToCrystalliseControllerSpec extends ControllerBaseSpec
         MockIntentToCrystalliseRequestDataParser.parse(intentToCrystalliseRawData)
           .returns(Left(ErrorWrapper(Some(correlationId), error, None)))
 
-        val result: Future[Result] = controller.create(nino, taxYear)(fakeRequest)
+        val result: Future[Result] = controller.intentToCrystallise(nino, taxYear)(fakeRequest)
+
+        status(result) shouldBe expectedStatus
+        contentAsJson(result) shouldBe Json.toJson(error)
+        header("X-CorrelationId", result) shouldBe Some(correlationId)
+      }
+    }
+
+    def errorsFromCreateServiceTester(error: Error, expectedStatus: Int): Unit = {
+      s"a ${error.code} error is returned from the service" in new Test {
+
+        MockIntentToCrystalliseRequestDataParser.parse(intentToCrystalliseRawData)
+          .returns(Right(intentToCrystalliseRequestData))
+
+        MockCrystallisationService.intent(intentToCrystalliseRequestData)
+          .returns(Future.successful(Left(ErrorWrapper(Some(correlationId), error, None))))
+
+        val result: Future[Result] = controller.intentToCrystallise(nino, taxYear)(fakeRequest)
 
         status(result) shouldBe expectedStatus
         contentAsJson(result) shouldBe Json.toJson(error)

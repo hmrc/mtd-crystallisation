@@ -20,9 +20,10 @@ import javax.inject.Inject
 import uk.gov.hmrc.http.HeaderCarrier
 import v2.connectors.DesConnector
 import v2.models.errors._
-import v2.models.requestData.CrystallisationRequestData
+import v2.models.outcomes.DesResponse
+import v2.models.requestData.{ CrystallisationRequestData, IntentToCrystalliseRequestData }
 
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.{ ExecutionContext, Future }
 
 class CrystallisationService @Inject()(connector: DesConnector) extends DesServiceSupport {
 
@@ -31,28 +32,46 @@ class CrystallisationService @Inject()(connector: DesConnector) extends DesServi
     */
   override val serviceName: String = this.getClass.getSimpleName
 
-  def createCrystallisation(request: CrystallisationRequestData)
-                           (implicit hc: HeaderCarrier,
-                           ec: ExecutionContext): Future[CrystallisationOutcome] = {
+  def performIntentToCrystallise(request: IntentToCrystalliseRequestData)(implicit hc: HeaderCarrier,
+                                                                          ec: ExecutionContext): Future[IntentToCrystalliseOutcome] = {
+    connector.performIntentToCrystallise(request).map {
+      mapToVendor("intentToCrystallise", desErrorToMtdErrorIntent) { desResponse =>
+        Right(DesResponse(desResponse.correlationId, desResponse.responseData.id))
+      }
+    }
+  }
+
+  def createCrystallisation(request: CrystallisationRequestData)(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[CrystallisationOutcome] = {
     connector.createCrystallisation(request).map {
       mapToVendorDirect("createCrystallisation", desErrorToMtdErrorCreate)
     }
   }
 
-  private def desErrorToMtdErrorCreate: Map[String, Error] = Map(
-    "INVALID_IDTYPE" -> DownstreamError,
-    "INVALID_IDVALUE" -> NinoFormatError,
-    "INVALID_TAXYEAR" -> TaxYearFormatError,
-    "INVALID_CALCID" -> InvalidCalcIdError,
-    "NOT_FOUND" -> NotFoundError,
-    "INCOME_SOURCES_CHANGED" -> IncomeSourcesChangedError,
-    "RECENT_SUBMISSIONS_EXIST" -> RecentSubmissionsExistError,
-    "RESIDENCY_CHANGED" -> ResidencyChangedError,
-    "FINAL_DECLARATION_RECEIVED" -> FinalDeclarationReceivedError,
-    "SERVER_ERROR" -> DownstreamError,
-    "SERVICE_UNAVAILABLE" -> DownstreamError
-  ).withDefault { error =>
-    logger.info(s"[CrystallisationService] [createCrystallisation] - No mapping found for error code $error")
-    DownstreamError
-  }
+  private def desErrorToMtdErrorIntent: Map[String, Error] =
+    Map(
+      "INVALID_NINO"               -> NinoFormatError,
+      "INVALID_TAX_YEAR"           -> TaxYearFormatError,
+      "INVALID_TAX_CRYSTALLISE"    -> DownstreamError,
+      "INVALID_REQUEST"            -> DownstreamError,
+      "NO_SUBMISSION_EXIST"        -> NoSubmissionsExistError,
+      "FINAL_DECLARATION_RECEIVED" -> FinalDeclarationReceivedError,
+      "CONFLICT"                   -> FinalDeclarationReceivedError,
+      "SERVER_ERROR"               -> DownstreamError,
+      "SERVICE_UNAVAILABLE"        -> DownstreamError
+    )
+
+  private def desErrorToMtdErrorCreate: Map[String, Error] =
+    Map(
+      "INVALID_IDTYPE"             -> DownstreamError,
+      "INVALID_IDVALUE"            -> NinoFormatError,
+      "INVALID_TAXYEAR"            -> TaxYearFormatError,
+      "INVALID_CALCID"             -> InvalidCalcIdError,
+      "NOT_FOUND"                  -> NotFoundError,
+      "INCOME_SOURCES_CHANGED"     -> IncomeSourcesChangedError,
+      "RECENT_SUBMISSIONS_EXIST"   -> RecentSubmissionsExistError,
+      "RESIDENCY_CHANGED"          -> ResidencyChangedError,
+      "FINAL_DECLARATION_RECEIVED" -> FinalDeclarationReceivedError,
+      "SERVER_ERROR"               -> DownstreamError,
+      "SERVICE_UNAVAILABLE"        -> DownstreamError
+    )
 }

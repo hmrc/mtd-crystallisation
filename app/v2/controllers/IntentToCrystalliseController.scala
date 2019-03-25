@@ -25,25 +25,32 @@ import play.api.mvc.{Action, AnyContent, ControllerComponents}
 import v2.controllers.requestParsers.IntentToCrystalliseRequestDataParser
 import v2.models.errors._
 import v2.models.requestData.IntentToCrystalliseRawData
-import v2.services.{EnrolmentsAuthService, MtdIdLookupService}
+import v2.services.{CrystallisationService, EnrolmentsAuthService, MtdIdLookupService}
 
+import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
 @Singleton
 class IntentToCrystalliseController  @Inject()(val authService: EnrolmentsAuthService,
                                                val lookupService: MtdIdLookupService,
                                                intentToCrystalliseRequestDataParser: IntentToCrystalliseRequestDataParser,
+                                               crystallisationService: CrystallisationService,
                                                cc: ControllerComponents) extends AuthorisedController(cc) {
 
   val logger: Logger = Logger(this.getClass)
 
-  def create(nino: String, taxYear: String): Action[AnyContent] = authorisedAction(nino).async { implicit request =>
+  def intentToCrystallise(nino: String, taxYear: String): Action[AnyContent] = authorisedAction(nino).async { implicit request =>
     intentToCrystalliseRequestDataParser.parseRequest(IntentToCrystalliseRawData(nino, taxYear)) match {
-      case Right(intentToCrystalliseRequestData) =>
-        // @todo Call to the service and generate the URL
-        //val url = s"self-assessment/ni/$nino/calculations/$id"
-        //SeeOther(url).withHeaders(LOCATION -> url, "X-CorrelationId" -> desResponse.correlationId)
-        Future.successful(SeeOther(""))
+      case Right(intentToCrystalliseRequestData) => crystallisationService.performIntentToCrystallise(intentToCrystalliseRequestData). map {
+        case Right(desResponse) =>
+          logger.info(s"[IntentToCrystalliseController][intentToCrystallise] - Success response received with CorrelationId: ${desResponse.correlationId}")
+          val url = s"self-assessment/ni/$nino/calculations/${desResponse.responseData}"
+          SeeOther(url).withHeaders(LOCATION -> url, "X-CorrelationId" -> desResponse.correlationId)
+        case Left(errorWrapper) =>
+          val correlationId = getCorrelationId(errorWrapper)
+          val result = processError(errorWrapper).withHeaders("X-CorrelationId" -> correlationId)
+          result
+      }
       case Left(errorWrapper) =>
         val correlationId = getCorrelationId(errorWrapper)
         val result = processError(errorWrapper).withHeaders("X-CorrelationId" -> correlationId)
@@ -57,7 +64,7 @@ class IntentToCrystalliseController  @Inject()(val authService: EnrolmentsAuthSe
            | NinoFormatError
            | TaxYearFormatError
            | RuleTaxYearNotSupportedError => BadRequest(Json.toJson(errorWrapper))
-      case NoSubmissionExistError
+      case NoSubmissionsExistError
            | FinalDeclarationReceivedError => Forbidden(Json.toJson(errorWrapper))
       case NotFoundError => NotFound(Json.toJson(errorWrapper))
       case DownstreamError => InternalServerError(Json.toJson(errorWrapper))

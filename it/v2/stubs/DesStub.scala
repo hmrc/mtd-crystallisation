@@ -17,7 +17,8 @@
 package v2.stubs
 
 import com.github.tomakehurst.wiremock.stubbing.StubMapping
-import play.api.http.Status.NO_CONTENT
+import play.api.http.Status.{NO_CONTENT, OK}
+import play.api.libs.json.Json
 import support.WireMockMethods
 
 object DesStub extends WireMockMethods {
@@ -32,6 +33,26 @@ object DesStub extends WireMockMethods {
 
   def createError(nino: String, taxYear: String, calcId: String, errorStatus: Int, errorBody: String): StubMapping = {
     when(method = POST, uri = crystallisationUrl(nino, taxYear, calcId))
+      .thenReturn(status = errorStatus, errorBody)
+  }
+
+  private val responseBody = Json.parse(
+    """
+      | {
+      | "id" : "041f7e4d-87b9-4d4a-a296-3cfbdf92f7e2"
+      | }
+    """.stripMargin)
+
+  private def intentToCrystalliseUrl(nino: String, taxYear: String): String =
+    s"/income-tax/nino/$nino/taxYear/$taxYear/tax-calculation"
+
+  def intentToSuccess(nino: String, taxYear: String): StubMapping = {
+    when(method = POST, uri = intentToCrystalliseUrl(nino, taxYear), queryParams = Map("crystallise" -> "true"))
+      .thenReturn(status = OK, responseBody)
+  }
+
+  def intentToError(nino: String, taxYear: String, errorStatus: Int, errorBody: String): StubMapping = {
+    when(method = POST, uri = intentToCrystalliseUrl(nino, taxYear), queryParams = Map("crystallise" -> "true"))
       .thenReturn(status = errorStatus, errorBody)
   }
 }

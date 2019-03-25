@@ -16,33 +16,46 @@
 
 package v2.connectors
 
-import javax.inject.{Inject, Singleton}
+import javax.inject.{ Inject, Singleton }
 import play.api.Logger
 import play.api.libs.json.Json
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.http.logging.Authorization
 import uk.gov.hmrc.play.bootstrap.http.HttpClient
 import v2.config.AppConfig
-import v2.models.requestData.CrystallisationRequestData
+import v2.models.requestData.{ CrystallisationRequestData, IntentToCrystalliseRequestData }
 import v2.connectors.httpparsers.StandardDesHttpParser
+import v2.models.des.DesCalculationIdResponse
 
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.{ ExecutionContext, Future }
 
 @Singleton
 class DesConnector @Inject()(http: HttpClient, appConfig: AppConfig) {
 
   val logger = Logger(this.getClass)
 
-  private[connectors] def desHeaderCarrier(implicit hc: HeaderCarrier): HeaderCarrier = hc
-    .copy(authorization = Some(Authorization(s"Bearer ${appConfig.desToken}")))
-    .withExtraHeaders("Environment" -> appConfig.desEnv)
+  private[connectors] def desHeaderCarrier(implicit hc: HeaderCarrier): HeaderCarrier =
+    hc.copy(authorization = Some(Authorization(s"Bearer ${appConfig.desToken}")))
+      .withExtraHeaders("Environment" -> appConfig.desEnv)
 
-  def createCrystallisation(crystallisationRequestData: CrystallisationRequestData)
-                           (implicit hc: HeaderCarrier, ec: ExecutionContext): Future[CreateCrystallisationConnectorOutcome] = {
+  def performIntentToCrystallise(requestData: IntentToCrystalliseRequestData)(implicit hc: HeaderCarrier,
+                                                                              ec: ExecutionContext): Future[IntentToCrystalliseConnectorOutcome] = {
 
-    val nino = crystallisationRequestData.nino.nino
+    val nino    = requestData.nino.nino
+    val taxYear = requestData.desTaxYear
+
+    val url = s"${appConfig.desBaseUrl}/income-tax/nino/$nino/taxYear/$taxYear/tax-calculation?crystallise=true"
+
+    http.POSTEmpty(url)(StandardDesHttpParser.reads[DesCalculationIdResponse], desHeaderCarrier, implicitly)
+  }
+
+  def createCrystallisation(crystallisationRequestData: CrystallisationRequestData)(
+      implicit hc: HeaderCarrier,
+      ec: ExecutionContext): Future[CreateCrystallisationConnectorOutcome] = {
+
+    val nino    = crystallisationRequestData.nino.nino
     val taxYear = crystallisationRequestData.desTaxYear
-    val calcId = crystallisationRequestData.crystallisation.calculationId
+    val calcId  = crystallisationRequestData.crystallisation.calculationId
 
     val url = s"${appConfig.desBaseUrl}/income-tax/calculation/nino/$nino/$taxYear/$calcId/crystallise"
 

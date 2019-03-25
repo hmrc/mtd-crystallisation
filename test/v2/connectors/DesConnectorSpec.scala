@@ -17,22 +17,23 @@
 package v2.connectors
 
 import uk.gov.hmrc.domain.Nino
-import v2.mocks.{MockAppConfig, MockHttpClient}
+import v2.mocks.{ MockAppConfig, MockHttpClient }
+import v2.models.des.DesCalculationIdResponse
 import v2.models.domain.CrystallisationRequest
 import v2.models.errors._
 import v2.models.outcomes.DesResponse
-import v2.models.requestData.{CrystallisationRequestData, DesTaxYear}
+import v2.models.requestData.{ CrystallisationRequestData, DesTaxYear, IntentToCrystalliseRequestData }
 
 import scala.concurrent.Future
 
 class DesConnectorSpec extends ConnectorSpec {
 
-  lazy val baseUrl = "test-BaseUrl"
+  lazy val baseUrl  = "test-BaseUrl"
   val correlationId = "a1e8057e-fbbc-47a8-a8b4-78d9f015c253"
 
   val taxYear = DesTaxYear("2018")
-  val nino = Nino("AA123456A")
-  val calcId = "041f7e4d-87b9-4d4a-a296-3cfbdf92f7e2"
+  val nino    = Nino("AA123456A")
+  val calcId  = "041f7e4d-87b9-4d4a-a296-3cfbdf92f7e2"
 
   class Test extends MockHttpClient with MockAppConfig {
     val connector: DesConnector = new DesConnector(http = mockHttpClient, appConfig = mockAppConfig)
@@ -41,15 +42,62 @@ class DesConnectorSpec extends ConnectorSpec {
     MockedAppConfig.desEnvironment returns "des-environment"
   }
 
+  "intent to crystallise" when {
+    "a valid request is supplied" should {
+      "return a successful response with the correct correlationId" in new Test {
+        val expected = Right(DesResponse(correlationId, DesCalculationIdResponse(calcId)))
+
+        MockedHttpClient
+          .postEmpty(s"$baseUrl/income-tax/nino/$nino/taxYear/$taxYear/tax-calculation?crystallise=true")
+          .returns(Future.successful(expected))
+
+        performIntentToCrystalliseResult(connector) shouldBe expected
+      }
+    }
+
+    "a request returning a single error" should {
+      "return an unsuccessful response with the correct correlationId and a single error" in new Test {
+        val expected = Left(DesResponse(correlationId, SingleError(NoSubmissionsExistError)))
+
+        MockedHttpClient
+          .postEmpty(s"$baseUrl/income-tax/nino/$nino/taxYear/$taxYear/tax-calculation?crystallise=true")
+          .returns(Future.successful(expected))
+
+        performIntentToCrystalliseResult(connector) shouldBe expected
+      }
+    }
+
+    "a request returning multiple errors" should {
+      "return an unsuccessful response with the correct correlationId and multiple errors" in new Test {
+        val expected = Left(DesResponse(correlationId, MultipleErrors(Seq(RecentSubmissionsExistError, ResidencyChangedError))))
+
+        MockedHttpClient
+          .postEmpty(s"$baseUrl/income-tax/nino/$nino/taxYear/$taxYear/tax-calculation?crystallise=true")
+          .returns(Future.successful(expected))
+
+        performIntentToCrystalliseResult(connector) shouldBe expected
+      }
+    }
+
+    def performIntentToCrystalliseResult(connector: DesConnector): IntentToCrystalliseConnectorOutcome =
+      await(
+        connector.performIntentToCrystallise(
+          IntentToCrystalliseRequestData(
+            nino = nino,
+            desTaxYear = taxYear
+          )))
+  }
+
   "createCrystallisation" when {
     "a valid request is supplied" should {
       "return a successful response with the correct correlationId" in new Test {
         val expected = Right(DesResponse(correlationId, ()))
 
-        MockedHttpClient.postEmpty(s"$baseUrl/income-tax/calculation/nino/$nino/$taxYear/$calcId/crystallise")
+        MockedHttpClient
+          .postEmpty(s"$baseUrl/income-tax/calculation/nino/$nino/$taxYear/$calcId/crystallise")
           .returns(Future.successful(expected))
 
-        val result: CreateCrystallisationConnectorOutcome = getResult(connector)
+        val result: CreateCrystallisationConnectorOutcome = createCrystallisationResult(connector)
 
         result shouldBe expected
       }
@@ -59,10 +107,11 @@ class DesConnectorSpec extends ConnectorSpec {
       "return an unsuccessful response with the correct correlationId and a single error" in new Test {
         val expected = Left(DesResponse(correlationId, SingleError(RecentSubmissionsExistError)))
 
-        MockedHttpClient.postEmpty(s"$baseUrl/income-tax/calculation/nino/$nino/$taxYear/$calcId/crystallise")
+        MockedHttpClient
+          .postEmpty(s"$baseUrl/income-tax/calculation/nino/$nino/$taxYear/$calcId/crystallise")
           .returns(Future.successful(expected))
 
-        val result: CreateCrystallisationConnectorOutcome = getResult(connector)
+        val result: CreateCrystallisationConnectorOutcome = createCrystallisationResult(connector)
 
         result shouldBe expected
       }
@@ -72,21 +121,24 @@ class DesConnectorSpec extends ConnectorSpec {
       "return an unsuccessful response with the correct correlationId and multiple errors" in new Test {
         val expected = Left(DesResponse(correlationId, MultipleErrors(Seq(RecentSubmissionsExistError, ResidencyChangedError))))
 
-        MockedHttpClient.postEmpty(s"$baseUrl/income-tax/calculation/nino/$nino/$taxYear/$calcId/crystallise")
+        MockedHttpClient
+          .postEmpty(s"$baseUrl/income-tax/calculation/nino/$nino/$taxYear/$calcId/crystallise")
           .returns(Future.successful(expected))
 
-        val result: CreateCrystallisationConnectorOutcome = getResult(connector)
+        val result: CreateCrystallisationConnectorOutcome = createCrystallisationResult(connector)
 
         result shouldBe expected
       }
     }
-  }
 
-  private def getResult(connector: DesConnector): CreateCrystallisationConnectorOutcome =
-    await(connector.createCrystallisation(CrystallisationRequestData(
-      nino = nino,
-      desTaxYear = taxYear,
-      crystallisation = CrystallisationRequest(calcId)
-    )))
+    def createCrystallisationResult(connector: DesConnector): CreateCrystallisationConnectorOutcome =
+      await(
+        connector.createCrystallisation(
+          CrystallisationRequestData(
+            nino = nino,
+            desTaxYear = taxYear,
+            crystallisation = CrystallisationRequest(calcId)
+          )))
+  }
 
 }

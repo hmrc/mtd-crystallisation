@@ -19,18 +19,28 @@ package v2.mocks.connectors
 import org.scalamock.handlers.CallHandler
 import org.scalamock.scalatest.MockFactory
 import uk.gov.hmrc.http.HeaderCarrier
-import v2.connectors.{CreateCrystallisationConnectorOutcome, DesConnector}
-import v2.models.requestData.CrystallisationRequestData
+import v2.connectors.{ CreateCrystallisationConnectorOutcome, DesConnector, IntentToCrystalliseConnectorOutcome }
+import v2.models.requestData.{ CrystallisationRequestData, IntentToCrystalliseRequestData }
 
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.{ ExecutionContext, Future }
 
 trait MockDesConnector extends MockFactory {
   val connector: DesConnector = mock[DesConnector]
 
   object MockedDesConnector {
+
+    def performIntentToCrystallise(
+        intentToCrystalliseRequestData: IntentToCrystalliseRequestData): CallHandler[Future[IntentToCrystalliseConnectorOutcome]] = {
+      (connector
+        .performIntentToCrystallise(_: IntentToCrystalliseRequestData)(_: HeaderCarrier, _: ExecutionContext))
+        .expects(intentToCrystalliseRequestData, *, *)
+    }
+
     def createCrystallisation(crystallisationRequestData: CrystallisationRequestData): CallHandler[Future[CreateCrystallisationConnectorOutcome]] = {
-      (connector.createCrystallisation(_: CrystallisationRequestData)(_: HeaderCarrier, _: ExecutionContext))
+      (connector
+        .createCrystallisation(_: CrystallisationRequestData)(_: HeaderCarrier, _: ExecutionContext))
         .expects(crystallisationRequestData, *, *)
     }
   }
+
 }

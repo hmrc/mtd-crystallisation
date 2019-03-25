@@ -24,5 +24,5 @@ import play.api.libs.json.{Json, Reads}
 case class DesCalculationIdResponse(id: String)
 
 object DesCalculationIdResponse {
-  implicit val reads: Reads[DesCalculationIdResponse] = Json.reads
+  implicit val reads: Reads[DesCalculationIdResponse] = Json.reads[DesCalculationIdResponse]
 }
