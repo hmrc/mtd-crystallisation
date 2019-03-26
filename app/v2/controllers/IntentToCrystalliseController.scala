@@ -20,6 +20,7 @@ import java.util.UUID
 
 import javax.inject.{ Inject, Singleton }
 import play.api.Logger
+import play.api.http.MimeTypes
 import play.api.libs.json.Json
 import play.api.mvc.{ Action, AnyContent, ControllerComponents }
 import v2.controllers.requestParsers.IntentToCrystalliseRequestDataParser
@@ -49,7 +50,7 @@ class IntentToCrystalliseController @Inject()(val authService: EnrolmentsAuthSer
               logger.info(
                 s"[IntentToCrystalliseController][intentToCrystallise] - Success response received with CorrelationId: ${desResponse.correlationId}")
               val url = s"/self-assessment/ni/$nino/calculations/${desResponse.responseData}"
-              SeeOther(url).withHeaders(LOCATION -> url, "X-CorrelationId" -> desResponse.correlationId, CONTENT_TYPE -> "application/json")
+              SeeOther(url).withHeaders(LOCATION -> url, "X-CorrelationId" -> desResponse.correlationId).as(MimeTypes.JSON)
             case Left(errorWrapper) =>
               val correlationId = getCorrelationId(errorWrapper)
               val result        = processError(errorWrapper).withHeaders("X-CorrelationId" -> correlationId)

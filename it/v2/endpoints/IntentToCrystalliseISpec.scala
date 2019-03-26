@@ -64,6 +64,7 @@ class IntentToCrystalliseISpec extends IntegrationBaseSpec {
         val response: WSResponse = await(request().post(EmptyBody))
         response.status shouldBe Status.SEE_OTHER
         response.header("Location") shouldBe Some(s"/self-assessment/ni/$nino/calculations/$calcId")
+        response.header("Content-Type") shouldBe Some("application/json")
       }
     }
 
