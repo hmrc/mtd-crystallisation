@@ -76,6 +76,7 @@ class IntentToCrystalliseControllerSpec
         status(result) shouldBe SEE_OTHER
         header("Location", result).isEmpty shouldBe false
         header("Location", result) shouldBe Some(s"/self-assessment/ni/$nino/calculations/$calculationId")
+        header("Content-Type", result) shouldBe Some("application/json")
       }
     }
 
