@@ -49,7 +49,7 @@ class IntentToCrystalliseController @Inject()(val authService: EnrolmentsAuthSer
               logger.info(
                 s"[IntentToCrystalliseController][intentToCrystallise] - Success response received with CorrelationId: ${desResponse.correlationId}")
               val url = s"/self-assessment/ni/$nino/calculations/${desResponse.responseData}"
-              SeeOther(url).withHeaders(LOCATION -> url, "X-CorrelationId" -> desResponse.correlationId)
+              SeeOther(url).withHeaders(LOCATION -> url, "X-CorrelationId" -> desResponse.correlationId, CONTENT_TYPE -> "application/json")
             case Left(errorWrapper) =>
               val correlationId = getCorrelationId(errorWrapper)
               val result        = processError(errorWrapper).withHeaders("X-CorrelationId" -> correlationId)
