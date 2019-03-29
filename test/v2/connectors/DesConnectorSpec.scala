@@ -17,12 +17,12 @@
 package v2.connectors
 
 import uk.gov.hmrc.domain.Nino
-import v2.mocks.{MockAppConfig, MockHttpClient}
+import v2.mocks.{ MockAppConfig, MockHttpClient }
 import v2.models.des.DesCalculationIdResponse
-import v2.models.domain.{CrystallisationRequest, EmptyJsonBody}
+import v2.models.domain.{ CrystallisationRequest, EmptyJsonBody }
 import v2.models.errors._
 import v2.models.outcomes.DesResponse
-import v2.models.requestData.{CrystallisationRequestData, DesTaxYear, IntentToCrystalliseRequestData}
+import v2.models.requestData.{ CrystallisationRequestData, DesTaxYear, IntentToCrystalliseRequestData }
 
 import scala.concurrent.Future
 
@@ -94,7 +94,7 @@ class DesConnectorSpec extends ConnectorSpec {
         val expected = Right(DesResponse(correlationId, ()))
 
         MockedHttpClient
-          .postEmpty(s"$baseUrl/income-tax/calculation/nino/$nino/$taxYear/$calcId/crystallise")
+          .post(s"$baseUrl/income-tax/calculation/nino/$nino/$taxYear/$calcId/crystallise", EmptyJsonBody)
           .returns(Future.successful(expected))
 
         val result: CreateCrystallisationConnectorOutcome = createCrystallisationResult(connector)
@@ -108,7 +108,7 @@ class DesConnectorSpec extends ConnectorSpec {
         val expected = Left(DesResponse(correlationId, SingleError(RecentSubmissionsExistError)))
 
         MockedHttpClient
-          .postEmpty(s"$baseUrl/income-tax/calculation/nino/$nino/$taxYear/$calcId/crystallise")
+          .post(s"$baseUrl/income-tax/calculation/nino/$nino/$taxYear/$calcId/crystallise", EmptyJsonBody)
           .returns(Future.successful(expected))
 
         val result: CreateCrystallisationConnectorOutcome = createCrystallisationResult(connector)
@@ -122,7 +122,7 @@ class DesConnectorSpec extends ConnectorSpec {
         val expected = Left(DesResponse(correlationId, MultipleErrors(Seq(RecentSubmissionsExistError, ResidencyChangedError))))
 
         MockedHttpClient
-          .postEmpty(s"$baseUrl/income-tax/calculation/nino/$nino/$taxYear/$calcId/crystallise")
+          .post(s"$baseUrl/income-tax/calculation/nino/$nino/$taxYear/$calcId/crystallise", EmptyJsonBody)
           .returns(Future.successful(expected))
 
         val result: CreateCrystallisationConnectorOutcome = createCrystallisationResult(connector)
