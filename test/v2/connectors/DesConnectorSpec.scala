@@ -48,7 +48,7 @@ class DesConnectorSpec extends ConnectorSpec {
         val expected = Right(DesResponse(correlationId, DesCalculationIdResponse(calcId)))
 
         MockedHttpClient
-          .postEmpty(s"$baseUrl/income-tax/nino/$nino/taxYear/$taxYear/tax-calculation?crystallise=true")
+          .post(s"$baseUrl/income-tax/nino/$nino/taxYear/$taxYear/tax-calculation?crystallise=true")
           .returns(Future.successful(expected))
 
         performIntentToCrystalliseResult(connector) shouldBe expected
@@ -60,7 +60,7 @@ class DesConnectorSpec extends ConnectorSpec {
         val expected = Left(DesResponse(correlationId, SingleError(NoSubmissionsExistError)))
 
         MockedHttpClient
-          .postEmpty(s"$baseUrl/income-tax/nino/$nino/taxYear/$taxYear/tax-calculation?crystallise=true")
+          .post(s"$baseUrl/income-tax/nino/$nino/taxYear/$taxYear/tax-calculation?crystallise=true")
           .returns(Future.successful(expected))
 
         performIntentToCrystalliseResult(connector) shouldBe expected
@@ -72,7 +72,7 @@ class DesConnectorSpec extends ConnectorSpec {
         val expected = Left(DesResponse(correlationId, MultipleErrors(Seq(RecentSubmissionsExistError, ResidencyChangedError))))
 
         MockedHttpClient
-          .postEmpty(s"$baseUrl/income-tax/nino/$nino/taxYear/$taxYear/tax-calculation?crystallise=true")
+          .post(s"$baseUrl/income-tax/nino/$nino/taxYear/$taxYear/tax-calculation?crystallise=true")
           .returns(Future.successful(expected))
 
         performIntentToCrystalliseResult(connector) shouldBe expected
