@@ -17,10 +17,9 @@
 package v2.controllers.requestParsers.validators
 
 import v2.models.errors.Error
-import v2.models.requestData.InputData
+import v2.models.requestData.RawData
 
-trait Validator[A <: InputData] {
-
+trait Validator[A <: RawData] {
 
   type ValidationLevel[T] = T => List[Error]
 
@@ -30,10 +29,11 @@ trait Validator[A <: InputData] {
 
     validationSet match {
       case Nil => List()
-      case thisLevel :: remainingLevels => thisLevel(data).flatten match {
-        case x if x.isEmpty => run(remainingLevels, data)
-        case x if x.nonEmpty => x
-      }
+      case thisLevel :: remainingLevels =>
+        thisLevel(data).flatten match {
+          case x if x.isEmpty  => run(remainingLevels, data)
+          case x if x.nonEmpty => x
+        }
     }
   }
 }

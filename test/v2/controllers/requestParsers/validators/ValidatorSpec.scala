@@ -19,7 +19,7 @@ package v2.controllers.requestParsers.validators
 import org.scalamock.scalatest.MockFactory
 import support.UnitSpec
 import v2.models.errors.Error
-import v2.models.requestData.InputData
+import v2.models.requestData.RawData
 
 class ValidatorSpec extends UnitSpec with MockFactory {
 
@@ -35,7 +35,7 @@ class ValidatorSpec extends UnitSpec with MockFactory {
         val levelOneValidationOne = new MockFunctionObject("Level: 1    Validation 1")
         val levelOneValidationTwo = new MockFunctionObject("Level: 1    Validation 2")
 
-        def levelOneValidations: TestInputData => List[List[Error]] = (data: TestInputData) => {
+        def levelOneValidations: TestRawData => List[List[Error]] = (data: TestRawData) => {
           List(
             levelOneValidationOne.validate(shouldError = false, None),
             levelOneValidationTwo.validate(shouldError = false, None)
@@ -44,8 +44,8 @@ class ValidatorSpec extends UnitSpec with MockFactory {
 
         val validationSet = List(levelOneValidations)
 
-        val inputData = TestInputData("ABCDEF", "12345")
-        val result = validator.run(validationSet, inputData)
+        val inputData = TestRawData("ABCDEF", "12345")
+        val result    = validator.run(validationSet, inputData)
         result.isEmpty shouldBe true
         levelOneValidationOne.called shouldBe 1
         levelOneValidationTwo.called shouldBe 1
@@ -58,9 +58,9 @@ class ValidatorSpec extends UnitSpec with MockFactory {
         // Set up the mock validations
         val levelOneValidationOne = new MockFunctionObject("Level: 1    Validation 1")
         val levelOneValidationTwo = new MockFunctionObject("Level: 1    Validation 2")
-        val mockError = Error("MOCK", "SOME ERROR")
+        val mockError             = Error("MOCK", "SOME ERROR")
 
-        def levelOneValidations: TestInputData => List[List[Error]] = (data: TestInputData) => {
+        def levelOneValidations: TestRawData => List[List[Error]] = (data: TestRawData) => {
           List(
             levelOneValidationOne.validate(shouldError = false, None),
             levelOneValidationTwo.validate(shouldError = true, Some(mockError))
@@ -69,8 +69,8 @@ class ValidatorSpec extends UnitSpec with MockFactory {
 
         val validationSet = List(levelOneValidations)
 
-        val inputData = TestInputData("ABCDEF", "12345")
-        val result = validator.run(validationSet, inputData)
+        val inputData = TestRawData("ABCDEF", "12345")
+        val result    = validator.run(validationSet, inputData)
         result.isEmpty shouldBe false
         result.size shouldBe 1
         result.head shouldBe mockError
@@ -86,16 +86,16 @@ class ValidatorSpec extends UnitSpec with MockFactory {
         val levelOneValidationTwo = new MockFunctionObject("Level: 1    Validation 2")
         val levelTwoValidationOne = new MockFunctionObject("Level: 2    Validation 1")
         val levelTwoValidationTwo = new MockFunctionObject("Level: 2    Validation 2")
-        val mockError = Error("MOCK", "SOME ERROR ON LEVEL 2")
+        val mockError             = Error("MOCK", "SOME ERROR ON LEVEL 2")
 
-        def levelOneValidations: TestInputData => List[List[Error]] = (data: TestInputData) => {
+        def levelOneValidations: TestRawData => List[List[Error]] = (data: TestRawData) => {
           List(
             levelOneValidationOne.validate(shouldError = false, None),
             levelOneValidationTwo.validate(shouldError = false, None)
           )
         }
 
-        def levelTwoValidations: TestInputData => List[List[Error]] = (data: TestInputData) => {
+        def levelTwoValidations: TestRawData => List[List[Error]] = (data: TestRawData) => {
           List(
             levelTwoValidationOne.validate(shouldError = false, None),
             levelTwoValidationTwo.validate(shouldError = true, Some(mockError))
@@ -104,8 +104,8 @@ class ValidatorSpec extends UnitSpec with MockFactory {
 
         val validationSet = List(levelOneValidations, levelTwoValidations)
 
-        val inputData = TestInputData("ABCDEF", "12345")
-        val result = validator.run(validationSet, inputData)
+        val inputData = TestRawData("ABCDEF", "12345")
+        val result    = validator.run(validationSet, inputData)
         result.isEmpty shouldBe false
         result.size shouldBe 1
         result.head shouldBe mockError
@@ -119,7 +119,6 @@ class ValidatorSpec extends UnitSpec with MockFactory {
 
 }
 
-
 class MockFunctionObject(name: String) {
   var called = 0
 
@@ -130,16 +129,15 @@ class MockFunctionObject(name: String) {
 
 }
 
-
-private case class TestInputData(fieldOne: String, fieldTwo: String) extends InputData
+private case class TestRawData(fieldOne: String, fieldTwo: String) extends RawData
 
 // Create a Validator based off the trait to be able to test it
-private class TestValidator extends Validator[TestInputData] {
-  override def validate(data: TestInputData): List[Error] = {
+private class TestValidator extends Validator[TestRawData] {
+  override def validate(data: TestRawData): List[Error] = {
     run(List(), data) match {
-      case Nil => List()
+      case Nil        => List()
       case err :: Nil => List(err)
-      case errs => errs
+      case errs       => errs
     }
   }
 }
