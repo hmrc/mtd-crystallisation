@@ -16,10 +16,8 @@
 
 package v2.connectors
 
-import javax.inject.{Inject, Singleton}
+import javax.inject.{ Inject, Singleton }
 import play.api.Logger
-import play.api.libs.json.{JsObject, Writes}
-import play.api.libs.ws.EmptyBody
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.http.logging.Authorization
 import uk.gov.hmrc.play.bootstrap.http.HttpClient
@@ -27,9 +25,9 @@ import v2.config.AppConfig
 import v2.connectors.httpparsers.StandardDesHttpParser
 import v2.models.des.DesCalculationIdResponse
 import v2.models.domain.EmptyJsonBody
-import v2.models.requestData.{CrystallisationRequestData, IntentToCrystalliseRequestData}
+import v2.models.requestData.{ CrystallisationRequestData, IntentToCrystalliseRequestData }
 
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.{ ExecutionContext, Future }
 
 @Singleton
 class DesConnector @Inject()(http: HttpClient, appConfig: AppConfig) {
@@ -43,14 +41,12 @@ class DesConnector @Inject()(http: HttpClient, appConfig: AppConfig) {
   def performIntentToCrystallise(requestData: IntentToCrystalliseRequestData)(implicit hc: HeaderCarrier,
                                                                               ec: ExecutionContext): Future[IntentToCrystalliseConnectorOutcome] = {
 
-    import EmptyJsonBody.writes
-
     val nino    = requestData.nino.nino
     val taxYear = requestData.desTaxYear
 
     val url = s"${appConfig.desBaseUrl}/income-tax/nino/$nino/taxYear/$taxYear/tax-calculation?crystallise=true"
 
-    http.POST(url, EmptyJsonBody)(writes, StandardDesHttpParser.reads[DesCalculationIdResponse], desHeaderCarrier, implicitly)
+    http.POST(url, EmptyJsonBody)(EmptyJsonBody.writes, StandardDesHttpParser.reads[DesCalculationIdResponse], desHeaderCarrier, implicitly)
   }
 
   def createCrystallisation(crystallisationRequestData: CrystallisationRequestData)(
@@ -63,7 +59,7 @@ class DesConnector @Inject()(http: HttpClient, appConfig: AppConfig) {
 
     val url = s"${appConfig.desBaseUrl}/income-tax/calculation/nino/$nino/$taxYear/$calcId/crystallise"
 
-    http.POSTEmpty(url)(StandardDesHttpParser.readsEmpty, desHeaderCarrier, implicitly)
+    http.POST(url, EmptyJsonBody)(EmptyJsonBody.writes, StandardDesHttpParser.readsEmpty, desHeaderCarrier, implicitly)
   }
 
 }
