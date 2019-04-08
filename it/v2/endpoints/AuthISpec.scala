@@ -19,17 +19,17 @@ package v2.endpoints
 import com.github.tomakehurst.wiremock.stubbing.StubMapping
 import play.api.http.Status
 import play.api.libs.json.Json
-import play.api.libs.ws.{WSRequest, WSResponse}
+import play.api.libs.ws.{ WSRequest, WSResponse }
 import support.IntegrationBaseSpec
 import v2.models.requestData.DesTaxYear
-import v2.stubs.{AuditStub, AuthStub, DesStub, MtdIdLookupStub}
+import v2.stubs.{ AuditStub, AuthStub, DesStub, MtdIdLookupStub }
 
 class AuthISpec extends IntegrationBaseSpec {
 
   private trait Test {
-    val nino = "AA123456A"
-    val taxYear = "2017-18"
-    val calcId = "041f7e4d-87b9-4d4a-a296-3cfbdf92f7e2"
+    val nino          = "AA123456A"
+    val taxYear       = "2017-18"
+    val calcId        = "041f7e4d-87b9-4d4a-a296-3cfbdf92f7e2"
     val correlationId = "X-123"
 
     val requestJson: String =
@@ -66,7 +66,7 @@ class AuthISpec extends IntegrationBaseSpec {
 
     "an MTD ID is successfully retrieve from the NINO and the user is authorised" should {
 
-      "return 204" in new Test {
+      "return 201" in new Test {
         override def setupStubs(): StubMapping = {
           AuditStub.audit()
           AuthStub.authorised()
@@ -75,7 +75,7 @@ class AuthISpec extends IntegrationBaseSpec {
         }
 
         val response: WSResponse = await(request().post(Json.parse(requestJson)))
-        response.status shouldBe Status.NO_CONTENT
+        response.status shouldBe Status.CREATED
       }
     }
 

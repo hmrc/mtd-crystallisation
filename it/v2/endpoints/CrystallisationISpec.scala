@@ -18,20 +18,20 @@ package v2.endpoints
 
 import com.github.tomakehurst.wiremock.stubbing.StubMapping
 import play.api.http.Status
-import play.api.libs.json.{JsValue, Json}
-import play.api.libs.ws.{WSRequest, WSResponse}
+import play.api.libs.json.{ JsValue, Json }
+import play.api.libs.ws.{ WSRequest, WSResponse }
 import support.IntegrationBaseSpec
 import v2.models.errors._
 import v2.models.requestData.DesTaxYear
-import v2.stubs.{AuditStub, AuthStub, DesStub, MtdIdLookupStub}
+import v2.stubs.{ AuditStub, AuthStub, DesStub, MtdIdLookupStub }
 
 class CrystallisationISpec extends IntegrationBaseSpec {
 
   private trait Test {
 
-    val nino = "AA123456A"
-    val taxYear = "2017-18"
-    val calcId = "041f7e4d-87b9-4d4a-a296-3cfbdf92f7e2"
+    val nino          = "AA123456A"
+    val taxYear       = "2017-18"
+    val calcId        = "041f7e4d-87b9-4d4a-a296-3cfbdf92f7e2"
     val correlationId = "X-123"
 
     val requestJson: String =
@@ -57,7 +57,7 @@ class CrystallisationISpec extends IntegrationBaseSpec {
       def uri: String = s"/2.0/ni/$nino/$taxYear/crystallisation"
     }
 
-    "return a 204 status code" when {
+    "return a 201 status code" when {
 
       "any valid request is made" in new CreateTest {
 
@@ -69,7 +69,7 @@ class CrystallisationISpec extends IntegrationBaseSpec {
         }
 
         val response: WSResponse = await(request().post(Json.parse(requestJson)))
-        response.status shouldBe Status.NO_CONTENT
+        response.status shouldBe Status.CREATED
       }
     }
 
@@ -100,7 +100,7 @@ class CrystallisationISpec extends IntegrationBaseSpec {
           AuditStub.audit()
           AuthStub.authorised()
           MtdIdLookupStub.ninoFound(nino)
-          DesStub.createError(nino,  DesTaxYear.fromMtd(taxYear).toString, calcId, desStatus, errorBody(desCode))
+          DesStub.createError(nino, DesTaxYear.fromMtd(taxYear).toString, calcId, desStatus, errorBody(desCode))
         }
 
         val response: WSResponse = await(request().post(Json.parse(requestJson)))
@@ -111,14 +111,14 @@ class CrystallisationISpec extends IntegrationBaseSpec {
 
     "return 400 (Bad Request)" when {
       createRequestValidationErrorTest("AA1123A", "2017-18", Status.BAD_REQUEST, NinoFormatError)
-      createRequestValidationErrorTest("AA123456A","20177", Status.BAD_REQUEST, TaxYearFormatError)
-      createRequestValidationErrorTest("AA123456A","2015-16", Status.BAD_REQUEST, RuleTaxYearNotSupportedError)
+      createRequestValidationErrorTest("AA123456A", "20177", Status.BAD_REQUEST, TaxYearFormatError)
+      createRequestValidationErrorTest("AA123456A", "2015-16", Status.BAD_REQUEST, RuleTaxYearNotSupportedError)
     }
 
     def createRequestValidationErrorTest(requestNino: String, requestTaxYear: String, expectedStatus: Int, expectedBody: Error): Unit = {
       s"validation fails with ${expectedBody.code} error" in new CreateTest {
 
-        override val nino: String = requestNino
+        override val nino: String    = requestNino
         override val taxYear: String = requestTaxYear
 
         override def setupStubs(): StubMapping = {
