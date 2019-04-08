@@ -17,23 +17,24 @@
 package v2.controllers
 
 import play.api.libs.json.Json
-import play.api.mvc.{AnyContentAsJson, Result}
+import play.api.mvc.{ AnyContentAsJson, Result }
 import uk.gov.hmrc.domain.Nino
 import uk.gov.hmrc.http.HeaderCarrier
 import v2.mocks.requestParsers.MockCrystallisationRequestDataParser
-import v2.mocks.services.{MockCrystallisationService, MockEnrolmentsAuthService, MockMtdIdLookupService}
+import v2.mocks.services.{ MockCrystallisationService, MockEnrolmentsAuthService, MockMtdIdLookupService }
 import v2.models.domain.CrystallisationRequest
 import v2.models.errors._
 import v2.models.outcomes.DesResponse
-import v2.models.requestData.{CrystallisationRawData, CrystallisationRequestData, DesTaxYear}
+import v2.models.requestData.{ CrystallisationRawData, CrystallisationRequestData, DesTaxYear }
 
 import scala.concurrent.Future
 
-class CrystallisationControllerSpec extends ControllerBaseSpec
-  with MockEnrolmentsAuthService
-  with MockMtdIdLookupService
-  with MockCrystallisationRequestDataParser
-  with MockCrystallisationService {
+class CrystallisationControllerSpec
+    extends ControllerBaseSpec
+    with MockEnrolmentsAuthService
+    with MockMtdIdLookupService
+    with MockCrystallisationRequestDataParser
+    with MockCrystallisationService {
 
   trait Test {
     val hc = HeaderCarrier()
@@ -50,10 +51,11 @@ class CrystallisationControllerSpec extends ControllerBaseSpec
     MockedEnrolmentsAuthService.authoriseUser()
   }
 
-  val nino = "AA123456A"
-  val taxYear = "2017-18"
+  val nino          = "AA123456A"
+  val taxYear       = "2017-18"
   val calculationId = "041f7e4d-87b9-4d4a-a296-3cfbdf92f7e2"
   val correlationId = "X-123"
+
   val request: String =
     s"""
       |{
@@ -68,24 +70,27 @@ class CrystallisationControllerSpec extends ControllerBaseSpec
   val crystallisationRawData = CrystallisationRawData(nino, taxYear, AnyContentAsJson(Json.parse(request)))
 
   "create" should {
-    "return 204" when {
+    "return 201" when {
       "a valid details is supplied" in new Test {
 
-        MockCrystallisationRequestDataParser.parse(crystallisationRawData)
+        MockCrystallisationRequestDataParser
+          .parse(crystallisationRawData)
           .returns(Right(crystallisationRequestData))
 
-        MockCrystallisationService.create(crystallisationRequestData)
+        MockCrystallisationService
+          .create(crystallisationRequestData)
           .returns(Future.successful(Right(DesResponse(correlationId, ()))))
 
         val result: Future[Result] = controller.create(nino, taxYear)(fakePostRequest(Json.parse(request)))
-        status(result) shouldBe NO_CONTENT
+        status(result) shouldBe CREATED
       }
     }
 
     "return single error" when {
       "a invalid nino is supplied" in new Test {
 
-        MockCrystallisationRequestDataParser.parse(crystallisationRawData)
+        MockCrystallisationRequestDataParser
+          .parse(crystallisationRawData)
           .returns(Left(ErrorWrapper(None, NinoFormatError, None)))
 
         val result: Future[Result] = controller.create(nino, taxYear)(fakePostRequest(Json.parse(request)))
@@ -96,7 +101,8 @@ class CrystallisationControllerSpec extends ControllerBaseSpec
 
     "return multiple errors response" when {
       "more than one validations exist" in new Test() {
-        MockCrystallisationRequestDataParser.parse(crystallisationRawData)
+        MockCrystallisationRequestDataParser
+          .parse(crystallisationRawData)
           .returns(Left(ErrorWrapper(None, BadRequestError, Some(Seq(NinoFormatError, TaxYearFormatError)))))
 
         val result: Future[Result] = controller.create(nino, taxYear)(fakePostRequest(Json.parse(request)))
@@ -167,7 +173,8 @@ class CrystallisationControllerSpec extends ControllerBaseSpec
     def errorsFromCreateParserTester(error: Error, expectedStatus: Int): Unit = {
       s"a ${error.code} error is returned from the parser" in new Test {
 
-        MockCrystallisationRequestDataParser.parse(crystallisationRawData)
+        MockCrystallisationRequestDataParser
+          .parse(crystallisationRawData)
           .returns(Left(ErrorWrapper(Some(correlationId), error, None)))
 
         val result: Future[Result] = controller.create(nino, taxYear)(fakePostRequest(Json.parse(request)))
@@ -181,10 +188,12 @@ class CrystallisationControllerSpec extends ControllerBaseSpec
     def errorsFromCreateServiceTester(error: Error, expectedStatus: Int): Unit = {
       s"a ${error.code} error is returned from the service" in new Test {
 
-        MockCrystallisationRequestDataParser.parse(crystallisationRawData)
+        MockCrystallisationRequestDataParser
+          .parse(crystallisationRawData)
           .returns(Right(crystallisationRequestData))
 
-        MockCrystallisationService.create(crystallisationRequestData)
+        MockCrystallisationService
+          .create(crystallisationRequestData)
           .returns(Future.successful(Left(ErrorWrapper(Some(correlationId), error, None))))
 
         val result: Future[Result] = controller.create(nino, taxYear)(fakePostRequest(Json.parse(request)))
