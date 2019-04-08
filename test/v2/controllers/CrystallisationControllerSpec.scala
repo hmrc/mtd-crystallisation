@@ -70,7 +70,7 @@ class CrystallisationControllerSpec
   val crystallisationRawData = CrystallisationRawData(nino, taxYear, AnyContentAsJson(Json.parse(request)))
 
   "create" should {
-    "return 204" when {
+    "return 201" when {
       "a valid details is supplied" in new Test {
 
         MockCrystallisationRequestDataParser
