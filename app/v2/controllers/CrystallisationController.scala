@@ -46,7 +46,6 @@ class CrystallisationController @Inject()(val authService: EnrolmentsAuthService
         crystallisationService.createCrystallisation(crystallisationRequestData).map {
           case Right(desResponse) =>
             logger.info(s"[CrystallisationController][create] - Success response received with CorrelationId: ${desResponse.correlationId}")
-            println(s">>>>>>>> DESRESPONSE: ${desResponse}")
             Created.withHeaders("X-CorrelationId" -> desResponse.correlationId)
           case Left(errorWrapper) =>
             val correlationId = getCorrelationId(errorWrapper)
