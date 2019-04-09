@@ -20,6 +20,7 @@ import java.util.UUID
 
 import javax.inject.{ Inject, Singleton }
 import play.api.Logger
+import play.api.http.MimeTypes
 import play.api.libs.json.{ JsValue, Json }
 import play.api.mvc.{ Action, AnyContentAsJson, ControllerComponents }
 import v2.controllers.requestParsers.CrystallisationRequestDataParser
@@ -46,7 +47,7 @@ class CrystallisationController @Inject()(val authService: EnrolmentsAuthService
         crystallisationService.createCrystallisation(crystallisationRequestData).map {
           case Right(desResponse) =>
             logger.info(s"[CrystallisationController][create] - Success response received with CorrelationId: ${desResponse.correlationId}")
-            Created.withHeaders("X-CorrelationId" -> desResponse.correlationId)
+            Created.withHeaders("X-CorrelationId" -> desResponse.correlationId).as(MimeTypes.JSON)
           case Left(errorWrapper) =>
             val correlationId = getCorrelationId(errorWrapper)
             val result        = processError(errorWrapper).withHeaders("X-CorrelationId" -> correlationId)

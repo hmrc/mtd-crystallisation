@@ -70,6 +70,7 @@ class CrystallisationISpec extends IntegrationBaseSpec {
 
         val response: WSResponse = await(request().post(Json.parse(requestJson)))
         response.status shouldBe Status.CREATED
+        response.header("Content-Type") shouldBe Some("application/json")
       }
     }
 
