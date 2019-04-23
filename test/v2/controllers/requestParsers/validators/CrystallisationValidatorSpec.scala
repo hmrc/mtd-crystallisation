@@ -24,7 +24,7 @@ import v2.models.requestData.CrystallisationRawData
 
 class CrystallisationValidatorSpec extends UnitSpec {
 
-  private val validNino = "AA123456A"
+  private val validNino    = "AA123456A"
   private val validTaxYear = "2018-19"
 
   private val validJson =
@@ -60,9 +60,8 @@ class CrystallisationValidatorSpec extends UnitSpec {
 
     "return RuleTaxYearNotSupportedError error" when {
       "an out of range tax year is supplied" in {
-                        validator.validate(
-                          CrystallisationRawData(validNino, "2016-17",  body(validJson))) shouldBe
-                            List(RuleTaxYearNotSupportedError)
+        validator.validate(CrystallisationRawData(validNino, "2016-17", body(validJson))) shouldBe
+          List(RuleTaxYearNotSupportedError)
       }
     }
 
@@ -82,20 +81,23 @@ class CrystallisationValidatorSpec extends UnitSpec {
 
     "return RuleIncorrectOrEmptyBodyError error" when {
       "an empty body is supplied" in {
-        val json = "{}"
+        val json          = "{}"
+        val expectedError = Error("JSON_FIELD_MISSING", "/calculationId is missing")
 
         validator.validate(
           CrystallisationRawData(validNino, validTaxYear, body(json))
-        ) shouldBe List(RuleIncorrectOrEmptyBodyError)
+        ) shouldBe List(expectedError)
       }
 
-      "an the body does not contain a calculationId" in {
-        val json = """{"someField": 1234}"""
+      "the body does not contain a calculationId" in {
+        val json          = """{"someField": 1234}"""
+        val expectedError = Error("JSON_FIELD_MISSING", "/calculationId is missing")
 
         validator.validate(
           CrystallisationRawData(validNino, validTaxYear, body(json))
-        ) shouldBe List(RuleIncorrectOrEmptyBodyError)
+        ) shouldBe List(expectedError)
       }
+
     }
 
     "return multiple errors" when {

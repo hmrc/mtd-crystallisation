@@ -19,17 +19,17 @@ package v2.controllers.requestParsers
 import javax.inject.Inject
 import uk.gov.hmrc.domain.Nino
 import v2.controllers.requestParsers.validators.IntentToCrystalliseValidator
-import v2.models.errors.{BadRequestError, ErrorWrapper}
-import v2.models.requestData.{DesTaxYear, IntentToCrystalliseRawData, IntentToCrystalliseRequestData}
+import v2.models.errors.{ BadRequestError, ErrorWrapper }
+import v2.models.requestData.{ DesTaxYear, IntentToCrystalliseRawData, IntentToCrystalliseRequestData }
 
 class IntentToCrystalliseRequestDataParser @Inject()(validator: IntentToCrystalliseValidator) {
 
   def parseRequest(data: IntentToCrystalliseRawData): Either[ErrorWrapper, IntentToCrystalliseRequestData] = {
     validator.validate(data) match {
-      case Nil =>
-        Right(IntentToCrystalliseRequestData(Nino(data.nino), DesTaxYear.fromMtd(data.taxYear)))
-      case err :: Nil => Left(ErrorWrapper(None, err, None))
-      case errs => Left(ErrorWrapper(None, BadRequestError, Some(errs)))
+      case Nil                                       => Right(IntentToCrystalliseRequestData(Nino(data.nino), DesTaxYear.fromMtd(data.taxYear)))
+      case err :: Nil if err.code.startsWith("JSON") => Left(ErrorWrapper(None, BadRequestError, Some(List(err))))
+      case err :: Nil                                => Left(ErrorWrapper(None, err, None))
+      case errs                                      => Left(ErrorWrapper(None, BadRequestError, Some(errs)))
     }
   }
 

@@ -20,18 +20,17 @@ import javax.inject.Inject
 import uk.gov.hmrc.domain.Nino
 import v2.controllers.requestParsers.validators.CrystallisationValidator
 import v2.models.domain.CrystallisationRequest
-import v2.models.errors.{BadRequestError, ErrorWrapper}
-import v2.models.requestData.{CrystallisationRawData, CrystallisationRequestData, DesTaxYear}
+import v2.models.errors.{ BadRequestError, ErrorWrapper }
+import v2.models.requestData.{ CrystallisationRawData, CrystallisationRequestData, DesTaxYear }
 
 class CrystallisationRequestDataParser @Inject()(validator: CrystallisationValidator) {
 
   def parseRequest(data: CrystallisationRawData): Either[ErrorWrapper, CrystallisationRequestData] = {
     validator.validate(data) match {
-      case Nil =>
-        //Validation passed.  Request data is ok to transform.
-        Right(CrystallisationRequestData(Nino(data.nino), DesTaxYear.fromMtd(data.taxYear), data.body.json.as[CrystallisationRequest]))
-      case err :: Nil => Left(ErrorWrapper(None, err, None))
-      case errs => Left(ErrorWrapper(None, BadRequestError, Some(errs)))
+      case Nil                                       => Right(CrystallisationRequestData(Nino(data.nino), DesTaxYear.fromMtd(data.taxYear), data.body.json.as[CrystallisationRequest]))
+      case err :: Nil if err.code.startsWith("JSON") => Left(ErrorWrapper(None, BadRequestError, Some(List(err))))
+      case err :: Nil                                => Left(ErrorWrapper(None, err, None))
+      case errs                                      => Left(ErrorWrapper(None, BadRequestError, Some(errs)))
     }
   }
 

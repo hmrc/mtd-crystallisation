@@ -114,13 +114,31 @@ class CrystallisationISpec extends IntegrationBaseSpec {
       createRequestValidationErrorTest("AA1123A", "2017-18", Status.BAD_REQUEST, NinoFormatError)
       createRequestValidationErrorTest("AA123456A", "20177", Status.BAD_REQUEST, TaxYearFormatError)
       createRequestValidationErrorTest("AA123456A", "2015-16", Status.BAD_REQUEST, RuleTaxYearNotSupportedError)
-    }
 
-    def createRequestValidationErrorTest(requestNino: String, requestTaxYear: String, expectedStatus: Int, expectedBody: Error): Unit = {
-      s"validation fails with ${expectedBody.code} error" in new CreateTest {
+      def createRequestValidationErrorTest(requestNino: String, requestTaxYear: String, expectedStatus: Int, expectedBody: Error): Unit = {
+        s"validation fails with ${expectedBody.code} error" in new CreateTest {
 
-        override val nino: String    = requestNino
-        override val taxYear: String = requestTaxYear
+          override val nino: String    = requestNino
+          override val taxYear: String = requestTaxYear
+
+          override def setupStubs(): StubMapping = {
+            AuditStub.audit()
+            AuthStub.authorised()
+            MtdIdLookupStub.ninoFound(nino)
+          }
+
+          val response: WSResponse = await(request().post(Json.parse(requestJson)))
+          response.status shouldBe expectedStatus
+          response.json shouldBe Json.toJson(expectedBody)
+        }
+      }
+
+      s"an incorrect body is supplied" in new CreateTest {
+        val requestBody: JsValue = Json.parse(
+          s"""{
+             | "calculationId": "1234567"
+             |}""".stripMargin
+        )
 
         override def setupStubs(): StubMapping = {
           AuditStub.audit()
@@ -128,46 +146,26 @@ class CrystallisationISpec extends IntegrationBaseSpec {
           MtdIdLookupStub.ninoFound(nino)
         }
 
-        val response: WSResponse = await(request().post(Json.parse(requestJson)))
-        response.status shouldBe expectedStatus
-        response.json shouldBe Json.toJson(expectedBody)
-      }
-    }
-
-    s"incorrect body is supplied" in new CreateTest {
-      val requestBody: JsValue = Json.parse(
-        s"""{
-           | "calculationId": "1234567"
-           |}""".stripMargin
-      )
-
-      override def setupStubs(): StubMapping = {
-        AuditStub.audit()
-        AuthStub.authorised()
-        MtdIdLookupStub.ninoFound(nino)
+        val response: WSResponse = await(request().post(requestBody))
+        response.status shouldBe Status.BAD_REQUEST
+        response.json shouldBe Json.toJson(ErrorWrapper(None, InvalidCalcIdError, None))
       }
 
-      val response: WSResponse = await(request().post(requestBody))
-      response.status shouldBe Status.BAD_REQUEST
-      response.json shouldBe Json.toJson(ErrorWrapper(None, InvalidCalcIdError, None))
-    }
+      s"an empty JSON body is supplied" in new CreateTest {
+        val requestBody: JsValue = Json.parse("{}")
+        val expectedError        = Error("JSON_FIELD_MISSING", "/calculationId is missing")
 
-    s"empty body is supplied" in new CreateTest {
-      val requestBody: JsValue = Json.parse(
-        s"""{
-           |
-           |}""".stripMargin
-      )
+        override def setupStubs(): StubMapping = {
+          AuditStub.audit()
+          AuthStub.authorised()
+          MtdIdLookupStub.ninoFound(nino)
+        }
 
-      override def setupStubs(): StubMapping = {
-        AuditStub.audit()
-        AuthStub.authorised()
-        MtdIdLookupStub.ninoFound(nino)
+        val response: WSResponse = await(request().post(requestBody))
+        response.status shouldBe Status.BAD_REQUEST
+        response.json shouldBe Json.toJson(ErrorWrapper(None, BadRequestError, Some(List(expectedError))))
       }
 
-      val response: WSResponse = await(request().post(requestBody))
-      response.status shouldBe Status.BAD_REQUEST
-      response.json shouldBe Json.toJson(ErrorWrapper(None, RuleIncorrectOrEmptyBodyError, None))
     }
   }
 

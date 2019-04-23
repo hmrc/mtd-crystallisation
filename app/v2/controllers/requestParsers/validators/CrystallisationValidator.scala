@@ -18,14 +18,12 @@ package v2.controllers.requestParsers.validators
 
 import v2.controllers.requestParsers.validators.validations._
 import v2.models.domain.CrystallisationRequest
-import v2.models.errors.{Error, RuleIncorrectOrEmptyBodyError, RuleTaxYearNotSupportedError}
+import v2.models.errors.{ Error, RuleTaxYearNotSupportedError }
 import v2.models.requestData.CrystallisationRawData
 
 class CrystallisationValidator extends Validator[CrystallisationRawData] {
 
-  private val validationSet = List(
-    parameterFormatValidation, bodyFormatValidator,
-    parameterRuleValidation, bodyFieldsValidation)
+  private val validationSet = List(parameterFormatValidation, bodyFormatValidator, parameterRuleValidation, bodyFieldsValidation)
 
   private def parameterFormatValidation: CrystallisationRawData => List[List[Error]] = (data: CrystallisationRawData) => {
     List(
@@ -42,7 +40,7 @@ class CrystallisationValidator extends Validator[CrystallisationRawData] {
 
   private def bodyFormatValidator: CrystallisationRawData => List[List[Error]] = { data =>
     List(
-      JsonFormatValidation.validate[CrystallisationRequest](data.body, RuleIncorrectOrEmptyBodyError)
+      JsonFormatValidation.validate[CrystallisationRequest](data.body)
     )
   }
 
