@@ -18,8 +18,8 @@ package v2.models.audit
 
 import play.api.libs.json.{Json, OWrites}
 
-case class IntendToCrystalliseAuditResponse(httpStatus: Int, errors: Option[Seq[AuditError]])
+case class IntentToCrystalliseAuditResponse(httpStatus: Int, errors: Option[Seq[AuditError]])
 
-object IntendToCrystalliseAuditResponse {
-  implicit val writes: OWrites[IntendToCrystalliseAuditResponse] = Json.writes[IntendToCrystalliseAuditResponse]
+object IntentToCrystalliseAuditResponse {
+  implicit val writes: OWrites[IntentToCrystalliseAuditResponse] = Json.writes[IntentToCrystalliseAuditResponse]
 }

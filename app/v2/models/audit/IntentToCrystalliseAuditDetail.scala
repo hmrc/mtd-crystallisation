@@ -18,16 +18,16 @@ package v2.models.audit
 
 import play.api.libs.json.{Json, OWrites}
 
-case class IntendToCrystalliseAuditDetail(
+case class IntentToCrystalliseAuditDetail(
                                           userType: String,
                                           agentReferenceNumber: Option[String],
                                           nino: String,
                                           taxYear: String,
                                           `X-CorrelationId`: String,
-                                          response: IntendToCrystalliseAuditResponse
+                                          response: IntentToCrystalliseAuditResponse
                                         )
 
-object IntendToCrystalliseAuditDetail {
-  implicit val writes: OWrites[IntendToCrystalliseAuditDetail] = Json.writes[IntendToCrystalliseAuditDetail]
+object IntentToCrystalliseAuditDetail {
+  implicit val writes: OWrites[IntentToCrystalliseAuditDetail] = Json.writes[IntentToCrystalliseAuditDetail]
 }
 
