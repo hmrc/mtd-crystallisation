@@ -30,6 +30,8 @@ object RuleTaxYearNotSupportedError
 
 object RuleIncorrectOrEmptyBodyError extends Error("RULE_INCORRECT_OR_EMPTY_BODY_SUBMITTED", "An empty or non-matching body was submitted")
 
+object RuleTaxYearRangeExceededError extends Error("RULE_TAX_YEAR_RANGE_EXCEEDED", "Tax year range exceeded. A tax year range of one year is required.")
+
 object IncomeSourcesChangedError extends Error("RULE_INCOME_SOURCES_CHANGED", "Income sources data has changed. Perform intent to crystallise")
 
 object RecentSubmissionsExistError extends Error("RULE_RECENT_SUBMISSIONS_EXIST", "More recent submissions exist. Perform intent to crystallise")
