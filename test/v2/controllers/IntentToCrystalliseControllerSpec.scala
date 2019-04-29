@@ -132,7 +132,8 @@ class IntentToCrystalliseControllerSpec
         BadRequestError,
         NinoFormatError,
         TaxYearFormatError,
-        RuleTaxYearNotSupportedError
+        RuleTaxYearNotSupportedError,
+        RuleTaxYearRangeExceededError
       )
 
       val badRequestErrorsFromService = List(

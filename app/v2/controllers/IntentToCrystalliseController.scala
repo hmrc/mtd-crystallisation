@@ -73,10 +73,11 @@ class IntentToCrystalliseController @Inject()(val authService: EnrolmentsAuthSer
 
   private def processError(errorWrapper: ErrorWrapper) = {
     errorWrapper.error match {
-      case BadRequestError | NinoFormatError | TaxYearFormatError | RuleTaxYearNotSupportedError => BadRequest(Json.toJson(errorWrapper))
-      case NoSubmissionsExistError | FinalDeclarationReceivedError                               => Forbidden(Json.toJson(errorWrapper))
-      case NotFoundError                                                                         => NotFound(Json.toJson(errorWrapper))
-      case DownstreamError                                                                       => InternalServerError(Json.toJson(errorWrapper))
+      case BadRequestError | NinoFormatError | TaxYearFormatError | RuleTaxYearNotSupportedError | RuleTaxYearRangeExceededError =>
+        BadRequest(Json.toJson(errorWrapper))
+      case NoSubmissionsExistError | FinalDeclarationReceivedError => Forbidden(Json.toJson(errorWrapper))
+      case NotFoundError                                           => NotFound(Json.toJson(errorWrapper))
+      case DownstreamError                                         => InternalServerError(Json.toJson(errorWrapper))
     }
   }
 

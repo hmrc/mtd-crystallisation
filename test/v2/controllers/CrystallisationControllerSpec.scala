@@ -143,6 +143,7 @@ class CrystallisationControllerSpec
         NinoFormatError,
         TaxYearFormatError,
         RuleTaxYearNotSupportedError,
+        RuleTaxYearRangeExceededError,
         RuleIncorrectOrEmptyBodyError,
         InvalidCalcIdError
       )
