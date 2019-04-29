@@ -29,6 +29,7 @@ class IntentToCrystalliseAuditDetailSpec extends UnitSpec {
   private val `X-CorrelationId` = "X-123"
   private val responseSuccess = IntentToCrystalliseAuditResponse(Status.SEE_OTHER, None)
   private val responseFail = IntentToCrystalliseAuditResponse(Status.BAD_REQUEST, Some(Seq(AuditError("FORMAT_NINO"))))
+  private val calculationId = "041f7e4d-87b9-4d4a-a296-3cfbdf92f7e2"
 
   "writes" when {
     "passed an audit model with all fields provided" should {
@@ -41,13 +42,14 @@ class IntentToCrystalliseAuditDetailSpec extends UnitSpec {
              |  "nino": "AA123456A",
              |  "taxYear": "2017-18",
              |  "X-CorrelationId": "X-123",
+             |  "calculationId": "$calculationId",
              |  "response": {
              |    "httpStatus": 303
              |  }
              |}
            """.stripMargin)
 
-        val model = IntentToCrystalliseAuditDetail(userType, agentReferenceNumber, nino, taxYear, `X-CorrelationId`, responseSuccess)
+        val model = IntentToCrystalliseAuditDetail(userType, agentReferenceNumber, nino, taxYear, `X-CorrelationId`, Some(calculationId), responseSuccess)
 
         Json.toJson(model) shouldBe json
       }
@@ -73,7 +75,7 @@ class IntentToCrystalliseAuditDetailSpec extends UnitSpec {
              |}
            """.stripMargin)
 
-        val model = IntentToCrystalliseAuditDetail(userType, None, nino, taxYear, `X-CorrelationId`, responseFail)
+        val model = IntentToCrystalliseAuditDetail(userType, None, nino, taxYear, `X-CorrelationId`, None, responseFail)
 
         Json.toJson(model) shouldBe json
       }
