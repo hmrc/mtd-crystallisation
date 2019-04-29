@@ -24,6 +24,7 @@ case class IntentToCrystalliseAuditDetail(
                                           nino: String,
                                           taxYear: String,
                                           `X-CorrelationId`: String,
+                                          calculationId: Option[String],
                                           response: IntentToCrystalliseAuditResponse
                                         )
 

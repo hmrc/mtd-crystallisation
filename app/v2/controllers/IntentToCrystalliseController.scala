@@ -55,18 +55,18 @@ class IntentToCrystalliseController @Inject()(val authService: EnrolmentsAuthSer
               logger.info(
                 s"[IntentToCrystalliseController][intentToCrystallise] - Success response received with CorrelationId: ${desResponse.correlationId}")
               val url = s"/self-assessment/ni/$nino/calculations/${desResponse.responseData}"
-              auditSubmission(createAuditDetails(nino, taxYear, SEE_OTHER, desResponse.correlationId, request.userDetails))
+              auditSubmission(createAuditDetails(nino, taxYear, SEE_OTHER, desResponse.correlationId, request.userDetails, Some(desResponse.responseData)))
               SeeOther(url).withHeaders(LOCATION -> url, "X-CorrelationId" -> desResponse.correlationId).as(MimeTypes.JSON)
             case Left(errorWrapper) =>
               val correlationId = getCorrelationId(errorWrapper)
               val result        = processError(errorWrapper).withHeaders("X-CorrelationId" -> correlationId)
-              auditSubmission(createAuditDetails(nino, taxYear, result.header.status, correlationId, request.userDetails, Some(errorWrapper)))
+              auditSubmission(createAuditDetails(nino, taxYear, result.header.status, correlationId, request.userDetails, None, Some(errorWrapper)))
               result
           }
         case Left(errorWrapper) =>
           val correlationId = getCorrelationId(errorWrapper)
           val result        = processError(errorWrapper).withHeaders("X-CorrelationId" -> correlationId)
-          auditSubmission(createAuditDetails(nino, taxYear, result.header.status, correlationId, request.userDetails, Some(errorWrapper)))
+          auditSubmission(createAuditDetails(nino, taxYear, result.header.status, correlationId, request.userDetails, None, Some(errorWrapper)))
           Future.successful(result)
       }
     }
@@ -102,6 +102,7 @@ class IntentToCrystalliseController @Inject()(val authService: EnrolmentsAuthSer
                                  statusCode: Int,
                                  correlationId: String,
                                  userDetails: UserDetails,
+                                 calculationId: Option[String] = None,
                                  errorWrapper: Option[ErrorWrapper] = None
                                 ): IntentToCrystalliseAuditDetail = {
     val response = errorWrapper.map {
@@ -109,7 +110,7 @@ class IntentToCrystalliseController @Inject()(val authService: EnrolmentsAuthSer
         IntentToCrystalliseAuditResponse(statusCode, Some(wrapper.allErrors.map(error => AuditError(error.code))))
     }.getOrElse(IntentToCrystalliseAuditResponse(statusCode, None))
 
-    IntentToCrystalliseAuditDetail(userDetails.userType, userDetails.agentReferenceNumber, nino, taxYear, correlationId, response)
+    IntentToCrystalliseAuditDetail(userDetails.userType, userDetails.agentReferenceNumber, nino, taxYear, correlationId, calculationId, response)
   }
 
   private def auditSubmission(details: IntentToCrystalliseAuditDetail)
