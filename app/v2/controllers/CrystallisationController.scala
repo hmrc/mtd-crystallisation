@@ -63,7 +63,7 @@ class CrystallisationController @Inject()(val authService: EnrolmentsAuthService
   private def processError(errorWrapper: ErrorWrapper) = {
     errorWrapper.error match {
       case BadRequestError | NinoFormatError | TaxYearFormatError | RuleTaxYearNotSupportedError | RuleIncorrectOrEmptyBodyError |
-          InvalidCalcIdError =>
+          RuleTaxYearRangeExceededError | InvalidCalcIdError =>
         BadRequest(Json.toJson(errorWrapper))
       case IncomeSourcesChangedError | RecentSubmissionsExistError | ResidencyChangedError | FinalDeclarationReceivedError =>
         Forbidden(Json.toJson(errorWrapper))
