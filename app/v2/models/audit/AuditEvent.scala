@@ -14,29 +14,10 @@
  * limitations under the License.
  */
 
-package v2.controllers.requestParsers.validators.validations
+package v2.models.audit
 
-import v2.models.errors.{Error, RuleTaxYearRangeExceededError, TaxYearFormatError}
-
-object TaxYearValidation {
-
-  val taxYearFormat = "20[1-9][0-9]\\-[1-9][0-9]"
-
-  def validate(taxYear: String): List[Error] = {
-    if (taxYear.matches(taxYearFormat)) {
-
-      val start = taxYear.substring(2, 4).toInt
-      val end = taxYear.substring(5, 7).toInt
-
-      if (end - start == 1) {
-        NoValidationErrors
-      } else {
-        List(RuleTaxYearRangeExceededError)
-      }
-    } else {
-      List(TaxYearFormatError)
-    }
-  }
-
-
-}
+case class AuditEvent[T](
+                          auditType: String,
+                          transactionName: String,
+                          detail: T
+                        )

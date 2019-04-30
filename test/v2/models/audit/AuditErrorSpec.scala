@@ -14,29 +14,28 @@
  * limitations under the License.
  */
 
-package v2.controllers.requestParsers.validators.validations
+package v2.models.audit
 
-import v2.models.errors.{Error, RuleTaxYearRangeExceededError, TaxYearFormatError}
+import play.api.libs.json.Json
+import support.UnitSpec
 
-object TaxYearValidation {
+class AuditErrorSpec extends UnitSpec {
 
-  val taxYearFormat = "20[1-9][0-9]\\-[1-9][0-9]"
+  private val auditError = AuditError("FORMAT_NINO")
 
-  def validate(taxYear: String): List[Error] = {
-    if (taxYear.matches(taxYearFormat)) {
+  "writes" when {
+    "passed an audit error model" should {
+      "produce valid json" in {
 
-      val start = taxYear.substring(2, 4).toInt
-      val end = taxYear.substring(5, 7).toInt
+         val json = Json.parse(
+          s"""
+             |{
+             |  "errorCode": "FORMAT_NINO"
+             |}
+           """.stripMargin)
 
-      if (end - start == 1) {
-        NoValidationErrors
-      } else {
-        List(RuleTaxYearRangeExceededError)
+        Json.toJson(auditError) shouldBe json
       }
-    } else {
-      List(TaxYearFormatError)
     }
   }
-
-
 }
