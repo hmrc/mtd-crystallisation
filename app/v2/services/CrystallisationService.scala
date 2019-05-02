@@ -49,14 +49,14 @@ class CrystallisationService @Inject()(connector: DesConnector) extends DesServi
 
   private def desErrorToMtdErrorIntent: Map[String, Error] =
     Map(
-      "INVALID_NINO"               -> NinoFormatError,
-      "INVALID_TAX_YEAR"           -> TaxYearFormatError,
-      "INVALID_TAX_CRYSTALLISE"    -> DownstreamError,
-      "INVALID_REQUEST"            -> DownstreamError,
-      "NO_SUBMISSION_EXIST"        -> NoSubmissionsExistError,
-      "CONFLICT"                   -> FinalDeclarationReceivedError,
-      "SERVER_ERROR"               -> DownstreamError,
-      "SERVICE_UNAVAILABLE"        -> DownstreamError
+      "INVALID_NINO"            -> NinoFormatError,
+      "INVALID_TAX_YEAR"        -> TaxYearFormatError,
+      "INVALID_TAX_CRYSTALLISE" -> DownstreamError,
+      "INVALID_REQUEST"         -> DownstreamError,
+      "NO_SUBMISSION_EXIST"     -> NoSubmissionsExistError,
+      "CONFLICT"                -> FinalDeclarationReceivedError,
+      "SERVER_ERROR"            -> DownstreamError,
+      "SERVICE_UNAVAILABLE"     -> DownstreamError
     )
 
   private def desErrorToMtdErrorCreate: Map[String, Error] =
