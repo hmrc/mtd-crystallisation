@@ -18,7 +18,8 @@ package v2.connectors
 
 import javax.inject.{ Inject, Singleton }
 import play.api.Logger
-import uk.gov.hmrc.http.HeaderCarrier
+import play.api.libs.json.Writes
+import uk.gov.hmrc.http.{ HeaderCarrier, HttpReads }
 import uk.gov.hmrc.http.logging.Authorization
 import uk.gov.hmrc.play.bootstrap.http.HttpClient
 import v2.config.AppConfig
@@ -26,6 +27,7 @@ import v2.connectors.httpparsers.StandardDesHttpParser
 import v2.models.des.DesCalculationIdResponse
 import v2.models.domain.EmptyJsonBody
 import v2.models.requestData.{ CrystallisationRequestData, IntentToCrystalliseRequestData }
+import v2.services.DesUri
 
 import scala.concurrent.{ ExecutionContext, Future }
 
@@ -60,6 +62,24 @@ class DesConnector @Inject()(http: HttpClient, appConfig: AppConfig) {
     val url = s"${appConfig.desBaseUrl}/income-tax/calculation/nino/$nino/$taxYear/$calcId/crystallise"
 
     http.POST(url, EmptyJsonBody)(EmptyJsonBody.writes, StandardDesHttpParser.readsEmpty, desHeaderCarrier, implicitly)
+  }
+
+  def post[Body: Writes, Resp](body: Body, cmd: DesUri[Resp])(implicit ec: ExecutionContext, hc: HeaderCarrier): Future[DesConnectorOutcome[Resp]] = {
+    implicit val parserReads: HttpReads[DesConnectorOutcome[Resp]] = StandardDesHttpParser.reads(cmd.responseReads)
+
+    def doPost(implicit hc: HeaderCarrier) =
+      http.POST(s"${appConfig.desBaseUrl}/${cmd.uri}", body)
+
+    doPost(desHeaderCarrier(hc))
+  }
+
+  def get[Resp](cmd: DesUri[Resp])(implicit ec: ExecutionContext, hc: HeaderCarrier): Future[DesConnectorOutcome[Resp]] = {
+    implicit val parserReads: HttpReads[DesConnectorOutcome[Resp]] = StandardDesHttpParser.reads(cmd.responseReads)
+
+    def doGet(implicit hc: HeaderCarrier) =
+      http.GET(s"${appConfig.desBaseUrl}/${cmd.uri}")
+
+    doGet(desHeaderCarrier(hc))
   }
 
 }

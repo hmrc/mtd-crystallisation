@@ -17,9 +17,12 @@
 package v2.services
 
 import play.api.Logger
+import play.api.libs.json.Reads
 import v2.connectors.DesConnectorOutcome
 import v2.models.errors.{ BadRequestError, DownstreamError, Error, ErrorWrapper, MultipleErrors, OutboundError, SingleError }
 import v2.models.outcomes.DesResponse
+
+case class DesUri[Resp](uri: String)(implicit val responseReads: Reads[Resp])
 
 trait DesServiceSupport {
 

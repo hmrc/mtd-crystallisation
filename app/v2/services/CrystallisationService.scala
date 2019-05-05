@@ -18,9 +18,10 @@ package v2.services
 
 import javax.inject.Inject
 import uk.gov.hmrc.http.HeaderCarrier
-import v2.connectors.DesConnector
+import v2.connectors.{ DesConnector, DesConnectorOutcome }
+import v2.models.des.DesCalculationIdResponse
+import v2.models.domain.EmptyJsonBody
 import v2.models.errors._
-import v2.models.outcomes.DesResponse
 import v2.models.requestData.{ CrystallisationRequestData, IntentToCrystalliseRequestData }
 
 import scala.concurrent.{ ExecutionContext, Future }
@@ -32,13 +33,13 @@ class CrystallisationService @Inject()(connector: DesConnector) extends DesServi
     */
   override val serviceName: String = this.getClass.getSimpleName
 
-  def performIntentToCrystallise(request: IntentToCrystalliseRequestData)(implicit hc: HeaderCarrier,
-                                                                          ec: ExecutionContext): Future[IntentToCrystalliseOutcome] = {
-    connector.performIntentToCrystallise(request).map {
-      mapToVendor("intentToCrystallise", desErrorToMtdErrorIntent) { desResponse =>
-        Right(DesResponse(desResponse.correlationId, desResponse.responseData.id))
-      }
-    }
+  def performIntentToCrystallise(request: IntentToCrystalliseRequestData)(
+      implicit hc: HeaderCarrier,
+      ec: ExecutionContext): Future[DesConnectorOutcome[DesCalculationIdResponse]] = {
+    connector.post(
+      body = EmptyJsonBody,
+      DesUri(s"income-tax/nino/${request.nino}/taxYear/${request.desTaxYear}/tax-calculation?crystallise=true")
+    )
   }
 
   def createCrystallisation(request: CrystallisationRequestData)(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[CrystallisationOutcome] = {
@@ -46,18 +47,6 @@ class CrystallisationService @Inject()(connector: DesConnector) extends DesServi
       mapToVendorDirect("createCrystallisation", desErrorToMtdErrorCreate)
     }
   }
-
-  private def desErrorToMtdErrorIntent: Map[String, Error] =
-    Map(
-      "INVALID_NINO"               -> NinoFormatError,
-      "INVALID_TAX_YEAR"           -> TaxYearFormatError,
-      "INVALID_TAX_CRYSTALLISE"    -> DownstreamError,
-      "INVALID_REQUEST"            -> DownstreamError,
-      "NO_SUBMISSION_EXIST"        -> NoSubmissionsExistError,
-      "CONFLICT"                   -> FinalDeclarationReceivedError,
-      "SERVER_ERROR"               -> DownstreamError,
-      "SERVICE_UNAVAILABLE"        -> DownstreamError
-    )
 
   private def desErrorToMtdErrorCreate: Map[String, Error] =
     Map(
