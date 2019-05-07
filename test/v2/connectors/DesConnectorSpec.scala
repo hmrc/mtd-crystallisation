@@ -57,7 +57,7 @@ class DesConnectorSpec extends ConnectorSpec {
 
     "a request returning a single error" should {
       "return an unsuccessful response with the correct correlationId and a single error" in new Test {
-        val expected = Left(DesResponse(correlationId, SingleError(NoSubmissionsExistError)))
+        val expected = Left(DesResponse(correlationId, DesErrors.single(NoSubmissionsExistError)))
 
         MockedHttpClient
           .post(s"$baseUrl/income-tax/nino/$nino/taxYear/$taxYear/tax-calculation?crystallise=true", EmptyJsonBody)
@@ -69,7 +69,7 @@ class DesConnectorSpec extends ConnectorSpec {
 
     "a request returning multiple errors" should {
       "return an unsuccessful response with the correct correlationId and multiple errors" in new Test {
-        val expected = Left(DesResponse(correlationId, MultipleErrors(Seq(RecentSubmissionsExistError, ResidencyChangedError))))
+        val expected = Left(DesResponse(correlationId, DesErrors(List(RecentSubmissionsExistError, ResidencyChangedError))))
 
         MockedHttpClient
           .post(s"$baseUrl/income-tax/nino/$nino/taxYear/$taxYear/tax-calculation?crystallise=true", EmptyJsonBody)
@@ -105,7 +105,7 @@ class DesConnectorSpec extends ConnectorSpec {
 
     "a request returning a single error" should {
       "return an unsuccessful response with the correct correlationId and a single error" in new Test {
-        val expected = Left(DesResponse(correlationId, SingleError(RecentSubmissionsExistError)))
+        val expected = Left(DesResponse(correlationId, DesErrors(List(RecentSubmissionsExistError))))
 
         MockedHttpClient
           .post(s"$baseUrl/income-tax/calculation/nino/$nino/$taxYear/$calcId/crystallise", EmptyJsonBody)
@@ -119,7 +119,7 @@ class DesConnectorSpec extends ConnectorSpec {
 
     "a request returning multiple errors" should {
       "return an unsuccessful response with the correct correlationId and multiple errors" in new Test {
-        val expected = Left(DesResponse(correlationId, MultipleErrors(Seq(RecentSubmissionsExistError, ResidencyChangedError))))
+        val expected = Left(DesResponse(correlationId, DesErrors(List(RecentSubmissionsExistError, ResidencyChangedError))))
 
         MockedHttpClient
           .post(s"$baseUrl/income-tax/calculation/nino/$nino/$taxYear/$calcId/crystallise", EmptyJsonBody)

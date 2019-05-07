@@ -17,7 +17,7 @@
 package v2.controllers
 
 import play.api.Logger
-import v2.models.errors.{ BadRequestError, DesError, DownstreamError, Error, ErrorWrapper, MultipleErrors, OutboundError, SingleError }
+import v2.models.errors.{ BadRequestError, DesError, DesErrors, DownstreamError, Error, ErrorWrapper, OutboundError }
 import v2.models.outcomes.DesResponse
 
 trait DesResponseMappingSupport {
@@ -37,7 +37,10 @@ trait DesResponseMappingSupport {
     }
 
     desOutcome match {
-      case DesResponse(correlationId, MultipleErrors(errors)) =>
+      case DesResponse(correlationId, DesErrors(error :: Nil)) =>
+        ErrorWrapper(Some(correlationId), errorMap.applyOrElse(error.code, defaultErrorMapping), None)
+
+      case DesResponse(correlationId, DesErrors(errors)) =>
         val mtdErrors = errors.map(error => errorMap.applyOrElse(error.code, defaultErrorMapping))
 
         if (mtdErrors.contains(DownstreamError)) {
@@ -49,10 +52,8 @@ trait DesResponseMappingSupport {
           ErrorWrapper(Some(correlationId), BadRequestError, Some(mtdErrors))
         }
 
-      case DesResponse(correlationId, SingleError(error)) =>
-        ErrorWrapper(Some(correlationId), errorMap.applyOrElse(error.code, defaultErrorMapping), None)
-      case DesResponse(correlationId, OutboundError(error)) =>
-        ErrorWrapper(Some(correlationId), error, None)
+      case DesResponse(correlationId, OutboundError(error, errors)) =>
+        ErrorWrapper(Some(correlationId), error, errors)
     }
   }
 }

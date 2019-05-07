@@ -18,6 +18,10 @@ package v2.models.errors
 
 sealed trait DesError
 
-case class SingleError(error: Error) extends DesError
-case class MultipleErrors(errors: Seq[Error]) extends DesError
-case class OutboundError(error: Error) extends DesError
+case class DesErrors(errors: List[Error]) extends DesError
+
+object DesErrors {
+  def single(error: Error): DesErrors = DesErrors(List(error))
+}
+
+case class OutboundError(error: Error, errors: Option[Seq[Error]] = None) extends DesError

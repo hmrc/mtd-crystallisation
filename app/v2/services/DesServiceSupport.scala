@@ -19,7 +19,7 @@ package v2.services
 import play.api.Logger
 import play.api.libs.json.Reads
 import v2.connectors.DesConnectorOutcome
-import v2.models.errors.{ BadRequestError, DownstreamError, Error, ErrorWrapper, MultipleErrors, OutboundError, SingleError }
+import v2.models.errors.{ BadRequestError, DesErrors, DownstreamError, Error, ErrorWrapper, OutboundError }
 import v2.models.outcomes.DesResponse
 
 case class DesUri[Resp](uri: String)(implicit val responseReads: Reads[Resp])
@@ -62,7 +62,10 @@ trait DesServiceSupport {
     desOutcome match {
       case Right(desResponse) => success(desResponse)
 
-      case Left(DesResponse(correlationId, MultipleErrors(errors))) =>
+      case Left(DesResponse(correlationId, DesErrors(error :: Nil))) =>
+        Left(ErrorWrapper(Some(correlationId), errorMap.applyOrElse(error.code, defaultErrorMapping), None))
+
+      case Left(DesResponse(correlationId, DesErrors(errors))) =>
         val mtdErrors = errors.map(error => errorMap.applyOrElse(error.code, defaultErrorMapping))
 
         if (mtdErrors.contains(DownstreamError)) {
@@ -74,11 +77,8 @@ trait DesServiceSupport {
           Left(ErrorWrapper(Some(correlationId), BadRequestError, Some(mtdErrors)))
         }
 
-      case Left(DesResponse(correlationId, SingleError(error))) =>
-        Left(ErrorWrapper(Some(correlationId), errorMap.applyOrElse(error.code, defaultErrorMapping), None))
-
-      case Left(DesResponse(correlationId, OutboundError(error))) =>
-        Left(ErrorWrapper(Some(correlationId), error, None))
+      case Left(DesResponse(correlationId, OutboundError(error, errors))) =>
+        Left(ErrorWrapper(Some(correlationId), error, errors))
     }
   }
 

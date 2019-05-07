@@ -65,7 +65,7 @@ class CrystallisationServiceSpec extends ServiceSpec {
           s"return a $v MTD error" in new Test {
             MockedDesConnector
               .performIntentToCrystallise(request)
-              .returns(Future.successful(Left(DesResponse(correlationId, SingleError(Error(k, "MESSAGE"))))))
+              .returns(Future.successful(Left(DesResponse(correlationId, DesErrors.single(Error(k, "MESSAGE"))))))
 
             await(service.performIntentToCrystallise(request)) shouldBe Left(ErrorWrapper(Some(correlationId), v, None))
           }
@@ -104,7 +104,7 @@ class CrystallisationServiceSpec extends ServiceSpec {
       case (k, v) =>
         s"a $k error is received from the connector" should {
           s"return a $v MTD error" in new Test {
-            val desResponse = DesResponse(correlationId, SingleError(Error(k, "MESSAGE")))
+            val desResponse = DesResponse(correlationId, DesErrors.single(Error(k, "MESSAGE")))
             val expected    = Left(ErrorWrapper(Some(correlationId), v, None))
 
             MockedDesConnector.createCrystallisation(request).returns(Future.successful(Left(desResponse)))

@@ -30,7 +30,8 @@ object RuleTaxYearNotSupportedError
 
 object RuleIncorrectOrEmptyBodyError extends Error("RULE_INCORRECT_OR_EMPTY_BODY_SUBMITTED", "An empty or non-matching body was submitted")
 
-object RuleTaxYearRangeExceededError extends Error("RULE_TAX_YEAR_RANGE_EXCEEDED", "Tax year range exceeded. A tax year range of one year is required.")
+object RuleTaxYearRangeExceededError
+    extends Error("RULE_TAX_YEAR_RANGE_EXCEEDED", "Tax year range exceeded. A tax year range of one year is required.")
 
 object IncomeSourcesChangedError extends Error("RULE_INCOME_SOURCES_CHANGED", "Income sources data has changed. Perform intent to crystallise")
 
@@ -48,6 +49,8 @@ object NotFoundError extends Error("MATCHING_RESOURCE_NOT_FOUND", "Matching reso
 object DownstreamError extends Error("INTERNAL_SERVER_ERROR", "An internal server error occurred")
 
 object BadRequestError extends Error("INVALID_REQUEST", "Invalid request")
+
+object BVRError extends Error("BUSINESS_ERROR", "Business validation error")
 
 object ServiceUnavailableError extends Error("SERVICE_UNAVAILABLE", "Internal server error")
 
