@@ -14,19 +14,23 @@
  * limitations under the License.
  */
 
-package v2
+package v2.models.errors
 
-import v2.models.des.DesCalculationIdResponse
-import v2.models.errors.{ DesError, MtdError }
-import v2.models.outcomes.DesResponse
+import play.api.libs.json.Json
+import support.UnitSpec
 
-package object connectors {
+class MtdErrorSpec extends UnitSpec {
 
-  type MtdIdLookupOutcome = Either[MtdError, String]
-
-  type DesConnectorOutcome[A] = Either[DesResponse[DesError], DesResponse[A]]
-
-  type CreateCrystallisationConnectorOutcome = DesConnectorOutcome[Unit]
-
-  type IntentToCrystalliseConnectorOutcome = DesConnectorOutcome[DesCalculationIdResponse]
+  "writes" should {
+    "generate the correct JSON" in {
+      Json.toJson(MtdError("CODE", "some message")) shouldBe Json.parse(
+        """
+          |{
+          |   "code": "CODE",
+          |   "message": "some message"
+          |}
+        """.stripMargin
+      )
+    }
+  }
 }

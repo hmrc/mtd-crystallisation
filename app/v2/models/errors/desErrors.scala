@@ -16,12 +16,22 @@
 
 package v2.models.errors
 
-sealed trait DesError
+import play.api.libs.json.{ Json, Reads }
 
-case class DesErrors(errors: List[Error]) extends DesError
-
-object DesErrors {
-  def single(error: Error): DesErrors = DesErrors(List(error))
+case class DesErrorCode(code: String) {
+  def toMtd: MtdError = MtdError(code = code, message = "")
 }
 
-case class OutboundError(error: Error, errors: Option[Seq[Error]] = None) extends DesError
+object DesErrorCode {
+  implicit val reads: Reads[DesErrorCode] = Json.reads[DesErrorCode]
+}
+
+sealed trait DesError
+
+case class DesErrors(errors: List[DesErrorCode]) extends DesError
+
+object DesErrors {
+  def single(error: DesErrorCode): DesErrors = DesErrors(List(error))
+}
+
+case class OutboundError(error: MtdError, errors: Option[Seq[MtdError]] = None) extends DesError

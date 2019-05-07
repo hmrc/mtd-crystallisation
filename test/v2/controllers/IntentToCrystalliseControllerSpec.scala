@@ -197,7 +197,7 @@ class IntentToCrystalliseControllerSpec
 
     }
 
-    def errorsFromCreateParserTester(error: Error, expectedStatus: Int): Unit = {
+    def errorsFromCreateParserTester(error: MtdError, expectedStatus: Int): Unit = {
       s"a ${error.code} error is returned from the parser" in new Test {
 
         MockIntentToCrystalliseRequestDataParser
@@ -225,7 +225,7 @@ class IntentToCrystalliseControllerSpec
       }
     }
 
-    def errorsFromCreateServiceTester(error: Error, expectedStatus: Int): Unit = {
+    def errorsFromCreateServiceTester(error: MtdError, expectedStatus: Int): Unit = {
       s"a ${error.code} error is returned from the service" in new Test {
 
         MockIntentToCrystalliseRequestDataParser

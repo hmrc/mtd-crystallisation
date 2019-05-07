@@ -17,16 +17,16 @@
 package v2.controllers
 
 import play.api.libs.json.Json
-import play.api.mvc.{AnyContentAsJson, Result}
+import play.api.mvc.{ AnyContentAsJson, Result }
 import uk.gov.hmrc.domain.Nino
 import uk.gov.hmrc.http.HeaderCarrier
 import v2.mocks.requestParsers.MockCrystallisationRequestDataParser
-import v2.mocks.services.{MockAuditService, MockCrystallisationService, MockEnrolmentsAuthService, MockMtdIdLookupService}
-import v2.models.audit.{AuditError, AuditEvent, CrystallisationAuditDetail, CrystallisationAuditResponse}
+import v2.mocks.services.{ MockAuditService, MockCrystallisationService, MockEnrolmentsAuthService, MockMtdIdLookupService }
+import v2.models.audit.{ AuditError, AuditEvent, CrystallisationAuditDetail, CrystallisationAuditResponse }
 import v2.models.domain.CrystallisationRequest
 import v2.models.errors._
 import v2.models.outcomes.DesResponse
-import v2.models.requestData.{CrystallisationRawData, CrystallisationRequestData, DesTaxYear}
+import v2.models.requestData.{ CrystallisationRawData, CrystallisationRequestData, DesTaxYear }
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
@@ -88,10 +88,14 @@ class CrystallisationControllerSpec
         val result: Future[Result] = controller.create(nino, taxYear)(fakePostRequest(Json.parse(request)))
         status(result) shouldBe CREATED
 
-        val detail = CrystallisationAuditDetail("Individual", None, nino, taxYear, Json.parse(request), correlationId,
-          CrystallisationAuditResponse(CREATED, None))
-        val event: AuditEvent[CrystallisationAuditDetail] = AuditEvent[CrystallisationAuditDetail]("submitCrystallisation",
-          "crystallisation", detail)
+        val detail = CrystallisationAuditDetail("Individual",
+                                                None,
+                                                nino,
+                                                taxYear,
+                                                Json.parse(request),
+                                                correlationId,
+                                                CrystallisationAuditResponse(CREATED, None))
+        val event: AuditEvent[CrystallisationAuditDetail] = AuditEvent[CrystallisationAuditDetail]("submitCrystallisation", "crystallisation", detail)
         MockedAuditService.verifyAuditEvent(event).once
       }
     }
@@ -108,10 +112,16 @@ class CrystallisationControllerSpec
         contentAsJson(result) shouldBe Json.toJson(ErrorWrapper(None, NinoFormatError, None))
         header("X-CorrelationId", result).nonEmpty shouldBe true
 
-        val detail = CrystallisationAuditDetail("Individual", None, nino, taxYear, Json.parse(request), header("X-CorrelationId", result).get,
-          CrystallisationAuditResponse(BAD_REQUEST, Some(Seq(AuditError(NinoFormatError.code)))))
-        val event: AuditEvent[CrystallisationAuditDetail] = AuditEvent[CrystallisationAuditDetail]("submitCrystallisation",
-          "crystallisation", detail)
+        val detail = CrystallisationAuditDetail(
+          "Individual",
+          None,
+          nino,
+          taxYear,
+          Json.parse(request),
+          header("X-CorrelationId", result).get,
+          CrystallisationAuditResponse(BAD_REQUEST, Some(Seq(AuditError(NinoFormatError.code))))
+        )
+        val event: AuditEvent[CrystallisationAuditDetail] = AuditEvent[CrystallisationAuditDetail]("submitCrystallisation", "crystallisation", detail)
         MockedAuditService.verifyAuditEvent(event).once
       }
     }
@@ -128,10 +138,16 @@ class CrystallisationControllerSpec
         contentAsJson(result) shouldBe Json.toJson(ErrorWrapper(None, BadRequestError, Some(Seq(NinoFormatError, TaxYearFormatError))))
         header("X-CorrelationId", result).nonEmpty shouldBe true
 
-        val detail = CrystallisationAuditDetail("Individual", None, nino, taxYear, Json.parse(request), header("X-CorrelationId", result).get,
-          CrystallisationAuditResponse(BAD_REQUEST, Some(Seq(AuditError(NinoFormatError.code), AuditError(TaxYearFormatError.code)))))
-        val event: AuditEvent[CrystallisationAuditDetail] = AuditEvent[CrystallisationAuditDetail]("submitCrystallisation",
-          "crystallisation", detail)
+        val detail = CrystallisationAuditDetail(
+          "Individual",
+          None,
+          nino,
+          taxYear,
+          Json.parse(request),
+          header("X-CorrelationId", result).get,
+          CrystallisationAuditResponse(BAD_REQUEST, Some(Seq(AuditError(NinoFormatError.code), AuditError(TaxYearFormatError.code))))
+        )
+        val event: AuditEvent[CrystallisationAuditDetail] = AuditEvent[CrystallisationAuditDetail]("submitCrystallisation", "crystallisation", detail)
         MockedAuditService.verifyAuditEvent(event).once
       }
     }
@@ -194,7 +210,7 @@ class CrystallisationControllerSpec
 
     }
 
-    def errorsFromCreateParserTester(error: Error, expectedStatus: Int): Unit = {
+    def errorsFromCreateParserTester(error: MtdError, expectedStatus: Int): Unit = {
       s"a ${error.code} error is returned from the parser" in new Test {
 
         MockCrystallisationRequestDataParser
@@ -207,15 +223,19 @@ class CrystallisationControllerSpec
         contentAsJson(result) shouldBe Json.toJson(error)
         header("X-CorrelationId", result) shouldBe Some(correlationId)
 
-        val detail = CrystallisationAuditDetail("Individual", None, nino, taxYear, Json.parse(request), correlationId,
-          CrystallisationAuditResponse(expectedStatus, Some(Seq(AuditError(error.code)))))
-        val event: AuditEvent[CrystallisationAuditDetail] = AuditEvent[CrystallisationAuditDetail]("submitCrystallisation",
-          "crystallisation", detail)
+        val detail = CrystallisationAuditDetail("Individual",
+                                                None,
+                                                nino,
+                                                taxYear,
+                                                Json.parse(request),
+                                                correlationId,
+                                                CrystallisationAuditResponse(expectedStatus, Some(Seq(AuditError(error.code)))))
+        val event: AuditEvent[CrystallisationAuditDetail] = AuditEvent[CrystallisationAuditDetail]("submitCrystallisation", "crystallisation", detail)
         MockedAuditService.verifyAuditEvent(event).once
       }
     }
 
-    def errorsFromCreateServiceTester(error: Error, expectedStatus: Int): Unit = {
+    def errorsFromCreateServiceTester(error: MtdError, expectedStatus: Int): Unit = {
       s"a ${error.code} error is returned from the service" in new Test {
 
         MockCrystallisationRequestDataParser
@@ -232,10 +252,14 @@ class CrystallisationControllerSpec
         contentAsJson(result) shouldBe Json.toJson(error)
         header("X-CorrelationId", result) shouldBe Some(correlationId)
 
-        val detail = CrystallisationAuditDetail("Individual", None, nino, taxYear, Json.parse(request), correlationId,
-          CrystallisationAuditResponse(expectedStatus, Some(Seq(AuditError(error.code)))))
-        val event: AuditEvent[CrystallisationAuditDetail] = AuditEvent[CrystallisationAuditDetail]("submitCrystallisation",
-          "crystallisation", detail)
+        val detail = CrystallisationAuditDetail("Individual",
+                                                None,
+                                                nino,
+                                                taxYear,
+                                                Json.parse(request),
+                                                correlationId,
+                                                CrystallisationAuditResponse(expectedStatus, Some(Seq(AuditError(error.code)))))
+        val event: AuditEvent[CrystallisationAuditDetail] = AuditEvent[CrystallisationAuditDetail]("submitCrystallisation", "crystallisation", detail)
         MockedAuditService.verifyAuditEvent(event).once
       }
     }

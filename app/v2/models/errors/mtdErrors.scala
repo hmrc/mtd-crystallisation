@@ -16,43 +16,51 @@
 
 package v2.models.errors
 
+import play.api.libs.json.{ Json, Writes }
+
+case class MtdError(code: String, message: String)
+
+object MtdError {
+  implicit val writes: Writes[MtdError] = Json.writes[MtdError]
+}
+
 // Nino Errors
-object NinoFormatError extends Error("FORMAT_NINO", "The provided NINO is invalid")
+object NinoFormatError extends MtdError("FORMAT_NINO", "The provided NINO is invalid")
 
 // MTD Errors
-object TaxYearFormatError extends Error("FORMAT_TAX_YEAR", "The provided tax year is invalid")
+object TaxYearFormatError extends MtdError("FORMAT_TAX_YEAR", "The provided tax year is invalid")
 
-object InvalidCalcIdError extends Error("FORMAT_CALCID", "The provided calculationId is invalid")
+object InvalidCalcIdError extends MtdError("FORMAT_CALCID", "The provided calculationId is invalid")
 
 // Rule Errors
 object RuleTaxYearNotSupportedError
-    extends Error("RULE_TAX_YEAR_NOT_SUPPORTED", "Tax year not supported, because it precedes the earliest allowable tax year")
+    extends MtdError("RULE_TAX_YEAR_NOT_SUPPORTED", "Tax year not supported, because it precedes the earliest allowable tax year")
 
-object RuleIncorrectOrEmptyBodyError extends Error("RULE_INCORRECT_OR_EMPTY_BODY_SUBMITTED", "An empty or non-matching body was submitted")
+object RuleIncorrectOrEmptyBodyError extends MtdError("RULE_INCORRECT_OR_EMPTY_BODY_SUBMITTED", "An empty or non-matching body was submitted")
 
 object RuleTaxYearRangeExceededError
-    extends Error("RULE_TAX_YEAR_RANGE_EXCEEDED", "Tax year range exceeded. A tax year range of one year is required.")
+    extends MtdError("RULE_TAX_YEAR_RANGE_EXCEEDED", "Tax year range exceeded. A tax year range of one year is required.")
 
-object IncomeSourcesChangedError extends Error("RULE_INCOME_SOURCES_CHANGED", "Income sources data has changed. Perform intent to crystallise")
+object IncomeSourcesChangedError extends MtdError("RULE_INCOME_SOURCES_CHANGED", "Income sources data has changed. Perform intent to crystallise")
 
-object RecentSubmissionsExistError extends Error("RULE_RECENT_SUBMISSIONS_EXIST", "More recent submissions exist. Perform intent to crystallise")
+object RecentSubmissionsExistError extends MtdError("RULE_RECENT_SUBMISSIONS_EXIST", "More recent submissions exist. Perform intent to crystallise")
 
-object ResidencyChangedError extends Error("RULE_RESIDENCY_CHANGED", "Residency has changed. Perform intent to crystallise")
+object ResidencyChangedError extends MtdError("RULE_RESIDENCY_CHANGED", "Residency has changed. Perform intent to crystallise")
 
-object FinalDeclarationReceivedError extends Error("RULE_FINAL_DECLARATION_RECEIVED", "Crystallisation declaration has already been received")
+object FinalDeclarationReceivedError extends MtdError("RULE_FINAL_DECLARATION_RECEIVED", "Crystallisation declaration has already been received")
 
-object NoSubmissionsExistError extends Error("RULE_NO_SUBMISSIONS_EXIST", "No income submissions exist")
+object NoSubmissionsExistError extends MtdError("RULE_NO_SUBMISSIONS_EXIST", "No income submissions exist")
 
 //Standard Errors
-object NotFoundError extends Error("MATCHING_RESOURCE_NOT_FOUND", "Matching resource not found")
+object NotFoundError extends MtdError("MATCHING_RESOURCE_NOT_FOUND", "Matching resource not found")
 
-object DownstreamError extends Error("INTERNAL_SERVER_ERROR", "An internal server error occurred")
+object DownstreamError extends MtdError("INTERNAL_SERVER_ERROR", "An internal server error occurred")
 
-object BadRequestError extends Error("INVALID_REQUEST", "Invalid request")
+object BadRequestError extends MtdError("INVALID_REQUEST", "Invalid request")
 
-object BVRError extends Error("BUSINESS_ERROR", "Business validation error")
+object BVRError extends MtdError("BUSINESS_ERROR", "Business validation error")
 
-object ServiceUnavailableError extends Error("SERVICE_UNAVAILABLE", "Internal server error")
+object ServiceUnavailableError extends MtdError("SERVICE_UNAVAILABLE", "Internal server error")
 
 //Authorisation Errors
-object UnauthorisedError extends Error("CLIENT_OR_AGENT_NOT_AUTHORISED", "The client and/or agent is not authorised.")
+object UnauthorisedError extends MtdError("CLIENT_OR_AGENT_NOT_AUTHORISED", "The client and/or agent is not authorised.")

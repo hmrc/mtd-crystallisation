@@ -16,20 +16,20 @@
 
 package v2.controllers.requestParsers.validators.validations
 
-import v2.models.errors.Error
+import v2.models.errors.MtdError
 
 trait RegexValidation {
   val regexFormat: String
 
-  val error: Error
+  val error: MtdError
 
-  def validate(value: String): List[Error] =
+  def validate(value: String): List[MtdError] =
     RegexValidation.validate(error, value, regexFormat)
 }
 
 object RegexValidation {
 
-  def validate(error: Error, value: String, regexFormat: String): List[Error] = {
+  def validate(error: MtdError, value: String, regexFormat: String): List[MtdError] = {
     if (value.matches(regexFormat)) NoValidationErrors else List(error)
   }
 }

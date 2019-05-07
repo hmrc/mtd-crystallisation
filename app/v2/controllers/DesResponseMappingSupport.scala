@@ -17,7 +17,7 @@
 package v2.controllers
 
 import play.api.Logger
-import v2.models.errors.{ BadRequestError, DesError, DesErrors, DownstreamError, Error, ErrorWrapper, OutboundError }
+import v2.models.errors.{ BadRequestError, DesError, DesErrors, DownstreamError, MtdError, ErrorWrapper, OutboundError }
 import v2.models.outcomes.DesResponse
 
 trait DesResponseMappingSupport {
@@ -29,9 +29,9 @@ trait DesResponseMappingSupport {
 
   protected val logger: Logger = Logger(this.getClass)
 
-  final def mapDesErrors[D](endpointName: String, errorMap: PartialFunction[String, Error])(desOutcome: DesResponse[DesError]): ErrorWrapper = {
+  final def mapDesErrors[D](endpointName: String, errorMap: PartialFunction[String, MtdError])(desOutcome: DesResponse[DesError]): ErrorWrapper = {
 
-    lazy val defaultErrorMapping: String => Error = { code =>
+    lazy val defaultErrorMapping: String => MtdError = { code =>
       logger.info(s"[$controllerName] [$endpointName] - No mapping found for error code $code")
       DownstreamError
     }

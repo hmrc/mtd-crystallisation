@@ -19,22 +19,20 @@ package v2.models.errors
 import play.api.libs.json.Json
 import support.UnitSpec
 
-class ErrorSpec extends UnitSpec{
+class DesErrorCodeSpec extends UnitSpec {
 
   "reads" should {
-    val error = Error("FORMAT_NINO", "The provided NINO is invalid")
-
     val json = Json.parse(
       """
         |{
-        |   "code": "FORMAT_NINO",
-        |   "reason": "The provided NINO is invalid"
+        |   "code": "CODE",
+        |   "reason": "ignored"
         |}
       """.stripMargin
     )
 
-    "generate the correct JSON" in {
-      json.as[Error] shouldBe error
+    "generate the correct error code" in {
+      json.as[DesErrorCode] shouldBe DesErrorCode("CODE")
     }
   }
 }

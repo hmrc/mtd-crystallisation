@@ -18,35 +18,33 @@ package v2.controllers.requestParsers.validators
 
 import v2.controllers.requestParsers.validators.validations._
 import v2.models.domain.CrystallisationRequest
-import v2.models.errors.{Error, RuleIncorrectOrEmptyBodyError, RuleTaxYearNotSupportedError}
+import v2.models.errors.{ MtdError, RuleIncorrectOrEmptyBodyError, RuleTaxYearNotSupportedError }
 import v2.models.requestData.CrystallisationRawData
 
 class CrystallisationValidator extends Validator[CrystallisationRawData] {
 
-  private val validationSet = List(
-    parameterFormatValidation, bodyFormatValidator,
-    parameterRuleValidation, bodyFieldsValidation)
+  private val validationSet = List(parameterFormatValidation, bodyFormatValidator, parameterRuleValidation, bodyFieldsValidation)
 
-  private def parameterFormatValidation: CrystallisationRawData => List[List[Error]] = (data: CrystallisationRawData) => {
+  private def parameterFormatValidation: CrystallisationRawData => List[List[MtdError]] = (data: CrystallisationRawData) => {
     List(
       NinoValidation.validate(data.nino),
       TaxYearValidation.validate(data.taxYear)
     )
   }
 
-  private def parameterRuleValidation: CrystallisationRawData => List[List[Error]] = { data =>
+  private def parameterRuleValidation: CrystallisationRawData => List[List[MtdError]] = { data =>
     List(
       MtdTaxYearValidation.validate(data.taxYear, RuleTaxYearNotSupportedError)
     )
   }
 
-  private def bodyFormatValidator: CrystallisationRawData => List[List[Error]] = { data =>
+  private def bodyFormatValidator: CrystallisationRawData => List[List[MtdError]] = { data =>
     List(
       JsonFormatValidation.validate[CrystallisationRequest](data.body, RuleIncorrectOrEmptyBodyError)
     )
   }
 
-  private def bodyFieldsValidation: CrystallisationRawData => List[List[Error]] = (data: CrystallisationRawData) => {
+  private def bodyFieldsValidation: CrystallisationRawData => List[List[MtdError]] = (data: CrystallisationRawData) => {
     val req = data.body.json.as[CrystallisationRequest]
 
     List(
@@ -54,7 +52,7 @@ class CrystallisationValidator extends Validator[CrystallisationRawData] {
     )
   }
 
-  override def validate(data: CrystallisationRawData): List[Error] = {
+  override def validate(data: CrystallisationRawData): List[MtdError] = {
     run(validationSet, data).distinct
   }
 }

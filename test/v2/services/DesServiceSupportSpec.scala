@@ -30,15 +30,15 @@ class DesServiceSupportSpec extends UnitSpec with DesServiceSupport {
   val ep            = "someEndpoint"
   val correlationId = "correllationId"
 
-  val desError1        = Error("DES_CODE1", "desmsg1")
-  val desError2        = Error("DES_CODE2", "desmsg2")
-  val desError3        = Error("DES_CODE_DOWNSTREAM", "desmsg3")
-  val desErrorUnmapped = Error("DES_UNMAPPED", "desmsg4")
+  val desError1        = DesErrorCode("DES_CODE1")
+  val desError2        = DesErrorCode("DES_CODE2")
+  val desError3        = DesErrorCode("DES_CODE_DOWNSTREAM")
+  val desErrorUnmapped = DesErrorCode("DES_UNMAPPED")
 
-  val error1 = Error("CODE1", "msg1")
-  val error2 = Error("CODE2", "msg2")
+  val error1 = MtdError("CODE1", "msg1")
+  val error2 = MtdError("CODE2", "msg2")
 
-  val desToMtdErrorMap: PartialFunction[String, Error] = {
+  val desToMtdErrorMap: PartialFunction[String, MtdError] = {
     case "DES_CODE1"           => error1
     case "DES_CODE2"           => error2
     case "DES_CODE_DOWNSTREAM" => DownstreamError
@@ -120,10 +120,12 @@ class DesServiceSupportSpec extends UnitSpec with DesServiceSupport {
 
     "an OutboundError" must {
       "return the error inside the OutboundError (regardless of mapping)" in {
-        val outboundErrorResponse = DesResponse(correlationId, OutboundError(desError1)).asLeft
+        val mtdError1             = MtdError("CODE1", "MESSAGE1")
+        val mtdError2             = MtdError("CODE2", "MESSAGE2")
+        val outboundErrorResponse = DesResponse(correlationId, OutboundError(mtdError1, Some(Seq(mtdError2)))).asLeft
 
         handler(outboundErrorResponse) shouldBe
-          ErrorWrapper(Some(correlationId), desError1, None).asLeft
+          ErrorWrapper(Some(correlationId), mtdError1, Some(Seq(mtdError2))).asLeft
       }
     }
   }

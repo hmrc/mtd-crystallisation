@@ -94,7 +94,7 @@ class CrystallisationISpec extends IntegrationBaseSpec {
       createErrorTest(Status.CONFLICT, "FINAL_DECLARATION_RECEIVED", Status.FORBIDDEN, FinalDeclarationReceivedError)
     }
 
-    def createErrorTest(desStatus: Int, desCode: String, expectedStatus: Int, expectedBody: Error): Unit = {
+    def createErrorTest(desStatus: Int, desCode: String, expectedStatus: Int, expectedBody: MtdError): Unit = {
       s"des returns an $desCode error" in new CreateTest {
 
         override def setupStubs(): StubMapping = {
@@ -116,7 +116,7 @@ class CrystallisationISpec extends IntegrationBaseSpec {
       createRequestValidationErrorTest("AA123456A", "2015-16", Status.BAD_REQUEST, RuleTaxYearNotSupportedError)
     }
 
-    def createRequestValidationErrorTest(requestNino: String, requestTaxYear: String, expectedStatus: Int, expectedBody: Error): Unit = {
+    def createRequestValidationErrorTest(requestNino: String, requestTaxYear: String, expectedStatus: Int, expectedBody: MtdError): Unit = {
       s"validation fails with ${expectedBody.code} error" in new CreateTest {
 
         override val nino: String    = requestNino

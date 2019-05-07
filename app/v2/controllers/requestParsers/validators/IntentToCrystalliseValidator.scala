@@ -17,27 +17,27 @@
 package v2.controllers.requestParsers.validators
 
 import v2.controllers.requestParsers.validators.validations._
-import v2.models.errors.{Error, RuleTaxYearNotSupportedError}
+import v2.models.errors.{ MtdError, RuleTaxYearNotSupportedError }
 import v2.models.requestData.IntentToCrystalliseRawData
 
 class IntentToCrystalliseValidator extends Validator[IntentToCrystalliseRawData] {
 
   private val validationSet = List(parameterFormatValidation, parameterRuleValidation)
 
-  private def parameterFormatValidation: IntentToCrystalliseRawData => List[List[Error]] = (data: IntentToCrystalliseRawData) => {
+  private def parameterFormatValidation: IntentToCrystalliseRawData => List[List[MtdError]] = (data: IntentToCrystalliseRawData) => {
     List(
       NinoValidation.validate(data.nino),
       TaxYearValidation.validate(data.taxYear)
     )
   }
 
-  private def parameterRuleValidation: IntentToCrystalliseRawData => List[List[Error]] = { data =>
+  private def parameterRuleValidation: IntentToCrystalliseRawData => List[List[MtdError]] = { data =>
     List(
       MtdTaxYearValidation.validate(data.taxYear, RuleTaxYearNotSupportedError)
     )
   }
 
-  override def validate(data: IntentToCrystalliseRawData): List[Error] = {
+  override def validate(data: IntentToCrystalliseRawData): List[MtdError] = {
     run(validationSet, data).distinct
   }
 }

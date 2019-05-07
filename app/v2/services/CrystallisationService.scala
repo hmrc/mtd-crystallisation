@@ -48,7 +48,7 @@ class CrystallisationService @Inject()(connector: DesConnector) extends DesServi
     }
   }
 
-  private def desErrorToMtdErrorCreate: Map[String, Error] =
+  private def desErrorToMtdErrorCreate: Map[String, MtdError] =
     Map(
       "INVALID_IDTYPE"             -> DownstreamError,
       "INVALID_IDVALUE"            -> NinoFormatError,
