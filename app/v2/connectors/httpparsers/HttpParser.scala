@@ -49,6 +49,8 @@ trait HttpParser {
 
   private val multipleErrorReads: Reads[List[DesErrorCode]] = (__ \ "failures").read[List[DesErrorCode]]
 
+  // FIXME do we need to keep the DES error message for BVRs? If so, have special dedicated parser rather than relying on
+  //  Seq[DesErrorCode]...
   private val bvrErrorReads: Reads[Seq[DesErrorCode]] = {
     implicit val errorIdReads: Reads[DesErrorCode] = (__ \ "id").read[String].map(DesErrorCode(_))
     (__ \ "bvrfailureResponseElement" \ "validationRuleFailures").read[Seq[DesErrorCode]]

@@ -23,7 +23,9 @@ import uk.gov.hmrc.http.HeaderCarrier
 import v2.mocks.requestParsers.MockIntentToCrystalliseRequestDataParser
 import v2.mocks.services.{ MockAuditService, MockCrystallisationService, MockEnrolmentsAuthService, MockMtdIdLookupService }
 import v2.models.audit.{ AuditError, AuditEvent, IntentToCrystalliseAuditDetail, IntentToCrystalliseAuditResponse }
+import v2.models.des.DesCalculationIdResponse
 import v2.models.errors._
+import v2.models.outcomes.DesResponse
 import v2.models.requestData.{ DesTaxYear, IntentToCrystalliseRawData, IntentToCrystalliseRequestData }
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -72,8 +74,7 @@ class IntentToCrystalliseControllerSpec
 
         MockCrystallisationService
           .intent(intentToCrystalliseRequestData)
-          .returns(???) // FIXME
-        //          .returns(Future.successful(Right(DesResponse(correlationId, calculationId))))
+          .returns(Future.successful(Right(DesResponse(correlationId, DesCalculationIdResponse(calculationId)))))
 
         val result: Future[Result] = controller.intentToCrystallise(nino, taxYear)(fakeRequest)
         status(result) shouldBe SEE_OTHER
@@ -148,6 +149,9 @@ class IntentToCrystalliseControllerSpec
 
     "return 400 Bad Request with a single error" when {
 
+      // TODO test like this for all combinations in the spec...
+      withDesErrorCode(DesErrorCode("INVALID_NINO")) shouldBe (BAD_REQUEST, NinoFormatError)
+
       val badRequestErrorsFromParser = List(
         BadRequestError,
         NinoFormatError,
@@ -196,6 +200,8 @@ class IntentToCrystalliseControllerSpec
       forbiddenErrors.foreach(errorsFromCreateServiceTester(_, FORBIDDEN))
 
     }
+
+    def withDesErrorCode(code: DesErrorCode): Result = ???
 
     def errorsFromCreateParserTester(error: MtdError, expectedStatus: Int): Unit = {
       s"a ${error.code} error is returned from the parser" in new Test {
