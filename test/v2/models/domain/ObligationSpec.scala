@@ -14,23 +14,22 @@
  * limitations under the License.
  */
 
-package v2.models.des
+package v2.models.domain
 
 import support.UnitSpec
 import v2.models.fixtures.Fixtures.CrystallisationObligationFixture._
 
-
 class ObligationSpec extends UnitSpec {
 
-  "Crystallisation Obligation reads" should {
+  "Obligation writes" should {
     "parse a fulfilled obligation from DES json.response" in {
-      val model = Obligation.reads.reads(fulfilledJsonObligationDes).get
-      model shouldBe fulfilledObligationMtd
+      val model = Obligation.writes.writes(fulfilledObligationMtd)
+      model shouldBe fulfilledObligationJsonMtd
     }
 
     "parse an open obligation from DES json.response" in {
-      val model = Obligation.reads.reads(openJsonObligationDes).get
-      model shouldBe openObligationMtd
+      val model = Obligation.writes.writes(openObligationMtd)
+      model shouldBe openObligationJsonMtd
     }
   }
 }

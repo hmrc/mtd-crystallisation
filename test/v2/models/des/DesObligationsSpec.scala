@@ -23,8 +23,8 @@ class CrystallisationObligationsSpec extends UnitSpec {
   "Crystallisation Obligations reads" should {
     "parse from DES json.response" in {
 
-      val model = CrystallisationObligationsResponse.reads.reads(fulfilledCrystallisationObligationDes).get
-      model shouldBe fulfilledCrystallisationObligationsResponseMtd
+      val model = DesObligationsResponse.reads.reads(fulfilledCrystallisationObligationJsonDes).get
+      model shouldBe fulfilledCrystallisationObligationsResponseDes
     }
   }
 }
@@ -34,8 +34,8 @@ class ObligationsSpec extends UnitSpec {
   "Obligations reads" should {
     "parse from DES json.response" in {
 
-      val model = Obligations.reads.reads(fulfilledObligationsDes).get
-      model shouldBe fulfilledObligationsMtd
+      val model = DesObligation.reads.reads(fulfilledObligationsJsonDes).get
+      model shouldBe fulfilledObligationsDes
     }
   }
 

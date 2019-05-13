@@ -16,7 +16,7 @@
 
 package v2.models.des
 
-import play.api.libs.json.JsString
+import play.api.libs.json.{JsString, Json}
 import support.UnitSpec
 
 import scala.util.{Failure, Success, Try}
@@ -47,6 +47,22 @@ class ObligationsStatusSpec extends UnitSpec {
           case Success(_) => fail("A JsError was expected")
           case Failure(e) => e.getMessage shouldBe "Invalid status supplied for obligation status"
         }
+      }
+    }
+  }
+
+  "Writing Json to represent the obligation status" when {
+    "the obligation is open" should {
+      "generate the correct Json" in {
+        val json = Json.toJson(OpenObligation)
+        json shouldBe JsString("Open")
+      }
+    }
+
+    "the obligation is fulfilled" should {
+      "generate the correct Json" in {
+        val json = Json.toJson(FulfilledObligation)
+        json shouldBe JsString("Fulfilled")
       }
     }
   }

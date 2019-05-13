@@ -19,6 +19,7 @@ import java.time.LocalDate
 
 import play.api.libs.json.Json
 import v2.models.des._
+import v2.models.domain.Obligation
 
 object Fixtures {
 
@@ -29,68 +30,92 @@ object Fixtures {
     val due: LocalDate = LocalDate.parse("2018-05-28")
     val statusFulfilled: ObligationStatus = FulfilledObligation
     val statusOpen: ObligationStatus = OpenObligation
-    val processed = Some(LocalDate.parse("2018-04-01"))
+    val processed = LocalDate.parse("2018-04-01")
 
-    val fulfilledCrystallisationObligationsResponseMtd = CrystallisationObligationsResponse(
-      Seq(Obligations(
-        Seq(Obligation(
+    val fulfilledCrystallisationObligationsResponseDes = DesObligationsResponse(
+      Seq(
+        DesObligation(
+        Seq(
+          DesObligationDetail(
           status = statusFulfilled,
-          startDate = start,
-          endDate = end,
-          dueDate = due,
-          processedDate = processed
+          inboundCorrespondenceFromDate = start,
+          inboundCorrespondenceToDate = end,
+          inboundCorrespondenceDueDate = due,
+          inboundCorrespondenceDateReceived = Some(processed)
         ))
       ))
     )
 
-    val openCrystallisationObligationsResponseMtd = CrystallisationObligationsResponse(
-      Seq(Obligations(
-        Seq(Obligation(
+    val openCrystallisationObligationsResponseDes = DesObligationsResponse(
+      Seq(
+        DesObligation(
+        Seq(
+          DesObligationDetail(
           status = statusOpen,
-          startDate = start,
-          endDate = end,
-          dueDate = due,
-          processedDate = None
+          inboundCorrespondenceFromDate = start,
+          inboundCorrespondenceToDate = end,
+          inboundCorrespondenceDueDate = due,
+          inboundCorrespondenceDateReceived = None
         ))
       ))
     )
 
-    val fulfilledObligationsMtd = Obligations(
-        Seq(Obligation(
+    val fulfilledObligationsDes = DesObligation(
+      Seq(
+        DesObligationDetail(
           status = statusFulfilled,
-          startDate = start,
-          endDate = end,
-          dueDate = due,
-          processedDate = processed
+          inboundCorrespondenceFromDate = start,
+          inboundCorrespondenceToDate = end,
+          inboundCorrespondenceDueDate = due,
+          inboundCorrespondenceDateReceived = Some(processed)
         ))
 
     )
 
-    val openObligationsMtd = Obligations(
-        Seq(Obligation(
+    val openObligationsDes = DesObligation(
+      Seq(
+        DesObligationDetail(
           status = statusOpen,
-          startDate = start,
-          endDate = end,
-          dueDate = due,
-          processedDate = None
+          inboundCorrespondenceFromDate = start,
+          inboundCorrespondenceToDate = end,
+          inboundCorrespondenceDueDate = due,
+          inboundCorrespondenceDateReceived = None
         ))
+    )
+
+    val fulfilledObligationDes = DesObligationDetail(
+          status = statusFulfilled,
+          inboundCorrespondenceFromDate = start,
+          inboundCorrespondenceToDate = end,
+          inboundCorrespondenceDueDate = due,
+          inboundCorrespondenceDateReceived = Some(processed)
+    )
+
+    val openObligationDes = DesObligationDetail(
+          status = statusOpen,
+          inboundCorrespondenceFromDate = start,
+          inboundCorrespondenceToDate = end,
+          inboundCorrespondenceDueDate = due,
+          inboundCorrespondenceDateReceived = None
     )
 
     val fulfilledObligationMtd = Obligation(
-          status = statusFulfilled,
-          startDate = start,
-          endDate = end,
-          dueDate = due,
-          processedDate = processed
+      status = statusFulfilled,
+      start = start,
+      end = end,
+      due = due,
+      processed = Some(processed)
     )
 
     val openObligationMtd = Obligation(
-          status = statusOpen,
-          startDate = start,
-          endDate = end,
-          dueDate = due,
-          processedDate = None
+      status = statusOpen,
+      start = start,
+      end = end,
+      due = due,
+      processed = None
     )
+
+
 
     val fulfilledJsonObligationDes = Json.parse(
       """
@@ -113,7 +138,7 @@ object Fixtures {
         |}
       """.stripMargin)
 
-    val fulfilledCrystallisationObligationDes = Json.parse(
+    val fulfilledCrystallisationObligationJsonDes = Json.parse(
       """
         |{
         |  "obligations": [
@@ -132,7 +157,7 @@ object Fixtures {
         |}
       """.stripMargin)
 
-    val fulfilledObligationsDes = Json.parse(
+    val fulfilledObligationsJsonDes = Json.parse(
       """
         |{
         |  "obligationDetails": [
@@ -146,5 +171,27 @@ object Fixtures {
         |  ]
         |}
       """.stripMargin)
+
+    val fulfilledObligationJsonMtd =Json.parse(
+      """
+        |{
+        |  "status": "Fulfilled",
+        |  "start": "2018-02-01",
+        |  "end": "2018-02-28",
+        |  "processed": "2018-04-01",
+        |  "due": "2018-05-28"
+        |}
+      """.stripMargin)
+
+    val openObligationJsonMtd =Json.parse(
+      """
+        |{
+        |  "status": "Open",
+        |  "start": "2018-02-01",
+        |  "end": "2018-02-28",
+        |  "due": "2018-05-28"
+        |}
+      """.stripMargin)
+
   }
 }

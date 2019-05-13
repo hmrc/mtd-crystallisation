@@ -35,6 +35,13 @@ object ObligationStatus {
       }
     }
   }
+
+  implicit val writes:Writes[ObligationStatus] = new Writes[ObligationStatus] {
+    def writes(status: ObligationStatus): JsValue = status match {
+      case FulfilledObligation => Json.toJson("Fulfilled")
+      case OpenObligation => Json.toJson("Open")
+    }
+  }
 }
 
 
