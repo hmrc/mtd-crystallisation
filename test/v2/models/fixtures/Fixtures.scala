@@ -18,12 +18,11 @@ package v2.models.fixtures
 import java.time.LocalDate
 
 import play.api.libs.json.Json
-import v2.models.des.{FulfilledObligation, Obligation, ObligationStatus, OpenObligation}
+import v2.models.des._
 
 object Fixtures {
 
   object CrystallisationObligationFixture {
-
 
     val start: LocalDate = LocalDate.parse("2018-02-01")
     val end: LocalDate = LocalDate.parse("2018-02-28")
@@ -32,25 +31,68 @@ object Fixtures {
     val statusOpen: ObligationStatus = OpenObligation
     val processed = Some(LocalDate.parse("2018-04-01"))
 
-
-
-    val fulfilledObligation = Obligation(
-      status = statusFulfilled,
-      startDate = start,
-      endDate = end,
-      dueDate = due,
-      processedDate = processed
+    val fulfilledCrystallisationObligationsResponseMtd = CrystallisationObligationsResponse(
+      Seq(Obligations(
+        Seq(Obligation(
+          status = statusFulfilled,
+          startDate = start,
+          endDate = end,
+          dueDate = due,
+          processedDate = processed
+        ))
+      ))
     )
 
-    val openObligation = Obligation(
-      status = statusOpen,
-      startDate = start,
-      endDate = end,
-      dueDate = due,
-      processedDate = None
+    val openCrystallisationObligationsResponseMtd = CrystallisationObligationsResponse(
+      Seq(Obligations(
+        Seq(Obligation(
+          status = statusOpen,
+          startDate = start,
+          endDate = end,
+          dueDate = due,
+          processedDate = None
+        ))
+      ))
     )
 
-    val fulfilledJsonObligation = Json.parse(
+    val fulfilledObligationsMtd = Obligations(
+        Seq(Obligation(
+          status = statusFulfilled,
+          startDate = start,
+          endDate = end,
+          dueDate = due,
+          processedDate = processed
+        ))
+
+    )
+
+    val openObligationsMtd = Obligations(
+        Seq(Obligation(
+          status = statusOpen,
+          startDate = start,
+          endDate = end,
+          dueDate = due,
+          processedDate = None
+        ))
+    )
+
+    val fulfilledObligationMtd = Obligation(
+          status = statusFulfilled,
+          startDate = start,
+          endDate = end,
+          dueDate = due,
+          processedDate = processed
+    )
+
+    val openObligationMtd = Obligation(
+          status = statusOpen,
+          startDate = start,
+          endDate = end,
+          dueDate = due,
+          processedDate = None
+    )
+
+    val fulfilledJsonObligationDes = Json.parse(
       """
         |{
         |   "status": "F",
@@ -61,7 +103,7 @@ object Fixtures {
         |}
       """.stripMargin)
 
-    val openJsonObligationInput = Json.parse(
+    val openJsonObligationDes = Json.parse(
       """
         |{
         |   "status": "O",
@@ -71,61 +113,79 @@ object Fixtures {
         |}
       """.stripMargin)
 
+    /*
 
-    val fulfilledObligationOutputJson =
-      """
-        |{
-        |  "status": "Fulfilled",
-        |  "start": "2018-02-01",
-        |  "end": "2018-02-28",
-        |  "processed": "2018-04-01",
-        |  "due": "2018-05-28"
-        |}
-      """.stripMargin
+        val fulfilledObligationJsonMtd =
+          """
+            |{
+            |  "status": "Fulfilled",
+            |  "start": "2018-02-01",
+            |  "end": "2018-02-28",
+            |  "processed": "2018-04-01",
+            |  "due": "2018-05-28"
+            |}
+          """.stripMargin
 
-    val openObligationOutputJson =
-      """
-        |{
-        |  "status": "Open",
-        |  "start": "2018-02-01",
-        |  "end": "2018-02-28",
-        |  "due": "2018-05-28"
-        |}
-      """.stripMargin
-
-
-    val fulfilledJsonObligationMissingProcessedDate = Json.parse(
-      """
-        |{
-        |  "status": "F",
-        |  "inboundCorrespondenceFromDate": "2018-01-01",
-        |  "inboundCorrespondenceToDate": "2018-01-01",
-        |  "inboundCorrespondenceDueDate": "2018-01-01",
-        |  "periodKey": ""
-        |}
-      """.stripMargin
-    )
+        val openObligationJsonMtd =
+          """
+            |{
+            |  "status": "Open",
+            |  "start": "2018-02-01",
+            |  "end": "2018-02-28",
+            |  "due": "2018-05-28"
+            |}
+          """.stripMargin
 
 
+        val fulfilledJsonObligationMissingProcessedDate = Json.parse(
+          """
+            |{
+            |  "status": "F",
+            |  "inboundCorrespondenceFromDate": "2018-01-01",
+            |  "inboundCorrespondenceToDate": "2018-01-01",
+            |  "inboundCorrespondenceDueDate": "2018-01-01",
+            |  "periodKey": ""
+            |}
+          """.stripMargin
+        )
 
+        val openJsonObligationWithProcessedDate = Json.parse(
+          """
+            |{
+            |  "status": "O",
+            |  "inboundCorrespondenceFromDate": "2018-01-01",
+            |  "inboundCorrespondenceToDate": "2018-01-01",
+            |  "inboundCorrespondenceDueDate": "2018-01-01",
+            |  "inboundCorrespondenceDateReceived": "2018-01-01",
+            |  "periodKey": ""
+            |}
+          """.stripMargin
+        )
+    */
 
-    val openJsonObligationWithProcessedDate = Json.parse(
-      """
-        |{
-        |  "status": "O",
-        |  "inboundCorrespondenceFromDate": "2018-01-01",
-        |  "inboundCorrespondenceToDate": "2018-01-01",
-        |  "inboundCorrespondenceDueDate": "2018-01-01",
-        |  "inboundCorrespondenceDateReceived": "2018-01-01",
-        |  "periodKey": ""
-        |}
-      """.stripMargin
-    )
-
-    val fulfilledCrystallisationObligation = Json.parse(
+    val fulfilledCrystallisationObligationDes = Json.parse(
       """
         |{
         |  "obligations": [
+        |    {
+        |    "obligationDetails": [
+        |      {
+        |        "status": "F",
+        |        "inboundCorrespondenceFromDate": "2018-02-01",
+        |        "inboundCorrespondenceToDate": "2018-02-28",
+        |        "inboundCorrespondenceDateReceived": "2018-04-01",
+        |        "inboundCorrespondenceDueDate": "2018-05-28"
+        |      }
+        |    ]
+        |    }
+        |  ]
+        |}
+      """.stripMargin)
+
+    val fulfilledObligationsDes = Json.parse(
+      """
+        |{
+        |  "obligationDetails": [
         |    {
         |      "status": "F",
         |      "inboundCorrespondenceFromDate": "2018-02-01",
@@ -136,7 +196,5 @@ object Fixtures {
         |  ]
         |}
       """.stripMargin)
-
-
   }
 }

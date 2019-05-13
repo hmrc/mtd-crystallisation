@@ -18,13 +18,24 @@ package v2.models.des
 import support.UnitSpec
 import v2.models.fixtures.Fixtures.CrystallisationObligationFixture._
 
-class CrystallisationObligationsResponseSpec extends UnitSpec {
+class CrystallisationObligationsSpec extends UnitSpec {
 
   "Crystallisation Obligations reads" should {
     "parse from DES json.response" in {
 
-      val model = CrystallisationObligationsResponse.reads.reads(fulfilledCrystallisationObligation).get
-      model shouldBe CrystallisationObligationsResponse(Seq(fulfilledObligation))
+      val model = CrystallisationObligationsResponse.reads.reads(fulfilledCrystallisationObligationDes).get
+      model shouldBe fulfilledCrystallisationObligationsResponseMtd
+    }
+  }
+}
+
+class ObligationsSpec extends UnitSpec {
+
+  "Obligations reads" should {
+    "parse from DES json.response" in {
+
+      val model = Obligations.reads.reads(fulfilledObligationsDes).get
+      model shouldBe fulfilledObligationsMtd
     }
   }
 

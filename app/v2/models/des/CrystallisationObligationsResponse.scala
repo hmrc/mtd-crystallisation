@@ -15,10 +15,36 @@
  */
 
 package v2.models.des
-import play.api.libs.json.{Json, Reads}
+import java.time.LocalDate
 
-case class CrystallisationObligationsResponse(obligations: Seq[Obligation])
+import play.api.libs.functional.syntax._
+import play.api.libs.json.{Json, Reads, __}
+
+case class CrystallisationObligationsResponse(obligations: Seq[Obligations])
 
 object CrystallisationObligationsResponse {
   implicit val reads: Reads[CrystallisationObligationsResponse] = Json.reads[CrystallisationObligationsResponse]
+  }
+
+case class Obligations(obligationDetails: Seq[Obligation])
+
+object Obligations {
+  implicit val reads: Reads[Obligations] = Json.reads[Obligations]
+}
+
+case class Obligation(startDate: LocalDate,
+                       endDate: LocalDate,
+                       dueDate: LocalDate,
+                       status: ObligationStatus,
+                       processedDate: Option[LocalDate]
+                      )
+
+object Obligation {
+  implicit val reads: Reads[Obligation] = (
+      (__ \ "inboundCorrespondenceFromDate").read[LocalDate] and
+        (__ \ "inboundCorrespondenceToDate").read[LocalDate] and
+        (__ \ "inboundCorrespondenceDueDate").read[LocalDate] and
+        (__ \ "status").read[ObligationStatus] and
+        (__ \ "inboundCorrespondenceDateReceived").readNullable[LocalDate]
+    )(Obligation.apply _)
   }
