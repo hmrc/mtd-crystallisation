@@ -17,7 +17,7 @@
 package v2.controllers.requestParsers.validators
 
 import v2.controllers.requestParsers.validators.validations._
-import v2.models.errors.{Error, RuleTaxYearNotSupportedError}
+import v2.models.errors.{ Error, RuleTaxYearNotSupportedError }
 import v2.models.requestData.IntentToCrystalliseRawData
 
 class IntentToCrystalliseValidator extends Validator[IntentToCrystalliseRawData] {
