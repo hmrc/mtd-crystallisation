@@ -16,10 +16,7 @@
 
 package v2.services
 
-import java.time.LocalDate
-
 import javax.inject.Inject
-import uk.gov.hmrc.domain.Nino
 import uk.gov.hmrc.http.HeaderCarrier
 import v2.connectors.DesConnector
 import v2.models.errors._
@@ -50,10 +47,10 @@ class CrystallisationService @Inject()(connector: DesConnector) extends DesServi
     }
   }
 
-  def retrieveCrystallisation(request: CrystallisationObligationsRequestData)
-                             (implicit hc: HeaderCarrier, ec: ExecutionContext): Future[RetrieveCrystallisationOutcome] = {
-    connector.retrieveCrystallisation(request).map {
-      mapToVendor("retrieveCrystallisation", desErrorToMtdErrorRetrieve) { desResponse =>
+  def retrieveObligations(request: CrystallisationObligationsRequestData)
+                         (implicit hc: HeaderCarrier, ec: ExecutionContext): Future[RetrieveCrystallisationOutcome] = {
+    connector.retrieveObligations(request).map {
+      mapToVendor("retrieveObligations", desErrorToMtdErrorRetrieve) { desResponse =>
         Right(DesResponse(desResponse.correlationId, desResponse.responseData.toMtd))
       }
     }

@@ -120,7 +120,7 @@ class CrystallisationServiceSpec extends ServiceSpec {
     }
   }
 
-  "retrieveCrystallisation" when {
+  "retrieveObligations" when {
     val from = LocalDate.parse("2018-02-01")
     val to = LocalDate.parse("2018-02-28")
     val due = LocalDate.parse("2018-05-28")
@@ -135,9 +135,9 @@ class CrystallisationServiceSpec extends ServiceSpec {
 
         val desResponse = Right(DesResponse(correlationId, DesObligationsResponse.reads.reads(fulfilledCrystallisationObligationJsonDes).get))
 
-        MockedDesConnector.retrieveCrystallisation(request).returns(Future.successful(desResponse))
+        MockedDesConnector.retrieveObligations(request).returns(Future.successful(desResponse))
 
-        val result: RetrieveCrystallisationOutcome = await(service.retrieveCrystallisation(request))
+        val result: RetrieveCrystallisationOutcome = await(service.retrieveObligations(request))
 
         result shouldBe expected
       }
@@ -162,9 +162,9 @@ class CrystallisationServiceSpec extends ServiceSpec {
             val desResponse = DesResponse(correlationId, SingleError(Error(k, "MESSAGE")))
             val expected    = Left(ErrorWrapper(Some(correlationId), v, None))
 
-            MockedDesConnector.retrieveCrystallisation(request).returns(Future.successful(Left(desResponse)))
+            MockedDesConnector.retrieveObligations(request).returns(Future.successful(Left(desResponse)))
 
-            val result: RetrieveCrystallisationOutcome = await(service.retrieveCrystallisation(request))
+            val result: RetrieveCrystallisationOutcome = await(service.retrieveObligations(request))
 
             result shouldBe expected
           }

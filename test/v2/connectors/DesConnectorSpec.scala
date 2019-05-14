@@ -146,8 +146,8 @@ class DesConnectorSpec extends ConnectorSpec {
 
   "retrieve crystallisation obligations" when {
 
-    val from = LocalDate.parse("2018-02-01")
-    val to = LocalDate.parse("2018-02-28")
+    val from = "2018-02-01"
+    val to = "2018-02-28"
 
     "a valid request is supplied" should {
       "return a successful response" in new Test {
@@ -158,7 +158,7 @@ class DesConnectorSpec extends ConnectorSpec {
           .post(s"$baseUrl/enterprise/obligation-data/nino/$nino/ITSA?from=$from&to=$to", EmptyJsonBody)
           .returns(Future.successful(expected))
 
-        retrieveCrystallisationResult(connector) shouldBe expected
+        retrieveObligationsResult(connector) shouldBe expected
       }
     }
 
@@ -171,7 +171,7 @@ class DesConnectorSpec extends ConnectorSpec {
           .returns(Future.successful(expected))
 
 
-        retrieveCrystallisationResult(connector) shouldBe expected
+        retrieveObligationsResult(connector) shouldBe expected
       }
     }
 
@@ -183,13 +183,13 @@ class DesConnectorSpec extends ConnectorSpec {
           .post(s"$baseUrl/enterprise/obligation-data/nino/$nino/ITSA?from=$from&to=$to", EmptyJsonBody)
           .returns(Future.successful(expected))
 
-        retrieveCrystallisationResult(connector) shouldBe expected
+        retrieveObligationsResult(connector) shouldBe expected
       }
     }
 
-    def retrieveCrystallisationResult(connector: DesConnector): RetrieveCrystallisationConnectorOutcome =
+    def retrieveObligationsResult(connector: DesConnector): RetrieveCrystallisationConnectorOutcome =
       await(
-        connector.retrieveCrystallisation(CrystallisationObligationsRequestData(nino, from, to)))
+        connector.retrieveObligations(CrystallisationObligationsRequestData(nino, LocalDate.parse(from), LocalDate.parse(to))))
   }
 
 }

@@ -16,11 +16,8 @@
 
 package v2.connectors
 
-import java.time.LocalDate
-
 import javax.inject.{Inject, Singleton}
 import play.api.Logger
-import uk.gov.hmrc.domain.Nino
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.http.logging.Authorization
 import uk.gov.hmrc.play.bootstrap.http.HttpClient
@@ -65,7 +62,7 @@ class DesConnector @Inject()(http: HttpClient, appConfig: AppConfig) {
     http.POST(url, EmptyJsonBody)(EmptyJsonBody.writes, StandardDesHttpParser.readsEmpty, desHeaderCarrier, implicitly)
   }
 
-  def retrieveCrystallisation(request: CrystallisationObligationsRequestData)(
+  def retrieveObligations(request: CrystallisationObligationsRequestData)(
     implicit hc: HeaderCarrier,
     ec: ExecutionContext): Future[RetrieveCrystallisationConnectorOutcome] = {
 

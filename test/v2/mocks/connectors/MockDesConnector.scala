@@ -42,9 +42,9 @@ trait MockDesConnector extends MockFactory {
         .expects(crystallisationRequestData, *, *)
     }
 
-    def retrieveCrystallisation(request: CrystallisationObligationsRequestData): CallHandler[Future[RetrieveCrystallisationConnectorOutcome]] = {
+    def retrieveObligations(request: CrystallisationObligationsRequestData): CallHandler[Future[RetrieveCrystallisationConnectorOutcome]] = {
       (connector
-        .retrieveCrystallisation(_: CrystallisationObligationsRequestData)(_: HeaderCarrier, _: ExecutionContext))
+        .retrieveObligations(_: CrystallisationObligationsRequestData)(_: HeaderCarrier, _: ExecutionContext))
         .expects(request, *, *)
     }
   }
