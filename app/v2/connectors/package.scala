@@ -16,7 +16,7 @@
 
 package v2
 
-import v2.models.des.DesCalculationIdResponse
+import v2.models.des.{DesCalculationIdResponse, DesObligationsResponse}
 import v2.models.errors.{DesError, Error}
 import v2.models.outcomes.DesResponse
 
@@ -28,6 +28,7 @@ package object connectors {
 
   type CreateCrystallisationConnectorOutcome = DesConnectorOutcome[Unit]
 
+  type RetrieveCrystallisationConnectorOutcome = DesConnectorOutcome[DesObligationsResponse]
 
   type IntentToCrystalliseConnectorOutcome = DesConnectorOutcome[DesCalculationIdResponse]
 }
