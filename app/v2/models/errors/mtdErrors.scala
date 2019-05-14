@@ -24,13 +24,28 @@ object TaxYearFormatError extends Error("FORMAT_TAX_YEAR", "The provided tax yea
 
 object InvalidCalcIdError extends Error("FORMAT_CALCID", "The provided calculationId is invalid")
 
+object InvalidFromDateError extends Error("FORMAT_FROM_DATE", "The provided from date is invalid")
+
+object InvalidToDateError extends Error("FORMAT_TO_DATE", "The provided to date is invalid")
+
+object MissingFromDateError extends Error("MISSING_FROM_DATE", "The from date parameter is missing")
+
+object MissingToDateError extends Error("MISSING_TO_DATE", "The to date parameter is missing")
+
+object RangeEndDateBeforeStartDateError extends Error("RANGE_TO_DATE_BEFORE_FROM_DATE", "The To date cannot be before the From date")
+
+object RangeDateTooLongError extends Error("RANGE_DATE_TOO_LONG", "The specified date range is too big")
+
+object RuleFromDateNotSupported extends Error("RULE_FROM_DATE_NOT_SUPPORTED", "The specified from date is not supported as too early")
+
 // Rule Errors
 object RuleTaxYearNotSupportedError
     extends Error("RULE_TAX_YEAR_NOT_SUPPORTED", "Tax year not supported, because it precedes the earliest allowable tax year")
 
 object RuleIncorrectOrEmptyBodyError extends Error("RULE_INCORRECT_OR_EMPTY_BODY_SUBMITTED", "An empty or non-matching body was submitted")
 
-object RuleTaxYearRangeExceededError extends Error("RULE_TAX_YEAR_RANGE_EXCEEDED", "Tax year range exceeded. A tax year range of one year is required.")
+object RuleTaxYearRangeExceededError
+    extends Error("RULE_TAX_YEAR_RANGE_EXCEEDED", "Tax year range exceeded. A tax year range of one year is required.")
 
 object IncomeSourcesChangedError extends Error("RULE_INCOME_SOURCES_CHANGED", "Income sources data has changed. Perform intent to crystallise")
 

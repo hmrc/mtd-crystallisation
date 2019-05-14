@@ -18,18 +18,12 @@ package v2.controllers.requestParsers.validators.validations
 
 import v2.models.errors.Error
 
-trait RegexValidation {
-  val regexFormat: String
+object PredicateValidation {
 
-  val error: Error
+  def validate(predicateResult: Boolean, errorToReturn: Error): List[Error] = {
 
-  def validate(value: String): List[Error] =
-    RegexValidation.validate(error, value, regexFormat)
-}
+    if (predicateResult) List(errorToReturn) else noValidationErrors
 
-object RegexValidation {
-
-  def validate(error: Error, value: String, regexFormat: String): List[Error] = {
-    if (value.matches(regexFormat)) noValidationErrors else List(error)
   }
+
 }

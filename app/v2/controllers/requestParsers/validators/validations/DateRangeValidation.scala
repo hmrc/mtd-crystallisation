@@ -16,20 +16,23 @@
 
 package v2.controllers.requestParsers.validators.validations
 
-import v2.models.errors.Error
+import java.time.LocalDate
 
-trait RegexValidation {
-  val regexFormat: String
+import v2.config.FixedConfig
+import v2.models.errors.{ Error, RangeDateTooLongError, RangeEndDateBeforeStartDateError }
 
-  val error: Error
+object DateRangeValidation extends FixedConfig {
 
-  def validate(value: String): List[Error] =
-    RegexValidation.validate(error, value, regexFormat)
-}
+  private val maxDays = 366
 
-object RegexValidation {
-
-  def validate(error: Error, value: String, regexFormat: String): List[Error] = {
-    if (value.matches(regexFormat)) noValidationErrors else List(error)
+  def validate(from: LocalDate, to: LocalDate): List[Error] = {
+    if (to.isBefore(from)) {
+      List(RangeEndDateBeforeStartDateError)
+    } else if (to.isAfter(from.plusDays(maxDays))) {
+      List(RangeDateTooLongError)
+    } else {
+      noValidationErrors
+    }
   }
+
 }
