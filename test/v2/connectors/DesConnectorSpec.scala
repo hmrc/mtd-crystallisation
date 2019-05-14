@@ -148,7 +148,6 @@ class DesConnectorSpec extends ConnectorSpec {
 
     val from = LocalDate.parse("2018-02-01")
     val to = LocalDate.parse("2018-02-28")
-    val status = "O"
 
     "a valid request is supplied" should {
       "return a successful response" in new Test {
