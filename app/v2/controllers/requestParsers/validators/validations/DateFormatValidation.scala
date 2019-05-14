@@ -27,7 +27,7 @@ object DateFormatValidation extends Validation {
   private val dateRegex = "([0-9]{4}\\-[0-9]{2}\\-[0-9]{2})"
 
   def validate(date: String, dateError: Error): List[Error] = {
-    if (date.matches(dateRegex) && Try(LocalDate.parse(date)).isSuccess) NoValidationErrors else List(dateError)
+    if (date.matches(dateRegex) && Try(LocalDate.parse(date)).isSuccess) noValidationErrors else List(dateError)
   }
 
 }

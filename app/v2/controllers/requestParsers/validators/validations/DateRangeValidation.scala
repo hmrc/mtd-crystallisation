@@ -31,7 +31,7 @@ object DateRangeValidation extends FixedConfig {
     } else if (to.isAfter(from.plusDays(maxDays))) {
       List(RangeDateTooLongError)
     } else {
-      NoValidationErrors
+      noValidationErrors
     }
   }
 

@@ -25,7 +25,7 @@ object JsonFormatValidation {
   def validate[A](data: AnyContentAsJson, error: Error)(implicit reads: Reads[A]): List[Error] = {
 
     data.json.validate[A] match {
-      case JsSuccess(_, _) => NoValidationErrors
+      case JsSuccess(_, _) => noValidationErrors
       case _ => List(error)
     }
 

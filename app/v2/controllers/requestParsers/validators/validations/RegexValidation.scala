@@ -30,6 +30,6 @@ trait RegexValidation {
 object RegexValidation {
 
   def validate(error: Error, value: String, regexFormat: String): List[Error] = {
-    if (value.matches(regexFormat)) NoValidationErrors else List(error)
+    if (value.matches(regexFormat)) noValidationErrors else List(error)
   }
 }

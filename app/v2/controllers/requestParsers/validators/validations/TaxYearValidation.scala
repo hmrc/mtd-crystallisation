@@ -29,7 +29,7 @@ object TaxYearValidation {
       val end = taxYear.substring(5, 7).toInt
 
       if (end - start == 1) {
-        NoValidationErrors
+        noValidationErrors
       } else {
         List(RuleTaxYearRangeExceededError)
       }

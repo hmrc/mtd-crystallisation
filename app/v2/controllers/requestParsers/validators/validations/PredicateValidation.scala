@@ -22,7 +22,7 @@ object PredicateValidation {
 
   def validate(predicateResult: Boolean, errorToReturn: Error): List[Error] = {
 
-    if (predicateResult) List(errorToReturn) else NoValidationErrors
+    if (predicateResult) List(errorToReturn) else noValidationErrors
 
   }
 
