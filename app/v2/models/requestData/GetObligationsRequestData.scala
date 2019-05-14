@@ -14,22 +14,10 @@
  * limitations under the License.
  */
 
-package v2.controllers.requestParsers.validators.validations
+package v2.models.requestData
 
-import v2.models.errors.Error
+import java.time.LocalDate
 
-trait RegexValidation {
-  val regexFormat: String
+import uk.gov.hmrc.domain.Nino
 
-  val error: Error
-
-  def validate(value: String): List[Error] =
-    RegexValidation.validate(error, value, regexFormat)
-}
-
-object RegexValidation {
-
-  def validate(error: Error, value: String, regexFormat: String): List[Error] = {
-    if (value.matches(regexFormat)) noValidationErrors else List(error)
-  }
-}
+case class GetObligationsRequestData(nino: Nino, from: LocalDate, to: LocalDate)

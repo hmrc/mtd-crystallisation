@@ -26,6 +26,6 @@ object NinoValidation {
       "[KT][A-CEGHJ-MPR-TW-Z]|N[A-CEGHJL-NPR-SW-Z]|Z[A-CEGHJ-NPR-TW-Y])[0-9]{6}[A-D ]?$"
 
   def validate(nino: String): List[Error] = {
-    if (Nino.isValid(nino) && nino.matches(ninoRegex)) NoValidationErrors else List(NinoFormatError)
+    if (Nino.isValid(nino) && nino.matches(ninoRegex)) noValidationErrors else List(NinoFormatError)
   }
 }

@@ -14,22 +14,6 @@
  * limitations under the License.
  */
 
-package v2.controllers.requestParsers.validators.validations
+package v2.models.requestData
 
-import v2.models.errors.Error
-
-trait RegexValidation {
-  val regexFormat: String
-
-  val error: Error
-
-  def validate(value: String): List[Error] =
-    RegexValidation.validate(error, value, regexFormat)
-}
-
-object RegexValidation {
-
-  def validate(error: Error, value: String, regexFormat: String): List[Error] = {
-    if (value.matches(regexFormat)) noValidationErrors else List(error)
-  }
-}
+case class GetObligationsRawData(nino: String, from: String, to: String) extends RawData

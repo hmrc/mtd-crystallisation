@@ -14,22 +14,24 @@
  * limitations under the License.
  */
 
-package v2.controllers.requestParsers.validators.validations
+package v2.mocks.validators
 
+import org.scalamock.handlers.CallHandler1
+import org.scalamock.scalatest.MockFactory
+import v2.controllers.requestParsers.validators.GetObligationsValidator
 import v2.models.errors.Error
+import v2.models.requestData.GetObligationsRawData
 
-trait RegexValidation {
-  val regexFormat: String
+class MockGetObligationsValidator extends MockFactory {
 
-  val error: Error
+  val mockValidator: GetObligationsValidator = mock[GetObligationsValidator]
 
-  def validate(value: String): List[Error] =
-    RegexValidation.validate(error, value, regexFormat)
-}
+  object MockGetObligationsValidator {
 
-object RegexValidation {
-
-  def validate(error: Error, value: String, regexFormat: String): List[Error] = {
-    if (value.matches(regexFormat)) noValidationErrors else List(error)
+    def validate(data: GetObligationsRawData): CallHandler1[GetObligationsRawData, List[Error]] = {
+      (mockValidator
+        .validate(_: GetObligationsRawData))
+        .expects(data)
+    }
   }
 }

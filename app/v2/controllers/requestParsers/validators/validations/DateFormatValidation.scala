@@ -16,20 +16,18 @@
 
 package v2.controllers.requestParsers.validators.validations
 
+import java.time.LocalDate
+
 import v2.models.errors.Error
 
-trait RegexValidation {
-  val regexFormat: String
+import scala.util.Try
 
-  val error: Error
+object DateFormatValidation extends Validation {
 
-  def validate(value: String): List[Error] =
-    RegexValidation.validate(error, value, regexFormat)
-}
+  private val dateRegex = "([0-9]{4}\\-[0-9]{2}\\-[0-9]{2})"
 
-object RegexValidation {
-
-  def validate(error: Error, value: String, regexFormat: String): List[Error] = {
-    if (value.matches(regexFormat)) noValidationErrors else List(error)
+  def validate(date: String, dateError: Error): List[Error] = {
+    if (date.matches(dateRegex) && Try(LocalDate.parse(date)).isSuccess) noValidationErrors else List(dateError)
   }
+
 }

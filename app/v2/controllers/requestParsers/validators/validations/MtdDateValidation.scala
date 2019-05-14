@@ -16,20 +16,14 @@
 
 package v2.controllers.requestParsers.validators.validations
 
+import java.time.LocalDate
+
+import v2.config.FixedConfig
 import v2.models.errors.Error
 
-trait RegexValidation {
-  val regexFormat: String
+object MtdDateValidation extends FixedConfig {
 
-  val error: Error
-
-  def validate(value: String): List[Error] =
-    RegexValidation.validate(error, value, regexFormat)
-}
-
-object RegexValidation {
-
-  def validate(error: Error, value: String, regexFormat: String): List[Error] = {
-    if (value.matches(regexFormat)) noValidationErrors else List(error)
+  def validate(date: LocalDate, error: Error): List[Error] = {
+    if (date.isBefore(minDate)) List(error) else Nil
   }
 }

@@ -16,9 +16,10 @@
 
 package v2.config
 
-import javax.inject.{Inject, Singleton}
-import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
+import java.time.LocalDate
 
+import javax.inject.{ Inject, Singleton }
+import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
 
 trait AppConfig {
   def desBaseUrl: String
@@ -33,15 +34,17 @@ trait AppConfig {
 @Singleton
 class AppConfigImpl @Inject()(config: ServicesConfig) extends AppConfig {
 
-
   val mtdIdBaseUrl: String = config.baseUrl("mtd-id-lookup")
-  val desBaseUrl: String = config.baseUrl("des")
-  val desEnv: String = config.getString("microservice.services.des.env")
-  val desToken: String = config.getString("microservice.services.des.token")
+  val desBaseUrl: String   = config.baseUrl("des")
+  val desEnv: String       = config.getString("microservice.services.des.env")
+  val desToken: String     = config.getString("microservice.services.des.token")
 
 }
 
 trait FixedConfig {
   // Minimum tax year for MTD
   val minimumTaxYear = 2018
+
+  // Minimum date for MTD
+  val minDate: LocalDate = LocalDate.parse("2018-04-06")
 }
