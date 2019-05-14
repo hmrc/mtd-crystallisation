@@ -14,11 +14,22 @@
  * limitations under the License.
  */
 
-package v2.models.des
-import play.api.libs.json.{Json, Reads}
+package v2.models.domain
 
-case class CrystallisationObligationsResponse(obligations: Seq[Obligation])
+import support.UnitSpec
+import v2.models.fixtures.Fixtures.CrystallisationObligationFixture._
 
-object CrystallisationObligationsResponse {
-  implicit val reads: Reads[CrystallisationObligationsResponse] = Json.reads[CrystallisationObligationsResponse]
+class ObligationSpec extends UnitSpec {
+
+  "Obligation writes" should {
+    "parse a fulfilled obligation from DES json.response" in {
+      val model = Obligation.writes.writes(fulfilledObligationMtd)
+      model shouldBe fulfilledObligationJsonMtd
+    }
+
+    "parse an open obligation from DES json.response" in {
+      val model = Obligation.writes.writes(openObligationMtd)
+      model shouldBe openObligationJsonMtd
+    }
   }
+}

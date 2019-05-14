@@ -21,7 +21,7 @@ import support.UnitSpec
 
 import scala.util.{Failure, Success, Try}
 
-class ObligationStatusSpec extends UnitSpec {
+class ObligationsStatusSpec extends UnitSpec {
 
   "Reading an obligation status from Json" when {
     "the Json represents a valid fulfilled status" should {
@@ -58,9 +58,7 @@ class ObligationStatusSpec extends UnitSpec {
         json shouldBe JsString("Open")
       }
     }
-  }
 
-  "Writing Json to represent the obligation status" when {
     "the obligation is fulfilled" should {
       "generate the correct Json" in {
         val json = Json.toJson(FulfilledObligation)
@@ -68,5 +66,4 @@ class ObligationStatusSpec extends UnitSpec {
       }
     }
   }
-
 }
