@@ -34,7 +34,7 @@ object MissingToDateError extends Error("MISSING_TO_DATE", "The to date paramete
 
 object RangeEndDateBeforeStartDateError extends Error("RANGE_TO_DATE_BEFORE_FROM_DATE", "The To date cannot be before the From date")
 
-object RangeDateToLongError extends Error("RANGE_DATE_TOO_LONG", "The specified date range is too big")
+object RangeDateTooLongError extends Error("RANGE_DATE_TOO_LONG", "The specified date range is too big")
 
 object RuleFromDateNotSupported extends Error("RULE_FROM_DATE_NOT_SUPPORTED", "The specified from date is not supported as too early")
 

@@ -20,7 +20,7 @@ import java.time.LocalDate
 
 import support.UnitSpec
 import v2.config.FixedConfig
-import v2.models.errors.{ RangeDateToLongError, RangeEndDateBeforeStartDateError }
+import v2.models.errors.{ RangeDateTooLongError, RangeEndDateBeforeStartDateError }
 
 class DateRangeValidationSpec extends UnitSpec with FixedConfig {
 
@@ -56,7 +56,7 @@ class DateRangeValidationSpec extends UnitSpec with FixedConfig {
         val fromDate = LocalDate.parse("2020-01-01")
         val toDate   = LocalDate.parse("2021-01-02")
 
-        DateRangeValidation.validate(fromDate, toDate) shouldBe Seq(RangeDateToLongError)
+        DateRangeValidation.validate(fromDate, toDate) shouldBe Seq(RangeDateTooLongError)
       }
     }
 

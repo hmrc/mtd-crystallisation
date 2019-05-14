@@ -19,7 +19,7 @@ package v2.controllers.requestParsers.validators.validations
 import java.time.LocalDate
 
 import v2.config.FixedConfig
-import v2.models.errors.{ Error, RangeDateToLongError, RangeEndDateBeforeStartDateError }
+import v2.models.errors.{ Error, RangeDateTooLongError, RangeEndDateBeforeStartDateError }
 
 object DateRangeValidation extends FixedConfig {
 
@@ -29,7 +29,7 @@ object DateRangeValidation extends FixedConfig {
     if (to.isBefore(from)) {
       List(RangeEndDateBeforeStartDateError)
     } else if (to.isAfter(from.plusDays(maxDays))) {
-      List(RangeDateToLongError)
+      List(RangeDateTooLongError)
     } else {
       NoValidationErrors
     }

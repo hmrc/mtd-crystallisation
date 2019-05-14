@@ -73,7 +73,7 @@ class GetObligationsValidatorSpec extends UnitSpec {
     "return RANGE_DATE_TOO_LONG" when {
       "to date range is more than 366 days" in {
         validator.validate(GetObligationsRawData(validNino, "2019-01-01", "2020-01-03")) shouldBe
-          List(RangeDateToLongError)
+          List(RangeDateTooLongError)
       }
     }
 
