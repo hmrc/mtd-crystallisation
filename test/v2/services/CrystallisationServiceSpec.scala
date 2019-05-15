@@ -19,8 +19,7 @@ package v2.services
 import uk.gov.hmrc.domain.Nino
 import v2.mocks.connectors.MockDesConnector
 import v2.models.des.DesCalculationIdResponse
-import v2.models.domain.CrystallisationRequest
-import v2.models.errors._
+import v2.models.domain.{ CrystallisationRequest, EmptyJsonBody }
 import v2.models.outcomes.DesResponse
 import v2.models.requestData.{ CrystallisationRequestData, DesTaxYear, IntentToCrystalliseRequestData }
 
@@ -38,78 +37,34 @@ class CrystallisationServiceSpec extends ServiceSpec {
     lazy val service = new CrystallisationService(connector)
   }
 
-  "performIntentToCrystallise" when {
-    lazy val request = IntentToCrystalliseRequestData(nino, taxYear)
+  "performIntentToCrystallise" must {
+    val request = IntentToCrystalliseRequestData(nino, taxYear)
 
-    "valid data is passed" should {
-      "return a successful response with the correct correlationId" in new Test {
-        MockedDesConnector
-          .performIntentToCrystallise(request)
-          .returns(Future.successful(Right(DesResponse(correlationId, DesCalculationIdResponse(calcId)))))
+    "post an empty body and retun the result" in new Test {
 
-        await(service.performIntentToCrystallise(request)) shouldBe Right(DesResponse(correlationId, calcId))
-      }
-    }
+      val outcome = Right(DesResponse(correlationId, DesCalculationIdResponse(calcId)))
 
-    Map(
-      "INVALID_NINO"            -> NinoFormatError,
-      "INVALID_TAX_YEAR"        -> TaxYearFormatError,
-      "INVALID_TAX_CRYSTALLISE" -> DownstreamError,
-      "NO_SUBMISSION_EXIST"     -> NoSubmissionsExistError,
-      "CONFLICT"                -> FinalDeclarationReceivedError,
-      "SERVER_ERROR"            -> DownstreamError,
-      "SERVICE_UNAVAILABLE"     -> DownstreamError
-    ).foreach {
-      case (k, v) =>
-        s"a $k error is received from the connector" should {
-          s"return a $v MTD error" in new Test {
-            MockedDesConnector
-              .performIntentToCrystallise(request)
-              .returns(Future.successful(Left(DesResponse(correlationId, DesErrors.single(DesErrorCode(k))))))
+      MockedDesConnector
+        .post(EmptyJsonBody,
+              DesUri[DesCalculationIdResponse](s"income-tax/nino/${nino.nino}/taxYear/${taxYear.value}/tax-calculation?crystallise=true"))
+        .returns(Future.successful(outcome))
 
-            await(service.performIntentToCrystallise(request)) shouldBe Left(ErrorWrapper(Some(correlationId), v, None))
-          }
-        }
+      await(service.performIntentToCrystallise(request)) shouldBe outcome
     }
   }
 
-  "createCrystallisation" when {
-    lazy val request = CrystallisationRequestData(nino, taxYear, CrystallisationRequest(calcId))
+  "createCrystallisation" must {
+    val request = CrystallisationRequestData(nino, taxYear, CrystallisationRequest(calcId))
 
-    "valid data is passed" should {
-      "return a successful response with the correct correlationId" in new Test {
-        val expected = Right(DesResponse(correlationId, ()))
+    "post an empty body and retun the result" in new Test {
 
-        MockedDesConnector.createCrystallisation(request).returns(Future.successful(expected))
+      val outcome = Right(DesResponse(correlationId, ()))
 
-        await(service.createCrystallisation(request)) shouldBe expected
-      }
-    }
+      MockedDesConnector
+        .post(EmptyJsonBody, DesUri[Unit](s"income-tax/calculation/nino/${nino.nino}/${taxYear.value}/$calcId/crystallise"))
+        .returns(Future.successful(outcome))
 
-    Map(
-      "INVALID_IDTYPE"             -> DownstreamError,
-      "INVALID_IDVALUE"            -> NinoFormatError,
-      "INVALID_TAXYEAR"            -> TaxYearFormatError,
-      "INVALID_CALCID"             -> InvalidCalcIdError,
-      "NOT_FOUND"                  -> NotFoundError,
-      "INCOME_SOURCES_CHANGED"     -> IncomeSourcesChangedError,
-      "RECENT_SUBMISSIONS_EXIST"   -> RecentSubmissionsExistError,
-      "RESIDENCY_CHANGED"          -> ResidencyChangedError,
-      "FINAL_DECLARATION_RECEIVED" -> FinalDeclarationReceivedError,
-      "SERVER_ERROR"               -> DownstreamError,
-      "SERVICE_UNAVAILABLE"        -> DownstreamError
-    ).foreach {
-      case (k, v) =>
-        s"a $k error is received from the connector" should {
-          s"return a $v MTD error" in new Test {
-            val desResponse = DesResponse(correlationId, DesErrors.single(DesErrorCode(k)))
-            val expected    = Left(ErrorWrapper(Some(correlationId), v, None))
-
-            MockedDesConnector.createCrystallisation(request).returns(Future.successful(Left(desResponse)))
-
-            await(service.createCrystallisation(request)) shouldBe expected
-          }
-        }
+      await(service.createCrystallisation(request)) shouldBe outcome
     }
   }
 }

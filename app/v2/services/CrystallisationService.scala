@@ -21,7 +21,6 @@ import v2.connectors.httpparsers.StandardDesHttpParser._
 import v2.connectors.{ DesConnector, DesConnectorOutcome }
 import v2.models.des.DesCalculationIdResponse
 import v2.models.domain.EmptyJsonBody
-import v2.models.errors._
 import v2.models.requestData.{ CrystallisationRequestData, IntentToCrystalliseRequestData }
 
 import scala.concurrent.{ ExecutionContext, Future }

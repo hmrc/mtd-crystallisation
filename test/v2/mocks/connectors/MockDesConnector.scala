@@ -18,9 +18,10 @@ package v2.mocks.connectors
 
 import org.scalamock.handlers.CallHandler
 import org.scalamock.scalatest.MockFactory
-import uk.gov.hmrc.http.HeaderCarrier
-import v2.connectors.{ CreateCrystallisationConnectorOutcome, DesConnector, IntentToCrystalliseConnectorOutcome }
-import v2.models.requestData.{ CrystallisationRequestData, IntentToCrystalliseRequestData }
+import play.api.libs.json.Writes
+import uk.gov.hmrc.http.{ HeaderCarrier, HttpReads }
+import v2.connectors.{ DesConnector, DesConnectorOutcome }
+import v2.services.DesUri
 
 import scala.concurrent.{ ExecutionContext, Future }
 
@@ -29,17 +30,16 @@ trait MockDesConnector extends MockFactory {
 
   object MockedDesConnector {
 
-    def performIntentToCrystallise(
-        intentToCrystalliseRequestData: IntentToCrystalliseRequestData): CallHandler[Future[IntentToCrystalliseConnectorOutcome]] = {
+    def post[Body, Resp](body: Body, uri: DesUri[Resp]): CallHandler[Future[DesConnectorOutcome[Resp]]] = {
       (connector
-        .performIntentToCrystallise(_: IntentToCrystalliseRequestData)(_: HeaderCarrier, _: ExecutionContext))
-        .expects(intentToCrystalliseRequestData, *, *)
+        .post(_: Body, _: DesUri[Resp])(_: Writes[Body], _: ExecutionContext, _: HeaderCarrier, _: HttpReads[DesConnectorOutcome[Resp]]))
+        .expects(body, uri, *, *, *, *)
     }
 
-    def createCrystallisation(crystallisationRequestData: CrystallisationRequestData): CallHandler[Future[CreateCrystallisationConnectorOutcome]] = {
+    def get[Resp](uri: DesUri[Resp]): CallHandler[Future[DesConnectorOutcome[Resp]]] = {
       (connector
-        .createCrystallisation(_: CrystallisationRequestData)(_: HeaderCarrier, _: ExecutionContext))
-        .expects(crystallisationRequestData, *, *)
+        .get(_: DesUri[Resp])(_: ExecutionContext, _: HeaderCarrier, _: HttpReads[DesConnectorOutcome[Resp]]))
+        .expects(uri, *, *, *)
     }
   }
 

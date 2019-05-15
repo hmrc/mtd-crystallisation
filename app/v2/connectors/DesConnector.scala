@@ -42,32 +42,6 @@ class DesConnector @Inject()(http: HttpClient, appConfig: AppConfig) {
     hc.copy(authorization = Some(Authorization(s"Bearer ${appConfig.desToken}")))
       .withExtraHeaders("Environment" -> appConfig.desEnv)
 
-  def performIntentToCrystallise(requestData: IntentToCrystalliseRequestData)(implicit hc: HeaderCarrier,
-                                                                              ec: ExecutionContext): Future[IntentToCrystalliseConnectorOutcome] = {
-    implicit val successCode: SuccessCode = SuccessCode(OK)
-
-    val nino    = requestData.nino.nino
-    val taxYear = requestData.desTaxYear
-
-    val url = s"${appConfig.desBaseUrl}/income-tax/nino/$nino/taxYear/$taxYear/tax-calculation?crystallise=true"
-
-    http.POST(url, EmptyJsonBody)(EmptyJsonBody.writes, StandardDesHttpParser.reads[DesCalculationIdResponse], desHeaderCarrier, implicitly)
-  }
-
-  def createCrystallisation(crystallisationRequestData: CrystallisationRequestData)(
-      implicit hc: HeaderCarrier,
-      ec: ExecutionContext): Future[CreateCrystallisationConnectorOutcome] = {
-    implicit val successCode: SuccessCode = SuccessCode(NO_CONTENT)
-
-    val nino    = crystallisationRequestData.nino.nino
-    val taxYear = crystallisationRequestData.desTaxYear
-    val calcId  = crystallisationRequestData.crystallisation.calculationId
-
-    val url = s"${appConfig.desBaseUrl}/income-tax/calculation/nino/$nino/$taxYear/$calcId/crystallise"
-
-    http.POST(url, EmptyJsonBody)(EmptyJsonBody.writes, StandardDesHttpParser.readsEmpty, desHeaderCarrier, implicitly)
-  }
-
   def post[Body: Writes, Resp](body: Body, cmd: DesUri[Resp])(implicit ec: ExecutionContext,
                                                               hc: HeaderCarrier,
                                                               httpReads: HttpReads[DesConnectorOutcome[Resp]]): Future[DesConnectorOutcome[Resp]] = {
@@ -83,7 +57,7 @@ class DesConnector @Inject()(http: HttpClient, appConfig: AppConfig) {
                                    hc: HeaderCarrier,
                                    httpReads: HttpReads[DesConnectorOutcome[Resp]]): Future[DesConnectorOutcome[Resp]] = {
 
-    def doGet(implicit hc: HeaderCarrier) =
+    def doGet(implicit hc: HeaderCarrier): Future[DesConnectorOutcome[Resp]] =
       http.GET(s"${appConfig.desBaseUrl}/${cmd.uri}")
 
     doGet(desHeaderCarrier(hc))
