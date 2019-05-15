@@ -28,7 +28,7 @@ package object connectors {
 
   type CreateCrystallisationConnectorOutcome = DesConnectorOutcome[Unit]
 
-  type RetrieveCrystallisationConnectorOutcome = DesConnectorOutcome[DesObligationsResponse]
+  type RetrieveObligationsConnectorOutcome = DesConnectorOutcome[DesObligationsResponse]
 
   type IntentToCrystalliseConnectorOutcome = DesConnectorOutcome[DesCalculationIdResponse]
 }

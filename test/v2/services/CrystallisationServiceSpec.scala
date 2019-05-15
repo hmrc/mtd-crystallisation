@@ -23,7 +23,7 @@ import v2.mocks.connectors.MockDesConnector
 import v2.models.des.{DesCalculationIdResponse, DesObligationsResponse, FulfilledObligation}
 import v2.models.domain.{CrystallisationRequest, Obligation}
 import v2.models.errors._
-import v2.models.fixtures.Fixtures.CrystallisationObligationFixture.fulfilledCrystallisationObligationJsonDes
+import v2.models.fixtures.Fixtures.CrystallisationObligationFixture._
 import v2.models.outcomes.DesResponse
 import v2.models.requestData.{ RetrieveObligationsRequestData, CrystallisationRequestData, DesTaxYear, IntentToCrystalliseRequestData}
 
@@ -129,7 +129,7 @@ class CrystallisationServiceSpec extends ServiceSpec {
     lazy val request = RetrieveObligationsRequestData(nino, from, to)
 
     "valid data is passed" should {
-      "return a successful response with the correct correlationId" in new Test {
+      "return a sequence of obligations with the correct correlationId" in new Test {
         val expected = Right(DesResponse(correlationId,
           List(Obligation(from, to, due, FulfilledObligation, Some(processed)))))
 
@@ -137,7 +137,21 @@ class CrystallisationServiceSpec extends ServiceSpec {
 
         MockedDesConnector.retrieveObligations(request).returns(Future.successful(desResponse))
 
-        val result: RetrieveCrystallisationOutcome = await(service.retrieveObligations(request))
+        val result: RetrieveObligationsOutcome = await(service.retrieveObligations(request))
+
+        result shouldBe expected
+      }
+    }
+
+    "data passed doesn't have any crystallisation obligations" should {
+      "return a empty sequence with the correct correlationId" in new Test {
+        val expected = Right(DesResponse(correlationId, List()))
+
+        val desResponse = Right(DesResponse(correlationId, DesObligationsResponse.reads.reads(notCrystallisationObligationsJsonDes).get))
+
+        MockedDesConnector.retrieveObligations(request).returns(Future.successful(desResponse))
+
+        val result: RetrieveObligationsOutcome = await(service.retrieveObligations(request))
 
         result shouldBe expected
       }
@@ -164,7 +178,7 @@ class CrystallisationServiceSpec extends ServiceSpec {
 
             MockedDesConnector.retrieveObligations(request).returns(Future.successful(Left(desResponse)))
 
-            val result: RetrieveCrystallisationOutcome = await(service.retrieveObligations(request))
+            val result: RetrieveObligationsOutcome = await(service.retrieveObligations(request))
 
             result shouldBe expected
           }

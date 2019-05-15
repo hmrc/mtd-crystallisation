@@ -44,7 +44,7 @@ object Fixtures {
             referenceType),
         Seq(
           DesObligationDetail(
-          status = statusFulfilled,
+          status = "F",
           inboundCorrespondenceFromDate = start,
           inboundCorrespondenceToDate = end,
           inboundCorrespondenceDueDate = due,
@@ -62,7 +62,7 @@ object Fixtures {
             referenceType),
         Seq(
           DesObligationDetail(
-          status = statusOpen,
+          status = "O",
           inboundCorrespondenceFromDate = start,
           inboundCorrespondenceToDate = end,
           inboundCorrespondenceDueDate = due,
@@ -78,7 +78,7 @@ object Fixtures {
         referenceType),
       Seq(
         DesObligationDetail(
-          status = statusFulfilled,
+          status = "F",
           inboundCorrespondenceFromDate = start,
           inboundCorrespondenceToDate = end,
           inboundCorrespondenceDueDate = due,
@@ -94,7 +94,7 @@ object Fixtures {
         referenceType),
       Seq(
         DesObligationDetail(
-          status = statusOpen,
+          status = "O",
           inboundCorrespondenceFromDate = start,
           inboundCorrespondenceToDate = end,
           inboundCorrespondenceDueDate = due,
@@ -103,7 +103,7 @@ object Fixtures {
     )
 
     val fulfilledObligationDes = DesObligationDetail(
-          status = statusFulfilled,
+          status = "F",
           inboundCorrespondenceFromDate = start,
           inboundCorrespondenceToDate = end,
           inboundCorrespondenceDueDate = due,
@@ -111,7 +111,7 @@ object Fixtures {
     )
 
     val openObligationDes = DesObligationDetail(
-          status = statusOpen,
+          status = "O",
           inboundCorrespondenceFromDate = start,
           inboundCorrespondenceToDate = end,
           inboundCorrespondenceDueDate = due,
@@ -188,6 +188,30 @@ object Fixtures {
         |    {
         |			"identification": {
         |				"incomeSourceType": "ITSA",
+        |				"referenceNumber": "AB123456A",
+        |				"referenceType": "NINO"
+        |			},
+        |    "obligationDetails": [
+        |      {
+        |        "status": "F",
+        |        "inboundCorrespondenceFromDate": "2018-02-01",
+        |        "inboundCorrespondenceToDate": "2018-02-28",
+        |        "inboundCorrespondenceDateReceived": "2018-04-01",
+        |        "inboundCorrespondenceDueDate": "2018-05-28"
+        |      }
+        |    ]
+        |    }
+        |  ]
+        |}
+      """.stripMargin)
+
+    val notCrystallisationObligationsJsonDes = Json.parse(
+      """
+        |{
+        |  "obligations": [
+        |    {
+        |			"identification": {
+        |				"incomeSourceType": "ITSP",
         |				"referenceNumber": "AB123456A",
         |				"referenceType": "NINO"
         |			},

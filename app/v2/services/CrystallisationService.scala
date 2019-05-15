@@ -48,7 +48,7 @@ class CrystallisationService @Inject()(connector: DesConnector) extends DesServi
   }
 
   def retrieveObligations(request: RetrieveObligationsRequestData)
-                         (implicit hc: HeaderCarrier, ec: ExecutionContext): Future[RetrieveCrystallisationOutcome] = {
+                         (implicit hc: HeaderCarrier, ec: ExecutionContext): Future[RetrieveObligationsOutcome] = {
     connector.retrieveObligations(request).map {
       mapToVendor("retrieveObligations", desErrorToMtdErrorRetrieve) { desResponse =>
         Right(DesResponse(desResponse.correlationId, desResponse.responseData.toMtd))

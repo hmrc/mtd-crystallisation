@@ -25,8 +25,8 @@ case class DesObligationsResponse(obligations: Seq[DesObligation]) {
   def toMtd: Seq[Obligation] =
       for {
         obligation       <- obligations
-        if obligation.identification.incomeSourceType == "ITSA"
         obligationDetail <- obligation.obligationDetails
+        if obligation.identification.incomeSourceType == "ITSA"
       } yield
   Obligation(
       start = obligationDetail.inboundCorrespondenceFromDate,

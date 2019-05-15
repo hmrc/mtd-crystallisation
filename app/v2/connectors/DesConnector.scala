@@ -64,7 +64,7 @@ class DesConnector @Inject()(http: HttpClient, appConfig: AppConfig) {
 
   def retrieveObligations(request: RetrieveObligationsRequestData)(
     implicit hc: HeaderCarrier,
-    ec: ExecutionContext): Future[RetrieveCrystallisationConnectorOutcome] = {
+    ec: ExecutionContext): Future[RetrieveObligationsConnectorOutcome] = {
 
     val nino = request.nino.nino
     val from = request.from

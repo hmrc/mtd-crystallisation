@@ -187,7 +187,7 @@ class DesConnectorSpec extends ConnectorSpec {
       }
     }
 
-    def retrieveObligationsResult(connector: DesConnector): RetrieveCrystallisationConnectorOutcome =
+    def retrieveObligationsResult(connector: DesConnector): RetrieveObligationsConnectorOutcome =
       await(
         connector.retrieveObligations(RetrieveObligationsRequestData(nino, LocalDate.parse(from), LocalDate.parse(to))))
   }

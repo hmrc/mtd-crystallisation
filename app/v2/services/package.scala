@@ -24,5 +24,5 @@ package object services {
 
   type IntentToCrystalliseOutcome = Either[ErrorWrapper, DesResponse[String]]
   type CrystallisationOutcome     = Either[ErrorWrapper, DesResponse[Unit]]
-  type RetrieveCrystallisationOutcome     = Either[ErrorWrapper, DesResponse[Seq[Obligation]]]
+  type RetrieveObligationsOutcome     = Either[ErrorWrapper, DesResponse[Seq[Obligation]]]
 }
