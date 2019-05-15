@@ -15,9 +15,9 @@
  */
 
 package v2.services
-
 import javax.inject.Inject
 import uk.gov.hmrc.http.HeaderCarrier
+import v2.connectors.httpparsers.StandardDesHttpParser._
 import v2.connectors.{ DesConnector, DesConnectorOutcome }
 import v2.models.des.DesCalculationIdResponse
 import v2.models.domain.EmptyJsonBody
@@ -36,30 +36,19 @@ class CrystallisationService @Inject()(connector: DesConnector) extends DesServi
   def performIntentToCrystallise(request: IntentToCrystalliseRequestData)(
       implicit hc: HeaderCarrier,
       ec: ExecutionContext): Future[DesConnectorOutcome[DesCalculationIdResponse]] = {
+
     connector.post(
       body = EmptyJsonBody,
-      DesUri(s"income-tax/nino/${request.nino}/taxYear/${request.desTaxYear}/tax-calculation?crystallise=true")
+      DesUri[DesCalculationIdResponse](s"income-tax/nino/${request.nino}/taxYear/${request.desTaxYear}/tax-calculation?crystallise=true")
     )
   }
 
-  def createCrystallisation(request: CrystallisationRequestData)(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[CrystallisationOutcome] = {
-    connector.createCrystallisation(request).map {
-      mapToVendorDirect("createCrystallisation", desErrorToMtdErrorCreate)
-    }
-  }
+  def createCrystallisation(request: CrystallisationRequestData)(implicit hc: HeaderCarrier,
+                                                                 ec: ExecutionContext): Future[DesConnectorOutcome[Unit]] = {
 
-  private def desErrorToMtdErrorCreate: Map[String, MtdError] =
-    Map(
-      "INVALID_IDTYPE"             -> DownstreamError,
-      "INVALID_IDVALUE"            -> NinoFormatError,
-      "INVALID_TAXYEAR"            -> TaxYearFormatError,
-      "INVALID_CALCID"             -> InvalidCalcIdError,
-      "NOT_FOUND"                  -> NotFoundError,
-      "INCOME_SOURCES_CHANGED"     -> IncomeSourcesChangedError,
-      "RECENT_SUBMISSIONS_EXIST"   -> RecentSubmissionsExistError,
-      "RESIDENCY_CHANGED"          -> ResidencyChangedError,
-      "FINAL_DECLARATION_RECEIVED" -> FinalDeclarationReceivedError,
-      "SERVER_ERROR"               -> DownstreamError,
-      "SERVICE_UNAVAILABLE"        -> DownstreamError
+    connector.post(
+      body = EmptyJsonBody,
+      DesUri[Unit](s"income-tax/calculation/nino/${request.nino}/${request.desTaxYear}/${request.crystallisation.calculationId}/crystallise")
     )
+  }
 }

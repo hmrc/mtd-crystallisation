@@ -244,7 +244,7 @@ class CrystallisationControllerSpec
 
         MockCrystallisationService
           .create(crystallisationRequestData)
-          .returns(Future.successful(Left(ErrorWrapper(Some(correlationId), error, None))))
+          .returns(???)
 
         val result: Future[Result] = controller.create(nino, taxYear)(fakePostRequest(Json.parse(request)))
 

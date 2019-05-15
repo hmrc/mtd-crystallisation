@@ -57,8 +57,7 @@ class IntentToCrystalliseController @Inject()(val authService: EnrolmentsAuthSer
             .leftMap(mapDesErrors("intentToCrystallise", desErrorMapIntent))
         } yield {
           val vendorResponse = desResponse.map(_.id)
-          logger.info(
-            s"[IntentToCrystalliseController][intentToCrystallise] - Success response received with CorrelationId: ${vendorResponse.correlationId}")
+          logger.info(s"[$controllerName][intentToCrystallise] - Success response received with CorrelationId: ${vendorResponse.correlationId}")
           val url = s"/self-assessment/ni/$nino/calculations/${vendorResponse.responseData}"
           auditSubmission(
             createAuditDetails(nino, taxYear, SEE_OTHER, vendorResponse.correlationId, request.userDetails, Some(vendorResponse.responseData)))

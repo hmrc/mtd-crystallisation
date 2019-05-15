@@ -82,9 +82,7 @@ class CrystallisationServiceSpec extends ServiceSpec {
 
         MockedDesConnector.createCrystallisation(request).returns(Future.successful(expected))
 
-        val result: CrystallisationOutcome = await(service.createCrystallisation(request))
-
-        result shouldBe expected
+        await(service.createCrystallisation(request)) shouldBe expected
       }
     }
 
@@ -109,9 +107,7 @@ class CrystallisationServiceSpec extends ServiceSpec {
 
             MockedDesConnector.createCrystallisation(request).returns(Future.successful(Left(desResponse)))
 
-            val result: CrystallisationOutcome = await(service.createCrystallisation(request))
-
-            result shouldBe expected
+            await(service.createCrystallisation(request)) shouldBe expected
           }
         }
     }

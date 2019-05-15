@@ -22,7 +22,7 @@ import v2.connectors.DesConnectorOutcome
 import v2.models.errors.{ BadRequestError, DesErrors, DownstreamError, MtdError, ErrorWrapper, OutboundError }
 import v2.models.outcomes.DesResponse
 
-case class DesUri[Resp](uri: String)(implicit val responseReads: Reads[Resp])
+case class DesUri[Resp](uri: String)
 
 trait DesServiceSupport {
 

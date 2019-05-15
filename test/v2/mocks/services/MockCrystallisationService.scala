@@ -22,7 +22,7 @@ import uk.gov.hmrc.http.HeaderCarrier
 import v2.connectors.DesConnectorOutcome
 import v2.models.des.DesCalculationIdResponse
 import v2.models.requestData.{ CrystallisationRequestData, IntentToCrystalliseRequestData }
-import v2.services.{ CrystallisationOutcome, CrystallisationService }
+import v2.services.CrystallisationService
 
 import scala.concurrent.{ ExecutionContext, Future }
 
@@ -32,7 +32,7 @@ trait MockCrystallisationService extends MockFactory {
 
   object MockCrystallisationService {
 
-    def create(crystallisationRequestData: CrystallisationRequestData): CallHandler[Future[CrystallisationOutcome]] = {
+    def create(crystallisationRequestData: CrystallisationRequestData): CallHandler[Future[DesConnectorOutcome[Unit]]] = {
       (mockCrystallisationService
         .createCrystallisation(_: CrystallisationRequestData)(_: HeaderCarrier, _: ExecutionContext))
         .expects(crystallisationRequestData, *, *)

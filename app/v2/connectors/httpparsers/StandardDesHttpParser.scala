@@ -26,36 +26,38 @@ import v2.models.outcomes.DesResponse
 
 object StandardDesHttpParser extends HttpParser {
 
+  case class SuccessCode(status: Int) extends AnyVal
+
   val logger = Logger(getClass)
 
   // Return Right[DesResponse[Unit]] as success response has no body - no need to assign it a value
-  implicit val readsEmpty: HttpReads[DesConnectorOutcome[Unit]] =
+  implicit def readsEmpty(implicit successCode: SuccessCode = SuccessCode(NO_CONTENT)): HttpReads[DesConnectorOutcome[Unit]] =
     new HttpReads[DesConnectorOutcome[Unit]] {
 
       override def read(method: String, url: String, response: HttpResponse): DesConnectorOutcome[Unit] =
-        doRead(NO_CONTENT, url, response) { correlationId =>
+        doRead(url, response) { correlationId =>
           Right(DesResponse(correlationId, ()))
         }
     }
 
-  implicit def reads[A: Reads]: HttpReads[DesConnectorOutcome[A]] =
+  implicit def reads[A: Reads](implicit successCode: SuccessCode = SuccessCode(OK)): HttpReads[DesConnectorOutcome[A]] =
     new HttpReads[DesConnectorOutcome[A]] {
 
       override def read(method: String, url: String, response: HttpResponse): DesConnectorOutcome[A] =
-        doRead(OK, url, response) { correlationId =>
+        doRead(url, response) { correlationId =>
           response.validateJson[A] match {
             case Some(ref) => Right(DesResponse(correlationId, ref))
-            case None => Left(DesResponse(correlationId, OutboundError(DownstreamError)))
+            case None      => Left(DesResponse(correlationId, OutboundError(DownstreamError)))
           }
         }
     }
 
-  private def doRead[A](successStatusCode: Int, url: String, response: HttpResponse)(
-      successOutcomeFactory: String => DesConnectorOutcome[A]): DesConnectorOutcome[A] = {
+  private def doRead[A](url: String, response: HttpResponse)(successOutcomeFactory: String => DesConnectorOutcome[A])(
+      implicit successCode: SuccessCode): DesConnectorOutcome[A] = {
 
     val correlationId = retrieveCorrelationId(response)
 
-    if (response.status != successStatusCode) {
+    if (response.status != successCode.status) {
       logger.info(
         "[StandardDesHttpParser][read] - " +
           s"Error response received from DES with status: ${response.status} and body\n" +
@@ -63,7 +65,7 @@ object StandardDesHttpParser extends HttpParser {
     }
 
     response.status match {
-      case `successStatusCode` =>
+      case successCode.status =>
         logger.info(
           "[StandardDesHttpParser][read] - " +
             s"Success response received from DES with correlationId: $correlationId when calling $url")

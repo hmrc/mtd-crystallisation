@@ -18,12 +18,14 @@ package v2.connectors
 
 import javax.inject.{ Inject, Singleton }
 import play.api.Logger
+import play.api.http.Status._
 import play.api.libs.json.Writes
-import uk.gov.hmrc.http.{ HeaderCarrier, HttpReads }
 import uk.gov.hmrc.http.logging.Authorization
+import uk.gov.hmrc.http.{ HeaderCarrier, HttpReads }
 import uk.gov.hmrc.play.bootstrap.http.HttpClient
 import v2.config.AppConfig
 import v2.connectors.httpparsers.StandardDesHttpParser
+import v2.connectors.httpparsers.StandardDesHttpParser.SuccessCode
 import v2.models.des.DesCalculationIdResponse
 import v2.models.domain.EmptyJsonBody
 import v2.models.requestData.{ CrystallisationRequestData, IntentToCrystalliseRequestData }
@@ -42,6 +44,7 @@ class DesConnector @Inject()(http: HttpClient, appConfig: AppConfig) {
 
   def performIntentToCrystallise(requestData: IntentToCrystalliseRequestData)(implicit hc: HeaderCarrier,
                                                                               ec: ExecutionContext): Future[IntentToCrystalliseConnectorOutcome] = {
+    implicit val successCode: SuccessCode = SuccessCode(OK)
 
     val nino    = requestData.nino.nino
     val taxYear = requestData.desTaxYear
@@ -54,6 +57,7 @@ class DesConnector @Inject()(http: HttpClient, appConfig: AppConfig) {
   def createCrystallisation(crystallisationRequestData: CrystallisationRequestData)(
       implicit hc: HeaderCarrier,
       ec: ExecutionContext): Future[CreateCrystallisationConnectorOutcome] = {
+    implicit val successCode: SuccessCode = SuccessCode(NO_CONTENT)
 
     val nino    = crystallisationRequestData.nino.nino
     val taxYear = crystallisationRequestData.desTaxYear
@@ -64,17 +68,20 @@ class DesConnector @Inject()(http: HttpClient, appConfig: AppConfig) {
     http.POST(url, EmptyJsonBody)(EmptyJsonBody.writes, StandardDesHttpParser.readsEmpty, desHeaderCarrier, implicitly)
   }
 
-  def post[Body: Writes, Resp](body: Body, cmd: DesUri[Resp])(implicit ec: ExecutionContext, hc: HeaderCarrier): Future[DesConnectorOutcome[Resp]] = {
-    implicit val parserReads: HttpReads[DesConnectorOutcome[Resp]] = StandardDesHttpParser.reads(cmd.responseReads)
+  def post[Body: Writes, Resp](body: Body, cmd: DesUri[Resp])(implicit ec: ExecutionContext,
+                                                              hc: HeaderCarrier,
+                                                              httpReads: HttpReads[DesConnectorOutcome[Resp]]): Future[DesConnectorOutcome[Resp]] = {
 
-    def doPost(implicit hc: HeaderCarrier) =
+    def doPost(implicit hc: HeaderCarrier): Future[DesConnectorOutcome[Resp]] = {
       http.POST(s"${appConfig.desBaseUrl}/${cmd.uri}", body)
+    }
 
     doPost(desHeaderCarrier(hc))
   }
 
-  def get[Resp](cmd: DesUri[Resp])(implicit ec: ExecutionContext, hc: HeaderCarrier): Future[DesConnectorOutcome[Resp]] = {
-    implicit val parserReads: HttpReads[DesConnectorOutcome[Resp]] = StandardDesHttpParser.reads(cmd.responseReads)
+  def get[Resp](cmd: DesUri[Resp])(implicit ec: ExecutionContext,
+                                   hc: HeaderCarrier,
+                                   httpReads: HttpReads[DesConnectorOutcome[Resp]]): Future[DesConnectorOutcome[Resp]] = {
 
     def doGet(implicit hc: HeaderCarrier) =
       http.GET(s"${appConfig.desBaseUrl}/${cmd.uri}")
