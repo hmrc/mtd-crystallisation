@@ -19,8 +19,8 @@ package v2.mocks.services
 import org.scalamock.handlers.CallHandler
 import org.scalamock.scalatest.MockFactory
 import uk.gov.hmrc.http.HeaderCarrier
-import v2.models.requestData.{CrystallisationRequestData, IntentToCrystalliseRequestData}
-import v2.services.{CrystallisationOutcome, CrystallisationService, IntentToCrystalliseOutcome}
+import v2.models.requestData.{CrystallisationRequestData, IntentToCrystalliseRequestData, RetrieveObligationsRequestData}
+import v2.services.{CrystallisationOutcome, CrystallisationService, IntentToCrystalliseOutcome, RetrieveObligationsOutcome}
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -37,6 +37,11 @@ trait MockCrystallisationService extends MockFactory {
     def intent(intentToCrystalliseRequestData: IntentToCrystalliseRequestData): CallHandler[Future[IntentToCrystalliseOutcome]] = {
       (mockCrystallisationService.performIntentToCrystallise(_: IntentToCrystalliseRequestData)(_: HeaderCarrier, _: ExecutionContext))
         .expects(intentToCrystalliseRequestData, *, *)
+    }
+
+    def retrieve(data: RetrieveObligationsRequestData): CallHandler[Future[RetrieveObligationsOutcome]] = {
+      (mockCrystallisationService.retrieveObligations(_: RetrieveObligationsRequestData)(_: HeaderCarrier, _: ExecutionContext))
+        .expects(data, *, *)
     }
   }
 

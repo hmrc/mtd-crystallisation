@@ -270,5 +270,20 @@ object Fixtures {
         |}
       """.stripMargin)
 
+    val fulfilledObligationsJsonArray =Json.parse(
+      """
+        |{
+        | "Obligations" : [
+        | {
+        |  "status": "Fulfilled",
+        |  "start": "2018-02-01",
+        |  "end": "2018-02-28",
+        |  "processed": "2018-04-01",
+        |  "due": "2018-05-28"
+        | }
+        | ]
+        |}
+      """.stripMargin)
+
   }
 }
