@@ -31,10 +31,17 @@ object Fixtures {
     val statusFulfilled: ObligationStatus = FulfilledObligation
     val statusOpen: ObligationStatus = OpenObligation
     val processed = LocalDate.parse("2018-04-01")
+    val incomeSourceType = "ITSA"
+    val referenceNumber = "AB123456A"
+    val referenceType = "NINO"
 
     val fulfilledCrystallisationObligationsResponseDes = DesObligationsResponse(
       Seq(
         DesObligation(
+          Identification(
+            incomeSourceType,
+            referenceNumber,
+            referenceType),
         Seq(
           DesObligationDetail(
           status = statusFulfilled,
@@ -49,6 +56,10 @@ object Fixtures {
     val openCrystallisationObligationsResponseDes = DesObligationsResponse(
       Seq(
         DesObligation(
+          Identification(
+            incomeSourceType,
+            referenceNumber,
+            referenceType),
         Seq(
           DesObligationDetail(
           status = statusOpen,
@@ -61,6 +72,10 @@ object Fixtures {
     )
 
     val fulfilledObligationsDes = DesObligation(
+      Identification(
+        incomeSourceType,
+        referenceNumber,
+        referenceType),
       Seq(
         DesObligationDetail(
           status = statusFulfilled,
@@ -73,6 +88,10 @@ object Fixtures {
     )
 
     val openObligationsDes = DesObligation(
+      Identification(
+        incomeSourceType,
+        referenceNumber,
+        referenceType),
       Seq(
         DesObligationDetail(
           status = statusOpen,
@@ -143,6 +162,11 @@ object Fixtures {
         |{
         |  "obligations": [
         |    {
+        |    	"identification": {
+        |				"incomeSourceType": "ITSA",
+        |				"referenceNumber": "AB123456A",
+        |				"referenceType": "NINO"
+        |			},
         |    "obligationDetails": [
         |      {
         |        "status": "O",
@@ -162,6 +186,11 @@ object Fixtures {
         |{
         |  "obligations": [
         |    {
+        |			"identification": {
+        |				"incomeSourceType": "ITSA",
+        |				"referenceNumber": "AB123456A",
+        |				"referenceType": "NINO"
+        |			},
         |    "obligationDetails": [
         |      {
         |        "status": "F",
@@ -179,6 +208,11 @@ object Fixtures {
     val fulfilledObligationsJsonDes = Json.parse(
       """
         |{
+        |	 "identification": {
+        |				"incomeSourceType": "ITSA",
+        |				"referenceNumber": "AB123456A",
+        |				"referenceType": "NINO"
+        |			},
         |  "obligationDetails": [
         |    {
         |      "status": "F",

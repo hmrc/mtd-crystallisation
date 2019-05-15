@@ -25,7 +25,7 @@ import v2.models.domain.{CrystallisationRequest, EmptyJsonBody}
 import v2.models.errors._
 import v2.models.fixtures.Fixtures.CrystallisationObligationFixture._
 import v2.models.outcomes.DesResponse
-import v2.models.requestData.{CrystallisationObligationsRequestData, CrystallisationRequestData, DesTaxYear, IntentToCrystalliseRequestData}
+import v2.models.requestData.{ RetrieveObligationsRequestData, CrystallisationRequestData, DesTaxYear, IntentToCrystalliseRequestData}
 
 import scala.concurrent.Future
 
@@ -189,7 +189,7 @@ class DesConnectorSpec extends ConnectorSpec {
 
     def retrieveObligationsResult(connector: DesConnector): RetrieveCrystallisationConnectorOutcome =
       await(
-        connector.retrieveObligations(CrystallisationObligationsRequestData(nino, LocalDate.parse(from), LocalDate.parse(to))))
+        connector.retrieveObligations(RetrieveObligationsRequestData(nino, LocalDate.parse(from), LocalDate.parse(to))))
   }
 
 }

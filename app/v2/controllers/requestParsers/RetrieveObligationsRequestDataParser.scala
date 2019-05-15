@@ -20,17 +20,17 @@ import java.time.LocalDate
 
 import javax.inject.Inject
 import uk.gov.hmrc.domain.Nino
-import v2.controllers.requestParsers.validators.GetObligationsValidator
-import v2.models.errors.{ BadRequestError, ErrorWrapper }
-import v2.models.requestData.{ GetObligationsRawData, GetObligationsRequestData }
+import v2.controllers.requestParsers.validators.RetrieveObligationsValidator
+import v2.models.errors.{BadRequestError, ErrorWrapper}
+import v2.models.requestData.{RetrieveObligationsRawData, RetrieveObligationsRequestData}
 
-class GetObligationsRequestDataParser @Inject()(validator: GetObligationsValidator) {
+class RetrieveObligationsRequestDataParser @Inject()(validator: RetrieveObligationsValidator) {
 
-  def parseRequest(data: GetObligationsRawData): Either[ErrorWrapper, GetObligationsRequestData] = {
+  def parseRequest(data: RetrieveObligationsRawData): Either[ErrorWrapper, RetrieveObligationsRequestData] = {
 
     validator.validate(data) match {
       case Nil =>
-        Right(GetObligationsRequestData(Nino(data.nino), LocalDate.parse(data.from), LocalDate.parse(data.to)))
+        Right(RetrieveObligationsRequestData(Nino(data.nino), LocalDate.parse(data.from), LocalDate.parse(data.to)))
       case err :: Nil => Left(ErrorWrapper(None, err, None))
       case errs       => Left(ErrorWrapper(None, BadRequestError, Some(errs)))
     }

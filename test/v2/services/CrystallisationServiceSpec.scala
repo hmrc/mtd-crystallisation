@@ -25,7 +25,7 @@ import v2.models.domain.{CrystallisationRequest, Obligation}
 import v2.models.errors._
 import v2.models.fixtures.Fixtures.CrystallisationObligationFixture.fulfilledCrystallisationObligationJsonDes
 import v2.models.outcomes.DesResponse
-import v2.models.requestData.{CrystallisationObligationsRequestData, CrystallisationRequestData, DesTaxYear, IntentToCrystalliseRequestData}
+import v2.models.requestData.{ RetrieveObligationsRequestData, CrystallisationRequestData, DesTaxYear, IntentToCrystalliseRequestData}
 
 import scala.concurrent.Future
 
@@ -126,7 +126,7 @@ class CrystallisationServiceSpec extends ServiceSpec {
     val due = LocalDate.parse("2018-05-28")
     val processed = LocalDate.parse("2018-04-01")
 
-    lazy val request = CrystallisationObligationsRequestData(nino, from, to)
+    lazy val request = RetrieveObligationsRequestData(nino, from, to)
 
     "valid data is passed" should {
       "return a successful response with the correct correlationId" in new Test {

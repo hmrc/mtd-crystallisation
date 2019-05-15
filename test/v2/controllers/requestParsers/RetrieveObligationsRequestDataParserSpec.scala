@@ -20,20 +20,20 @@ import java.time.LocalDate
 
 import support.UnitSpec
 import uk.gov.hmrc.domain.Nino
-import v2.mocks.validators.MockGetObligationsValidator
-import v2.models.errors.{ BadRequestError, ErrorWrapper, InvalidToDateError, NinoFormatError, TaxYearFormatError }
-import v2.models.requestData.{ GetObligationsRawData, GetObligationsRequestData }
+import v2.mocks.validators.MockRetrieveObligationsValidator
+import v2.models.errors.{BadRequestError, ErrorWrapper, InvalidToDateError, NinoFormatError, TaxYearFormatError}
+import v2.models.requestData.{RetrieveObligationsRawData, RetrieveObligationsRequestData}
 
-class GetObligationsRequestDataParserSpec extends UnitSpec {
+class RetrieveObligationsRequestDataParserSpec extends UnitSpec {
   val nino = "AA123456B"
   val from = "2018-04-06"
   val to   = "2019-04-05"
 
   val inputData =
-    GetObligationsRawData(nino, from, to)
+    RetrieveObligationsRawData(nino, from, to)
 
-  trait Test extends MockGetObligationsValidator {
-    lazy val parser = new GetObligationsRequestDataParser(mockValidator)
+  trait Test extends MockRetrieveObligationsValidator {
+    lazy val parser = new RetrieveObligationsRequestDataParser(mockValidator)
   }
 
   "parse" should {
@@ -43,7 +43,7 @@ class GetObligationsRequestDataParserSpec extends UnitSpec {
         MockGetObligationsValidator.validate(inputData).returns(Nil)
 
         parser.parseRequest(inputData) shouldBe
-          Right(GetObligationsRequestData(Nino(nino), LocalDate.parse(from), LocalDate.parse(to)))
+          Right(RetrieveObligationsRequestData(Nino(nino), LocalDate.parse(from), LocalDate.parse(to)))
       }
     }
 

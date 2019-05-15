@@ -23,12 +23,16 @@ import v2.models.domain.Obligation
 case class DesObligationsResponse(obligations: Seq[DesObligation]) {
 
   def toMtd: Seq[Obligation] =
-    for { obligation <- obligations
-          obligationDetail <- obligation.obligationDetails
-    } yield Obligation(start = obligationDetail.inboundCorrespondenceFromDate,
+      for {
+        obligation       <- obligations
+        if obligation.identification.incomeSourceType == "ITSA"
+        obligationDetail <- obligation.obligationDetails
+      } yield
+  Obligation(
+      start = obligationDetail.inboundCorrespondenceFromDate,
       end = obligationDetail.inboundCorrespondenceToDate,
       due = obligationDetail.inboundCorrespondenceDueDate,
-      status = obligationDetail.status,
+      status = ObligationStatus(obligationDetail.status),
       processed = obligationDetail.inboundCorrespondenceDateReceived
     )
 }
@@ -37,7 +41,7 @@ object DesObligationsResponse {
   implicit val reads: Reads[DesObligationsResponse] = Json.reads[DesObligationsResponse]
 }
 
-case class DesObligation(obligationDetails: Seq[DesObligationDetail])
+case class DesObligation(identification: Identification, obligationDetails: Seq[DesObligationDetail])
 
 object DesObligation {
   implicit val reads: Reads[DesObligation] = Json.reads[DesObligation]
@@ -46,11 +50,17 @@ object DesObligation {
 case class DesObligationDetail(inboundCorrespondenceFromDate: LocalDate,
                                inboundCorrespondenceToDate: LocalDate,
                                inboundCorrespondenceDueDate: LocalDate,
-                               status: ObligationStatus,
+                               status: String,
                                inboundCorrespondenceDateReceived: Option[LocalDate]
                               )
-
 object DesObligationDetail {
   implicit val reads: Reads[DesObligationDetail] = Json.reads[DesObligationDetail]
+}
 
+case class Identification(incomeSourceType: String,
+                          referenceNumber: String,
+                          referenceType: String
+                         )
+object Identification {
+    implicit val reads: Reads[Identification] = Json.reads[Identification]
 }

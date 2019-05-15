@@ -18,28 +18,22 @@ package v2.controllers.requestParsers.validators
 
 import java.time.LocalDate
 
-import v2.controllers.requestParsers.validators.validations.{
-  DateFormatValidation,
-  DateRangeValidation,
-  MtdDateValidation,
-  NinoValidation,
-  PredicateValidation
-}
+import v2.controllers.requestParsers.validators.validations.{DateFormatValidation, DateRangeValidation, MtdDateValidation, NinoValidation, PredicateValidation}
 import v2.models.errors._
-import v2.models.requestData.GetObligationsRawData
+import v2.models.requestData.RetrieveObligationsRawData
 
-class GetObligationsValidator extends Validator[GetObligationsRawData] {
+class RetrieveObligationsValidator extends Validator[RetrieveObligationsRawData] {
 
   private val validations = List(parameterPresenceValidation, parameterFormatValidation, parameterRuleValidation)
 
-  private def parameterPresenceValidation: GetObligationsRawData => List[List[Error]] = (data: GetObligationsRawData) => {
+  private def parameterPresenceValidation: RetrieveObligationsRawData => List[List[Error]] = (data: RetrieveObligationsRawData) => {
     List(
       PredicateValidation.validate(data.from.isEmpty, MissingFromDateError),
       PredicateValidation.validate(data.to.isEmpty, MissingToDateError)
     )
   }
 
-  private def parameterFormatValidation: GetObligationsRawData => List[List[Error]] = (data: GetObligationsRawData) => {
+  private def parameterFormatValidation: RetrieveObligationsRawData => List[List[Error]] = (data: RetrieveObligationsRawData) => {
     List(
       NinoValidation.validate(data.nino),
       DateFormatValidation.validate(data.from, InvalidFromDateError),
@@ -47,7 +41,7 @@ class GetObligationsValidator extends Validator[GetObligationsRawData] {
     )
   }
 
-  private def parameterRuleValidation: GetObligationsRawData => List[List[Error]] = (data: GetObligationsRawData) => {
+  private def parameterRuleValidation: RetrieveObligationsRawData => List[List[Error]] = (data: RetrieveObligationsRawData) => {
 
     val from = LocalDate.parse(data.from)
     val to   = LocalDate.parse(data.to)
@@ -58,6 +52,6 @@ class GetObligationsValidator extends Validator[GetObligationsRawData] {
     )
   }
 
-  def validate(data: GetObligationsRawData): List[Error] =
+  def validate(data: RetrieveObligationsRawData): List[Error] =
     run(validations, data).distinct
 }

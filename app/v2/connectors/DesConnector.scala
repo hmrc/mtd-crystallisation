@@ -25,7 +25,7 @@ import v2.config.AppConfig
 import v2.connectors.httpparsers.StandardDesHttpParser
 import v2.models.des.{DesCalculationIdResponse, DesObligationsResponse}
 import v2.models.domain.EmptyJsonBody
-import v2.models.requestData.{CrystallisationObligationsRequestData, CrystallisationRequestData, IntentToCrystalliseRequestData}
+import v2.models.requestData.{ RetrieveObligationsRequestData, CrystallisationRequestData, IntentToCrystalliseRequestData}
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -62,7 +62,7 @@ class DesConnector @Inject()(http: HttpClient, appConfig: AppConfig) {
     http.POST(url, EmptyJsonBody)(EmptyJsonBody.writes, StandardDesHttpParser.readsEmpty, desHeaderCarrier, implicitly)
   }
 
-  def retrieveObligations(request: CrystallisationObligationsRequestData)(
+  def retrieveObligations(request: RetrieveObligationsRequestData)(
     implicit hc: HeaderCarrier,
     ec: ExecutionContext): Future[RetrieveCrystallisationConnectorOutcome] = {
 

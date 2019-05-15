@@ -18,19 +18,19 @@ package v2.mocks.validators
 
 import org.scalamock.handlers.CallHandler1
 import org.scalamock.scalatest.MockFactory
-import v2.controllers.requestParsers.validators.GetObligationsValidator
+import v2.controllers.requestParsers.validators.RetrieveObligationsValidator
 import v2.models.errors.Error
-import v2.models.requestData.GetObligationsRawData
+import v2.models.requestData.RetrieveObligationsRawData
 
-class MockGetObligationsValidator extends MockFactory {
+class MockRetrieveObligationsValidator extends MockFactory {
 
-  val mockValidator: GetObligationsValidator = mock[GetObligationsValidator]
+  val mockValidator: RetrieveObligationsValidator = mock[RetrieveObligationsValidator]
 
   object MockGetObligationsValidator {
 
-    def validate(data: GetObligationsRawData): CallHandler1[GetObligationsRawData, List[Error]] = {
+    def validate(data: RetrieveObligationsRawData): CallHandler1[RetrieveObligationsRawData, List[Error]] = {
       (mockValidator
-        .validate(_: GetObligationsRawData))
+        .validate(_: RetrieveObligationsRawData))
         .expects(data)
     }
   }
