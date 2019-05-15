@@ -20,7 +20,7 @@ import v2.models.fixtures.Fixtures.CrystallisationObligationFixture._
 
 class CrystallisationObligationsSpec extends UnitSpec {
 
-  "Crystallisation Obligations reads" should {
+  "Obligations reads" should {
     "parse from DES json.response" in {
 
       val model = DesObligationsResponse.reads.reads(fulfilledCrystallisationObligationJsonDes).get

@@ -16,13 +16,16 @@
 
 package v2.services
 
+import java.time.LocalDate
+
 import uk.gov.hmrc.domain.Nino
 import v2.mocks.connectors.MockDesConnector
-import v2.models.des.DesCalculationIdResponse
-import v2.models.domain.CrystallisationRequest
+import v2.models.des.{DesCalculationIdResponse, DesObligationsResponse, FulfilledObligation}
+import v2.models.domain.{CrystallisationRequest, Obligation}
 import v2.models.errors._
+import v2.models.fixtures.Fixtures.CrystallisationObligationFixture._
 import v2.models.outcomes.DesResponse
-import v2.models.requestData.{ CrystallisationRequestData, DesTaxYear, IntentToCrystalliseRequestData }
+import v2.models.requestData.{ RetrieveObligationsRequestData, CrystallisationRequestData, DesTaxYear, IntentToCrystalliseRequestData}
 
 import scala.concurrent.Future
 
@@ -110,6 +113,72 @@ class CrystallisationServiceSpec extends ServiceSpec {
             MockedDesConnector.createCrystallisation(request).returns(Future.successful(Left(desResponse)))
 
             val result: CrystallisationOutcome = await(service.createCrystallisation(request))
+
+            result shouldBe expected
+          }
+        }
+    }
+  }
+
+  "retrieveObligations" when {
+    val from = LocalDate.parse("2018-02-01")
+    val to = LocalDate.parse("2018-02-28")
+    val due = LocalDate.parse("2018-05-28")
+    val processed = LocalDate.parse("2018-04-01")
+
+    lazy val request = RetrieveObligationsRequestData(nino, from, to)
+
+    "valid data is passed" should {
+      "return a sequence of obligations with the correct correlationId" in new Test {
+        val expected = Right(DesResponse(correlationId,
+          List(Obligation(from, to, due, FulfilledObligation, Some(processed)))))
+
+        val desResponse = Right(DesResponse(correlationId, DesObligationsResponse.reads.reads(fulfilledCrystallisationObligationJsonDes).get))
+
+        MockedDesConnector.retrieveObligations(request).returns(Future.successful(desResponse))
+
+        val result: RetrieveObligationsOutcome = await(service.retrieveObligations(request))
+
+        result shouldBe expected
+      }
+    }
+
+    "data passed doesn't have any crystallisation obligations" should {
+      "return a empty sequence with the correct correlationId" in new Test {
+        val expected = Right(DesResponse(correlationId, List()))
+
+        val desResponse = Right(DesResponse(correlationId, DesObligationsResponse.reads.reads(notCrystallisationObligationsJsonDes).get))
+
+        MockedDesConnector.retrieveObligations(request).returns(Future.successful(desResponse))
+
+        val result: RetrieveObligationsOutcome = await(service.retrieveObligations(request))
+
+        result shouldBe expected
+      }
+    }
+
+    Map(
+      "INVALID_IDTYPE"             -> DownstreamError,
+      "INVALID_IDNUMBER"           -> NinoFormatError,
+      "INVALID_STATUS"             -> DownstreamError,
+      "INVALID_REGIME"             -> DownstreamError,
+      "NOT_FOUND"                  -> NotFoundError,
+      "INVALID_DATE_TO"            -> InvalidToDateError,
+      "INVALID_DATE_FROM"          -> InvalidFromDateError,
+      "NOT_FOUND_BPKEY"            -> DownstreamError,
+      "INVALID_DATE_RANGE"         -> RangeDateTooLongError,
+      "SERVER_ERROR"               -> DownstreamError,
+      "SERVICE_UNAVAILABLE"        -> DownstreamError
+    ).foreach {
+      case (k, v) =>
+        s"a $k error is received from the connector" should {
+          s"return a $v MTD error" in new Test {
+            val desResponse = DesResponse(correlationId, SingleError(Error(k, "MESSAGE")))
+            val expected    = Left(ErrorWrapper(Some(correlationId), v, None))
+
+            MockedDesConnector.retrieveObligations(request).returns(Future.successful(Left(desResponse)))
+
+            val result: RetrieveObligationsOutcome = await(service.retrieveObligations(request))
 
             result shouldBe expected
           }

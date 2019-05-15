@@ -16,18 +16,18 @@
 
 package v2.connectors
 
-import javax.inject.{ Inject, Singleton }
+import javax.inject.{Inject, Singleton}
 import play.api.Logger
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.http.logging.Authorization
 import uk.gov.hmrc.play.bootstrap.http.HttpClient
 import v2.config.AppConfig
 import v2.connectors.httpparsers.StandardDesHttpParser
-import v2.models.des.DesCalculationIdResponse
+import v2.models.des.{DesCalculationIdResponse, DesObligationsResponse}
 import v2.models.domain.EmptyJsonBody
-import v2.models.requestData.{ CrystallisationRequestData, IntentToCrystalliseRequestData }
+import v2.models.requestData.{ RetrieveObligationsRequestData, CrystallisationRequestData, IntentToCrystalliseRequestData}
 
-import scala.concurrent.{ ExecutionContext, Future }
+import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
 class DesConnector @Inject()(http: HttpClient, appConfig: AppConfig) {
@@ -62,4 +62,15 @@ class DesConnector @Inject()(http: HttpClient, appConfig: AppConfig) {
     http.POST(url, EmptyJsonBody)(EmptyJsonBody.writes, StandardDesHttpParser.readsEmpty, desHeaderCarrier, implicitly)
   }
 
+  def retrieveObligations(request: RetrieveObligationsRequestData)(
+    implicit hc: HeaderCarrier,
+    ec: ExecutionContext): Future[RetrieveObligationsConnectorOutcome] = {
+
+    val nino = request.nino.nino
+    val from = request.from
+    val to   = request.to
+    val url = s"${appConfig.desBaseUrl}/enterprise/obligation-data/nino/$nino/ITSA?from=$from&to=$to"
+
+    http.POST(url, EmptyJsonBody)(EmptyJsonBody.writes, StandardDesHttpParser.reads[DesObligationsResponse], desHeaderCarrier, implicitly)
+  }
 }

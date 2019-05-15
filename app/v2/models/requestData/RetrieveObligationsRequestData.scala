@@ -15,5 +15,8 @@
  */
 
 package v2.models.requestData
+import java.time.LocalDate
 
-case class GetObligationsRawData(nino: String, from: String, to: String) extends RawData
+import uk.gov.hmrc.domain.Nino
+
+case class RetrieveObligationsRequestData(nino: Nino, from: LocalDate, to: LocalDate)

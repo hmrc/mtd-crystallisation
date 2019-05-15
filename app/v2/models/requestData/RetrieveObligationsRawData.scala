@@ -15,8 +15,5 @@
  */
 
 package v2.models.requestData
-import java.time.LocalDate
 
-import uk.gov.hmrc.domain.Nino
-
-case class CrystallisationObligationsRequestData(nino: Nino, from: LocalDate, to: LocalDate)
+case class RetrieveObligationsRawData(nino: String, from: String, to: String) extends RawData

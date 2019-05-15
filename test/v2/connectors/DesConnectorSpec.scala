@@ -16,13 +16,16 @@
 
 package v2.connectors
 
+import java.time.LocalDate
+
 import uk.gov.hmrc.domain.Nino
-import v2.mocks.{ MockAppConfig, MockHttpClient }
-import v2.models.des.DesCalculationIdResponse
-import v2.models.domain.{ CrystallisationRequest, EmptyJsonBody }
+import v2.mocks.{MockAppConfig, MockHttpClient}
+import v2.models.des.{DesCalculationIdResponse, DesObligationsResponse}
+import v2.models.domain.{CrystallisationRequest, EmptyJsonBody}
 import v2.models.errors._
+import v2.models.fixtures.Fixtures.CrystallisationObligationFixture._
 import v2.models.outcomes.DesResponse
-import v2.models.requestData.{ CrystallisationRequestData, DesTaxYear, IntentToCrystalliseRequestData }
+import v2.models.requestData.{ RetrieveObligationsRequestData, CrystallisationRequestData, DesTaxYear, IntentToCrystalliseRequestData}
 
 import scala.concurrent.Future
 
@@ -139,6 +142,54 @@ class DesConnectorSpec extends ConnectorSpec {
             desTaxYear = taxYear,
             crystallisation = CrystallisationRequest(calcId)
           )))
+  }
+
+  "retrieve crystallisation obligations" when {
+
+    val from = "2018-02-01"
+    val to = "2018-02-28"
+
+    "a valid request is supplied" should {
+      "return a successful response" in new Test {
+
+        val expected = Right(DesResponse(correlationId, DesObligationsResponse.reads.reads(openCrystallisationObligationJsonDes).get))
+
+        MockedHttpClient
+          .post(s"$baseUrl/enterprise/obligation-data/nino/$nino/ITSA?from=$from&to=$to", EmptyJsonBody)
+          .returns(Future.successful(expected))
+
+        retrieveObligationsResult(connector) shouldBe expected
+      }
+    }
+
+    "a request returning a single error" should {
+      "return an unsuccessful response with the correct correlationId and a single error" in new Test {
+        val expected = Left(DesResponse(correlationId, SingleError(NinoFormatError)))
+
+        MockedHttpClient
+          .post(s"$baseUrl/enterprise/obligation-data/nino/$nino/ITSA?from=$from&to=$to", EmptyJsonBody)
+          .returns(Future.successful(expected))
+
+
+        retrieveObligationsResult(connector) shouldBe expected
+      }
+    }
+
+    "a request returning multiple errors" should {
+      "return an unsuccessful response with the correct correlationId and multiple errors" in new Test {
+        val expected = Left(DesResponse(correlationId, MultipleErrors(Seq(NinoFormatError, InvalidFromDateError))))
+
+        MockedHttpClient
+          .post(s"$baseUrl/enterprise/obligation-data/nino/$nino/ITSA?from=$from&to=$to", EmptyJsonBody)
+          .returns(Future.successful(expected))
+
+        retrieveObligationsResult(connector) shouldBe expected
+      }
+    }
+
+    def retrieveObligationsResult(connector: DesConnector): RetrieveObligationsConnectorOutcome =
+      await(
+        connector.retrieveObligations(RetrieveObligationsRequestData(nino, LocalDate.parse(from), LocalDate.parse(to))))
   }
 
 }

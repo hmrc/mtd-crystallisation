@@ -21,9 +21,9 @@ import uk.gov.hmrc.http.HeaderCarrier
 import v2.connectors.DesConnector
 import v2.models.errors._
 import v2.models.outcomes.DesResponse
-import v2.models.requestData.{ CrystallisationRequestData, IntentToCrystalliseRequestData }
+import v2.models.requestData.{ RetrieveObligationsRequestData, CrystallisationRequestData, IntentToCrystalliseRequestData}
 
-import scala.concurrent.{ ExecutionContext, Future }
+import scala.concurrent.{ExecutionContext, Future}
 
 class CrystallisationService @Inject()(connector: DesConnector) extends DesServiceSupport {
 
@@ -44,6 +44,15 @@ class CrystallisationService @Inject()(connector: DesConnector) extends DesServi
   def createCrystallisation(request: CrystallisationRequestData)(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[CrystallisationOutcome] = {
     connector.createCrystallisation(request).map {
       mapToVendorDirect("createCrystallisation", desErrorToMtdErrorCreate)
+    }
+  }
+
+  def retrieveObligations(request: RetrieveObligationsRequestData)
+                         (implicit hc: HeaderCarrier, ec: ExecutionContext): Future[RetrieveObligationsOutcome] = {
+    connector.retrieveObligations(request).map {
+      mapToVendor("retrieveObligations", desErrorToMtdErrorRetrieve) { desResponse =>
+        Right(DesResponse(desResponse.correlationId, desResponse.responseData.toMtd))
+      }
     }
   }
 
@@ -70,6 +79,21 @@ class CrystallisationService @Inject()(connector: DesConnector) extends DesServi
       "RECENT_SUBMISSIONS_EXIST"   -> RecentSubmissionsExistError,
       "RESIDENCY_CHANGED"          -> ResidencyChangedError,
       "FINAL_DECLARATION_RECEIVED" -> FinalDeclarationReceivedError,
+      "SERVER_ERROR"               -> DownstreamError,
+      "SERVICE_UNAVAILABLE"        -> DownstreamError
+    )
+
+  private def desErrorToMtdErrorRetrieve: Map[String, Error] =
+    Map(
+      "INVALID_IDTYPE"             -> DownstreamError,
+      "INVALID_IDNUMBER"           -> NinoFormatError,
+      "INVALID_STATUS"             -> DownstreamError,
+      "INVALID_REGIME"             -> DownstreamError,
+      "NOT_FOUND"                  -> NotFoundError,
+      "INVALID_DATE_TO"            -> InvalidToDateError,
+      "INVALID_DATE_FROM"          -> InvalidFromDateError,
+      "NOT_FOUND_BPKEY"            -> DownstreamError,
+      "INVALID_DATE_RANGE"         -> RangeDateTooLongError,
       "SERVER_ERROR"               -> DownstreamError,
       "SERVICE_UNAVAILABLE"        -> DownstreamError
     )

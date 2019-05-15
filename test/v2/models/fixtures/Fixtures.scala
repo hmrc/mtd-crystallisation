@@ -31,13 +31,20 @@ object Fixtures {
     val statusFulfilled: ObligationStatus = FulfilledObligation
     val statusOpen: ObligationStatus = OpenObligation
     val processed = LocalDate.parse("2018-04-01")
+    val incomeSourceType = "ITSA"
+    val referenceNumber = "AB123456A"
+    val referenceType = "NINO"
 
     val fulfilledCrystallisationObligationsResponseDes = DesObligationsResponse(
       Seq(
         DesObligation(
+          Identification(
+            incomeSourceType,
+            referenceNumber,
+            referenceType),
         Seq(
           DesObligationDetail(
-          status = statusFulfilled,
+          status = "F",
           inboundCorrespondenceFromDate = start,
           inboundCorrespondenceToDate = end,
           inboundCorrespondenceDueDate = due,
@@ -49,9 +56,13 @@ object Fixtures {
     val openCrystallisationObligationsResponseDes = DesObligationsResponse(
       Seq(
         DesObligation(
+          Identification(
+            incomeSourceType,
+            referenceNumber,
+            referenceType),
         Seq(
           DesObligationDetail(
-          status = statusOpen,
+          status = "O",
           inboundCorrespondenceFromDate = start,
           inboundCorrespondenceToDate = end,
           inboundCorrespondenceDueDate = due,
@@ -61,9 +72,13 @@ object Fixtures {
     )
 
     val fulfilledObligationsDes = DesObligation(
+      Identification(
+        incomeSourceType,
+        referenceNumber,
+        referenceType),
       Seq(
         DesObligationDetail(
-          status = statusFulfilled,
+          status = "F",
           inboundCorrespondenceFromDate = start,
           inboundCorrespondenceToDate = end,
           inboundCorrespondenceDueDate = due,
@@ -73,9 +88,13 @@ object Fixtures {
     )
 
     val openObligationsDes = DesObligation(
+      Identification(
+        incomeSourceType,
+        referenceNumber,
+        referenceType),
       Seq(
         DesObligationDetail(
-          status = statusOpen,
+          status = "O",
           inboundCorrespondenceFromDate = start,
           inboundCorrespondenceToDate = end,
           inboundCorrespondenceDueDate = due,
@@ -84,7 +103,7 @@ object Fixtures {
     )
 
     val fulfilledObligationDes = DesObligationDetail(
-          status = statusFulfilled,
+          status = "F",
           inboundCorrespondenceFromDate = start,
           inboundCorrespondenceToDate = end,
           inboundCorrespondenceDueDate = due,
@@ -92,7 +111,7 @@ object Fixtures {
     )
 
     val openObligationDes = DesObligationDetail(
-          status = statusOpen,
+          status = "O",
           inboundCorrespondenceFromDate = start,
           inboundCorrespondenceToDate = end,
           inboundCorrespondenceDueDate = due,
@@ -138,11 +157,64 @@ object Fixtures {
         |}
       """.stripMargin)
 
+    val openCrystallisationObligationJsonDes = Json.parse(
+      """
+        |{
+        |  "obligations": [
+        |    {
+        |    	"identification": {
+        |				"incomeSourceType": "ITSA",
+        |				"referenceNumber": "AB123456A",
+        |				"referenceType": "NINO"
+        |			},
+        |    "obligationDetails": [
+        |      {
+        |        "status": "O",
+        |        "inboundCorrespondenceFromDate": "2018-02-01",
+        |        "inboundCorrespondenceToDate": "2018-02-28",
+        |        "inboundCorrespondenceDateReceived": "2018-04-01",
+        |        "inboundCorrespondenceDueDate": "2018-05-28"
+        |      }
+        |    ]
+        |    }
+        |  ]
+        |}
+      """.stripMargin)
+
     val fulfilledCrystallisationObligationJsonDes = Json.parse(
       """
         |{
         |  "obligations": [
         |    {
+        |			"identification": {
+        |				"incomeSourceType": "ITSA",
+        |				"referenceNumber": "AB123456A",
+        |				"referenceType": "NINO"
+        |			},
+        |    "obligationDetails": [
+        |      {
+        |        "status": "F",
+        |        "inboundCorrespondenceFromDate": "2018-02-01",
+        |        "inboundCorrespondenceToDate": "2018-02-28",
+        |        "inboundCorrespondenceDateReceived": "2018-04-01",
+        |        "inboundCorrespondenceDueDate": "2018-05-28"
+        |      }
+        |    ]
+        |    }
+        |  ]
+        |}
+      """.stripMargin)
+
+    val notCrystallisationObligationsJsonDes = Json.parse(
+      """
+        |{
+        |  "obligations": [
+        |    {
+        |			"identification": {
+        |				"incomeSourceType": "ITSP",
+        |				"referenceNumber": "AB123456A",
+        |				"referenceType": "NINO"
+        |			},
         |    "obligationDetails": [
         |      {
         |        "status": "F",
@@ -160,6 +232,11 @@ object Fixtures {
     val fulfilledObligationsJsonDes = Json.parse(
       """
         |{
+        |	 "identification": {
+        |				"incomeSourceType": "ITSA",
+        |				"referenceNumber": "AB123456A",
+        |				"referenceType": "NINO"
+        |			},
         |  "obligationDetails": [
         |    {
         |      "status": "F",

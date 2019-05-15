@@ -16,6 +16,7 @@
 
 package v2
 
+import v2.models.domain.Obligation
 import v2.models.errors.ErrorWrapper
 import v2.models.outcomes.DesResponse
 
@@ -23,4 +24,5 @@ package object services {
 
   type IntentToCrystalliseOutcome = Either[ErrorWrapper, DesResponse[String]]
   type CrystallisationOutcome     = Either[ErrorWrapper, DesResponse[Unit]]
+  type RetrieveObligationsOutcome     = Either[ErrorWrapper, DesResponse[Seq[Obligation]]]
 }
