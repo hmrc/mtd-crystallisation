@@ -155,7 +155,7 @@ class DesConnectorSpec extends ConnectorSpec {
         val expected = Right(DesResponse(correlationId, DesObligationsResponse.reads.reads(openCrystallisationObligationJsonDes).get))
 
         MockedHttpClient
-          .post(s"$baseUrl/enterprise/obligation-data/nino/$nino/ITSA?from=$from&to=$to", EmptyJsonBody)
+          .get(s"$baseUrl/enterprise/obligation-data/nino/$nino/ITSA?from=$from&to=$to")
           .returns(Future.successful(expected))
 
         retrieveObligationsResult(connector) shouldBe expected
@@ -167,7 +167,7 @@ class DesConnectorSpec extends ConnectorSpec {
         val expected = Left(DesResponse(correlationId, SingleError(NinoFormatError)))
 
         MockedHttpClient
-          .post(s"$baseUrl/enterprise/obligation-data/nino/$nino/ITSA?from=$from&to=$to", EmptyJsonBody)
+          .get(s"$baseUrl/enterprise/obligation-data/nino/$nino/ITSA?from=$from&to=$to")
           .returns(Future.successful(expected))
 
 
@@ -180,7 +180,7 @@ class DesConnectorSpec extends ConnectorSpec {
         val expected = Left(DesResponse(correlationId, MultipleErrors(Seq(NinoFormatError, InvalidFromDateError))))
 
         MockedHttpClient
-          .post(s"$baseUrl/enterprise/obligation-data/nino/$nino/ITSA?from=$from&to=$to", EmptyJsonBody)
+          .get(s"$baseUrl/enterprise/obligation-data/nino/$nino/ITSA?from=$from&to=$to")
           .returns(Future.successful(expected))
 
         retrieveObligationsResult(connector) shouldBe expected

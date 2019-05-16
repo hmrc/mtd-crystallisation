@@ -28,7 +28,7 @@ case class DesObligationsResponse(obligations: Seq[DesObligation]) {
         obligationDetail <- obligation.obligationDetails
         if obligation.identification.incomeSourceType == "ITSA"
       } yield
-  Obligation(
+    Obligation(
       start = obligationDetail.inboundCorrespondenceFromDate,
       end = obligationDetail.inboundCorrespondenceToDate,
       due = obligationDetail.inboundCorrespondenceDueDate,

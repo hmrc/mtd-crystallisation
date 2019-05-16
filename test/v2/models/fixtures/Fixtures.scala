@@ -25,12 +25,12 @@ object Fixtures {
 
   object CrystallisationObligationFixture {
 
-    val start: LocalDate = LocalDate.parse("2018-02-01")
-    val end: LocalDate = LocalDate.parse("2018-02-28")
-    val due: LocalDate = LocalDate.parse("2018-05-28")
+    val start: LocalDate = LocalDate.parse("2018-04-06")
+    val end: LocalDate = LocalDate.parse("2019-04-05")
+    val due: LocalDate = LocalDate.parse("2020-01-31")
     val statusFulfilled: ObligationStatus = FulfilledObligation
     val statusOpen: ObligationStatus = OpenObligation
-    val processed = LocalDate.parse("2018-04-01")
+    val processed = LocalDate.parse("2020-01-25")
     val incomeSourceType = "ITSA"
     val referenceNumber = "AB123456A"
     val referenceType = "NINO"
@@ -140,10 +140,10 @@ object Fixtures {
       """
         |{
         |   "status": "F",
-        |   "inboundCorrespondenceFromDate": "2018-02-01",
-        |   "inboundCorrespondenceToDate": "2018-02-28",
-        |   "inboundCorrespondenceDateReceived": "2018-04-01",
-        |   "inboundCorrespondenceDueDate": "2018-05-28"
+        |   "inboundCorrespondenceFromDate": "2018-04-06",
+        |   "inboundCorrespondenceToDate": "2019-04-05",
+        |   "inboundCorrespondenceDateReceived": "2020-01-25",
+        |   "inboundCorrespondenceDueDate": "2020-01-31"
         |}
       """.stripMargin)
 
@@ -151,9 +151,9 @@ object Fixtures {
       """
         |{
         |   "status": "O",
-        |   "inboundCorrespondenceFromDate": "2018-02-01",
-        |   "inboundCorrespondenceToDate": "2018-02-28",
-        |   "inboundCorrespondenceDueDate": "2018-05-28"
+        |   "inboundCorrespondenceFromDate": "2018-04-06",
+        |   "inboundCorrespondenceToDate": "2019-04-05",
+        |   "inboundCorrespondenceDueDate": "2020-01-31"
         |}
       """.stripMargin)
 
@@ -170,10 +170,10 @@ object Fixtures {
         |    "obligationDetails": [
         |      {
         |        "status": "O",
-        |        "inboundCorrespondenceFromDate": "2018-02-01",
-        |        "inboundCorrespondenceToDate": "2018-02-28",
-        |        "inboundCorrespondenceDateReceived": "2018-04-01",
-        |        "inboundCorrespondenceDueDate": "2018-05-28"
+        |        "inboundCorrespondenceFromDate": "2018-04-06",
+        |        "inboundCorrespondenceToDate": "2019-04-05",
+        |        "inboundCorrespondenceDateReceived": "2020-01-25",
+        |        "inboundCorrespondenceDueDate": "2020-01-31"
         |      }
         |    ]
         |    }
@@ -194,10 +194,10 @@ object Fixtures {
         |    "obligationDetails": [
         |      {
         |        "status": "F",
-        |        "inboundCorrespondenceFromDate": "2018-02-01",
-        |        "inboundCorrespondenceToDate": "2018-02-28",
-        |        "inboundCorrespondenceDateReceived": "2018-04-01",
-        |        "inboundCorrespondenceDueDate": "2018-05-28"
+        |        "inboundCorrespondenceFromDate": "2018-04-06",
+        |        "inboundCorrespondenceToDate": "2019-04-05",
+        |        "inboundCorrespondenceDateReceived": "2020-01-25",
+        |        "inboundCorrespondenceDueDate": "2020-01-31"
         |      }
         |    ]
         |    }
@@ -218,10 +218,10 @@ object Fixtures {
         |    "obligationDetails": [
         |      {
         |        "status": "F",
-        |        "inboundCorrespondenceFromDate": "2018-02-01",
-        |        "inboundCorrespondenceToDate": "2018-02-28",
-        |        "inboundCorrespondenceDateReceived": "2018-04-01",
-        |        "inboundCorrespondenceDueDate": "2018-05-28"
+        |        "inboundCorrespondenceFromDate": "2018-04-06",
+        |        "inboundCorrespondenceToDate": "2019-04-05",
+        |        "inboundCorrespondenceDateReceived": "2020-01-25",
+        |        "inboundCorrespondenceDueDate": "2020-01-31"
         |      }
         |    ]
         |    }
@@ -240,10 +240,10 @@ object Fixtures {
         |  "obligationDetails": [
         |    {
         |      "status": "F",
-        |      "inboundCorrespondenceFromDate": "2018-02-01",
-        |      "inboundCorrespondenceToDate": "2018-02-28",
-        |      "inboundCorrespondenceDateReceived": "2018-04-01",
-        |      "inboundCorrespondenceDueDate": "2018-05-28"
+        |      "inboundCorrespondenceFromDate": "2018-04-06",
+        |      "inboundCorrespondenceToDate": "2019-04-05",
+        |      "inboundCorrespondenceDateReceived": "2020-01-25",
+        |      "inboundCorrespondenceDueDate": "2020-01-31"
         |    }
         |  ]
         |}
@@ -253,10 +253,10 @@ object Fixtures {
       """
         |{
         |  "status": "Fulfilled",
-        |  "start": "2018-02-01",
-        |  "end": "2018-02-28",
-        |  "processed": "2018-04-01",
-        |  "due": "2018-05-28"
+        |  "start": "2018-04-06",
+        |  "end": "2019-04-05",
+        |  "processed": "2020-01-25",
+        |  "due": "2020-01-31"
         |}
       """.stripMargin)
 
@@ -264,9 +264,24 @@ object Fixtures {
       """
         |{
         |  "status": "Open",
-        |  "start": "2018-02-01",
-        |  "end": "2018-02-28",
-        |  "due": "2018-05-28"
+        |  "start": "2018-04-06",
+        |  "end": "2019-04-05",
+        |  "due": "2020-01-31"
+        |}
+      """.stripMargin)
+
+    val fulfilledObligationsJsonArray =Json.parse(
+      """
+        |{
+        | "obligations" : [
+        | {
+        |  "status": "Fulfilled",
+        |  "start": "2018-04-06",
+        |  "end": "2019-04-05",
+        |  "processed": "2020-01-25",
+        |  "due": "2020-01-31"
+        | }
+        | ]
         |}
       """.stripMargin)
 

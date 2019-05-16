@@ -71,6 +71,6 @@ class DesConnector @Inject()(http: HttpClient, appConfig: AppConfig) {
     val to   = request.to
     val url = s"${appConfig.desBaseUrl}/enterprise/obligation-data/nino/$nino/ITSA?from=$from&to=$to"
 
-    http.POST(url, EmptyJsonBody)(EmptyJsonBody.writes, StandardDesHttpParser.reads[DesObligationsResponse], desHeaderCarrier, implicitly)
+    http.GET(url)(StandardDesHttpParser.reads[DesObligationsResponse], desHeaderCarrier, implicitly)
   }
 }

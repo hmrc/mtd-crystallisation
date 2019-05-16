@@ -121,17 +121,14 @@ class CrystallisationServiceSpec extends ServiceSpec {
   }
 
   "retrieveObligations" when {
-    val from = LocalDate.parse("2018-02-01")
-    val to = LocalDate.parse("2018-02-28")
-    val due = LocalDate.parse("2018-05-28")
-    val processed = LocalDate.parse("2018-04-01")
 
-    lazy val request = RetrieveObligationsRequestData(nino, from, to)
+
+    lazy val request = RetrieveObligationsRequestData(nino, start, end)
 
     "valid data is passed" should {
       "return a sequence of obligations with the correct correlationId" in new Test {
         val expected = Right(DesResponse(correlationId,
-          List(Obligation(from, to, due, FulfilledObligation, Some(processed)))))
+          List(Obligation(start, end, due, FulfilledObligation, Some(processed)))))
 
         val desResponse = Right(DesResponse(correlationId, DesObligationsResponse.reads.reads(fulfilledCrystallisationObligationJsonDes).get))
 
