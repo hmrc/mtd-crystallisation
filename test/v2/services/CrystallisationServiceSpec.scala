@@ -143,20 +143,6 @@ class CrystallisationServiceSpec extends ServiceSpec {
       }
     }
 
-    "data passed doesn't have any crystallisation obligations" should {
-      "return a empty sequence with the correct correlationId" in new Test {
-        val expected = Right(DesResponse(correlationId, List()))
-
-        val desResponse = Right(DesResponse(correlationId, DesObligationsResponse.reads.reads(notCrystallisationObligationsJsonDes).get))
-
-        MockedDesConnector.retrieveObligations(request).returns(Future.successful(desResponse))
-
-        val result: RetrieveObligationsOutcome = await(service.retrieveObligations(request))
-
-        result shouldBe expected
-      }
-    }
-
     Map(
       "INVALID_IDTYPE"             -> DownstreamError,
       "INVALID_IDNUMBER"           -> NinoFormatError,

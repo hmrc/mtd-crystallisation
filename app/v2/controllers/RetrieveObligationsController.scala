@@ -45,14 +45,10 @@ class RetrieveObligationsController @Inject()(val authService: EnrolmentsAuthSer
       retrieveObligationsRequestDataParser.parseRequest(RetrieveObligationsRawData(nino, from, to)) match {
         case Right(retrieveObligationsRequestData) =>
           crystallisationService.retrieveObligations(retrieveObligationsRequestData).map {
-            case Right(desResponse) if desResponse.responseData.nonEmpty =>
+            case Right(desResponse) =>
               logger.info(
                 s"[RetrieveObligationsController][retrieveObligations] - Success response received with CorrelationId: ${desResponse.correlationId}")
               Ok(Json.obj("Obligations"-> desResponse.responseData)).withHeaders("X-CorrelationId" -> desResponse.correlationId).as(MimeTypes.JSON)
-            case Right(desResponse) if desResponse.responseData.isEmpty =>
-              logger.info(
-                s"[RetrieveObligationsController][retrieveObligations] - Empty obligations response received with CorrelationId: ${desResponse.correlationId}")
-              NotFound(Json.toJson(NotFoundError)).withHeaders("X-CorrelationId" -> desResponse.correlationId).as(MimeTypes.JSON)
             case Left(errorWrapper) =>
               val correlationId = getCorrelationId(errorWrapper)
               val result        = processError(errorWrapper).withHeaders("X-CorrelationId" -> correlationId)
@@ -67,11 +63,15 @@ class RetrieveObligationsController @Inject()(val authService: EnrolmentsAuthSer
 
   private def processError(errorWrapper: ErrorWrapper) = {
     errorWrapper.error match {
-      case BadRequestError      |
-           NinoFormatError      |
-           InvalidToDateError   |
-           InvalidFromDateError |
-           RangeDateTooLongError => BadRequest(Json.toJson(errorWrapper))
+      case BadRequestError          |
+           NinoFormatError          |
+           MissingFromDateError     |
+           MissingToDateError       |
+           InvalidToDateError       |
+           InvalidFromDateError     |
+           RangeDateTooLongError    |
+           RuleFromDateNotSupported |
+           RangeEndDateBeforeStartDateError => BadRequest(Json.toJson(errorWrapper))
       case NotFoundError         => NotFound(Json.toJson(errorWrapper))
       case DownstreamError       => InternalServerError(Json.toJson(errorWrapper))
     }

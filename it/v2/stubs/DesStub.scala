@@ -20,6 +20,7 @@ import com.github.tomakehurst.wiremock.stubbing.StubMapping
 import play.api.http.Status.{NO_CONTENT, OK}
 import play.api.libs.json.Json
 import support.WireMockMethods
+import v2.models.fixtures.Fixtures
 
 object DesStub extends WireMockMethods {
 
@@ -53,6 +54,21 @@ object DesStub extends WireMockMethods {
 
   def intentToError(nino: String, taxYear: String, errorStatus: Int, errorBody: String): StubMapping = {
     when(method = POST, uri = intentToCrystalliseUrl(nino, taxYear), queryParams = Map("crystallise" -> "true"))
+      .thenReturn(status = errorStatus, errorBody)
+  }
+
+  private val retrieveResponseJson = Fixtures.CrystallisationObligationFixture.fulfilledCrystallisationObligationJsonDes
+
+  private def retrieveObligationsUrl(nino: String): String =
+    s"/enterprise/obligation-data/nino/$nino/ITSA"
+
+  def retrieveObligationsSuccess(nino: String, from: String, to: String): StubMapping = {
+    when(method = GET, uri = retrieveObligationsUrl(nino), queryParams = Map("from" -> from, "to" -> to))
+      .thenReturn(status = OK, retrieveResponseJson)
+  }
+
+  def retrieveObligationsError(nino: String, from: String, to: String, errorStatus: Int, errorBody: String): StubMapping = {
+    when(method = GET, uri = retrieveObligationsUrl(nino), queryParams = Map("from" -> from, "to" -> to))
       .thenReturn(status = errorStatus, errorBody)
   }
 }
