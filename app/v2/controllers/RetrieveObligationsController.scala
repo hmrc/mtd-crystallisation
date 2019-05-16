@@ -48,7 +48,7 @@ class RetrieveObligationsController @Inject()(val authService: EnrolmentsAuthSer
             case Right(desResponse) if desResponse.responseData.nonEmpty =>
               logger.info(
                 s"[RetrieveObligationsController][retrieveObligations] - Success response received with CorrelationId: ${desResponse.correlationId}")
-              Ok(Json.obj("Obligations"-> desResponse.responseData)).withHeaders("X-CorrelationId" -> desResponse.correlationId).as(MimeTypes.JSON)
+              Ok(Json.obj("obligations"-> desResponse.responseData)).withHeaders("X-CorrelationId" -> desResponse.correlationId).as(MimeTypes.JSON)
             case Right(desResponse) if desResponse.responseData.isEmpty =>
               logger.info(
                 s"[RetrieveObligationsController][retrieveObligations] - Empty obligations response received with CorrelationId: ${desResponse.correlationId}")
