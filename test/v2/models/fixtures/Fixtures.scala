@@ -273,7 +273,7 @@ object Fixtures {
     val fulfilledObligationsJsonArray =Json.parse(
       """
         |{
-        | "Obligations" : [
+        | "obligations" : [
         | {
         |  "status": "Fulfilled",
         |  "start": "2018-04-06",
