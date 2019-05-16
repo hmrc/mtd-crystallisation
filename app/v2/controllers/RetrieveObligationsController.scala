@@ -45,10 +45,14 @@ class RetrieveObligationsController @Inject()(val authService: EnrolmentsAuthSer
       retrieveObligationsRequestDataParser.parseRequest(RetrieveObligationsRawData(nino, from, to)) match {
         case Right(retrieveObligationsRequestData) =>
           crystallisationService.retrieveObligations(retrieveObligationsRequestData).map {
-            case Right(desResponse) =>
+            case Right(desResponse) if desResponse.responseData.nonEmpty =>
               logger.info(
                 s"[RetrieveObligationsController][retrieveObligations] - Success response received with CorrelationId: ${desResponse.correlationId}")
               Ok(Json.obj("Obligations"-> desResponse.responseData)).withHeaders("X-CorrelationId" -> desResponse.correlationId).as(MimeTypes.JSON)
+            case Right(desResponse) if desResponse.responseData.isEmpty =>
+              logger.info(
+                s"[RetrieveObligationsController][retrieveObligations] - Empty obligations response received with CorrelationId: ${desResponse.correlationId}")
+              NotFound(Json.toJson(NotFoundError)).withHeaders("X-CorrelationId" -> desResponse.correlationId).as(MimeTypes.JSON)
             case Left(errorWrapper) =>
               val correlationId = getCorrelationId(errorWrapper)
               val result        = processError(errorWrapper).withHeaders("X-CorrelationId" -> correlationId)

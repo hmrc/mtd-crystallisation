@@ -81,6 +81,24 @@ class RetrieveObligationsControllerSpec
       }
     }
 
+    "return 404" when {
+      "no crystallisation obligations found" in new Test {
+
+        MockRetrieveObligationsRequestDataParser
+          .parse(retrieveObligationsRawData)
+          .returns(Right(retrieveObligationsRequestData))
+
+        MockCrystallisationService
+          .retrieve(retrieveObligationsRequestData)
+          .returns(Future.successful(Right(DesResponse(correlationId, Seq()))))
+
+        val result: Future[Result] = controller.retrieveObligations(nino, from, to)(fakeRequest)
+        status(result) shouldBe NOT_FOUND
+        contentAsJson(result) shouldBe Json.toJson(NotFoundError)
+        header("X-CorrelationId", result) shouldBe Some(correlationId)
+      }
+    }
+
     "return single error" when {
       "a invalid nino is supplied" in new Test {
 

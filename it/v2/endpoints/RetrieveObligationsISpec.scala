@@ -22,6 +22,7 @@ import play.api.libs.json.Json
 import play.api.libs.ws.{WSRequest, WSResponse}
 import support.IntegrationBaseSpec
 import v2.models.errors._
+import v2.models.fixtures.Fixtures
 import v2.stubs.{AuditStub, AuthStub, DesStub, MtdIdLookupStub}
 
 class RetrieveObligationsISpec extends IntegrationBaseSpec {
@@ -61,6 +62,23 @@ class RetrieveObligationsISpec extends IntegrationBaseSpec {
 
         val response: WSResponse = await(request().get())
         response.status shouldBe Status.OK
+        response.json shouldBe Json.toJson(Fixtures.CrystallisationObligationFixture.fulfilledObligationsJsonArray)
+      }
+    }
+
+    "return a 404 status code" when {
+
+      "any valid request is made but no obligations found" in new RetrieveObligationsTest {
+
+        override def setupStubs(): StubMapping = {
+          AuthStub.authorised()
+          MtdIdLookupStub.ninoFound(nino)
+          DesStub.retrieveNonCrystallisationObligationsSuccess(nino, from, to)
+        }
+
+        val response: WSResponse = await(request().get())
+        response.status shouldBe Status.NOT_FOUND
+        response.json shouldBe Json.toJson(NotFoundError)
       }
     }
 

@@ -67,6 +67,11 @@ object DesStub extends WireMockMethods {
       .thenReturn(status = OK, retrieveResponseJson)
   }
 
+  def retrieveNonCrystallisationObligationsSuccess(nino: String, from: String, to: String): StubMapping = {
+    when(method = GET, uri = retrieveObligationsUrl(nino), queryParams = Map("from" -> from, "to" -> to))
+      .thenReturn(status = OK, Fixtures.CrystallisationObligationFixture.notCrystallisationObligationsJsonDes)
+  }
+
   def retrieveObligationsError(nino: String, from: String, to: String, errorStatus: Int, errorBody: String): StubMapping = {
     when(method = GET, uri = retrieveObligationsUrl(nino), queryParams = Map("from" -> from, "to" -> to))
       .thenReturn(status = errorStatus, errorBody)
