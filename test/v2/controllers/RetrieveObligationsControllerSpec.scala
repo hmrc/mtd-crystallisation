@@ -23,12 +23,13 @@ import play.api.mvc.Result
 import uk.gov.hmrc.domain.Nino
 import uk.gov.hmrc.http.HeaderCarrier
 import v2.mocks.requestParsers.MockRetrieveObligationsRequestDataParser
-import v2.mocks.services.{MockCrystallisationService, MockEnrolmentsAuthService, MockMtdIdLookupService}
+import v2.mocks.services.{ MockCrystallisationService, MockEnrolmentsAuthService, MockMtdIdLookupService }
 import v2.models.errors._
 import v2.models.fixtures.Fixtures
 import v2.models.outcomes.DesResponse
 import v2.models.requestData._
 
+import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
 class RetrieveObligationsControllerSpec
@@ -54,8 +55,8 @@ class RetrieveObligationsControllerSpec
   }
 
   private val nino          = "AA123456A"
-  private val from       = "2018-04-06"
-  private val to       = "2019-04-05"
+  private val from          = "2018-04-06"
+  private val to            = "2019-04-05"
   private val correlationId = "X-123"
 
   private val retrieveObligationsRequestData = RetrieveObligationsRequestData(Nino(nino), LocalDate.parse(from), LocalDate.parse(to))

@@ -18,11 +18,11 @@ package v2.controllers
 
 import java.util.UUID
 
-import javax.inject.{Inject, Singleton}
+import javax.inject.{ Inject, Singleton }
 import play.api.Logger
 import play.api.http.MimeTypes
-import play.api.libs.json.{JsValue, Json}
-import play.api.mvc.{Action, AnyContentAsJson, ControllerComponents}
+import play.api.libs.json.{ JsValue, Json }
+import play.api.mvc.{ Action, AnyContentAsJson, ControllerComponents }
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.audit.http.connector.AuditResult
 import v2.controllers.requestParsers.CrystallisationRequestDataParser
@@ -30,10 +30,9 @@ import v2.models.audit._
 import v2.models.auth.UserDetails
 import v2.models.errors._
 import v2.models.requestData.CrystallisationRawData
-import v2.services.{AuditService, CrystallisationService, EnrolmentsAuthService, MtdIdLookupService}
+import v2.services.{ AuditService, CrystallisationService, EnrolmentsAuthService, MtdIdLookupService }
 
-import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.{ ExecutionContext, Future }
 
 @Singleton
 class CrystallisationController @Inject()(val authService: EnrolmentsAuthService,
@@ -41,7 +40,7 @@ class CrystallisationController @Inject()(val authService: EnrolmentsAuthService
                                           crystallisationRequestDataParser: CrystallisationRequestDataParser,
                                           crystallisationService: CrystallisationService,
                                           auditService: AuditService,
-                                          cc: ControllerComponents)
+                                          cc: ControllerComponents)(implicit ec: ExecutionContext)
     extends AuthorisedController(cc) {
 
   val logger: Logger = Logger(this.getClass)
@@ -52,21 +51,20 @@ class CrystallisationController @Inject()(val authService: EnrolmentsAuthService
         crystallisationService.createCrystallisation(crystallisationRequestData).map {
           case Right(desResponse) =>
             logger.info(s"[CrystallisationController][create] - Success response received with CorrelationId: ${desResponse.correlationId}")
-            auditSubmission(createAuditDetails(nino, taxYear, CREATED, request.request.body, desResponse.correlationId,
-              request.userDetails))
+            auditSubmission(createAuditDetails(nino, taxYear, CREATED, request.request.body, desResponse.correlationId, request.userDetails))
             Created.withHeaders("X-CorrelationId" -> desResponse.correlationId).as(MimeTypes.JSON)
           case Left(errorWrapper) =>
             val correlationId = getCorrelationId(errorWrapper)
             val result        = processError(errorWrapper).withHeaders("X-CorrelationId" -> correlationId)
-            auditSubmission(createAuditDetails(nino, taxYear, result.header.status, request.request.body, correlationId,
-              request.userDetails, Some(errorWrapper)))
+            auditSubmission(
+              createAuditDetails(nino, taxYear, result.header.status, request.request.body, correlationId, request.userDetails, Some(errorWrapper)))
             result
         }
       case Left(errorWrapper) =>
         val correlationId = getCorrelationId(errorWrapper)
         val result        = processError(errorWrapper).withHeaders("X-CorrelationId" -> correlationId)
-        auditSubmission(createAuditDetails(nino, taxYear, result.header.status, request.request.body, correlationId,
-          request.userDetails, Some(errorWrapper)))
+        auditSubmission(
+          createAuditDetails(nino, taxYear, result.header.status, request.request.body, correlationId, request.userDetails, Some(errorWrapper)))
         Future.successful(result)
     }
   }
@@ -105,19 +103,17 @@ class CrystallisationController @Inject()(val authService: EnrolmentsAuthService
                                  request: JsValue,
                                  correlationId: String,
                                  userDetails: UserDetails,
-                                 errorWrapper: Option[ErrorWrapper] = None
-                                ): CrystallisationAuditDetail = {
-    val response = errorWrapper.map {
-      wrapper =>
+                                 errorWrapper: Option[ErrorWrapper] = None): CrystallisationAuditDetail = {
+    val response = errorWrapper
+      .map { wrapper =>
         CrystallisationAuditResponse(statusCode, Some(wrapper.allErrors.map(error => AuditError(error.code))))
-    }.getOrElse(CrystallisationAuditResponse(statusCode, None))
+      }
+      .getOrElse(CrystallisationAuditResponse(statusCode, None))
 
     CrystallisationAuditDetail(userDetails.userType, userDetails.agentReferenceNumber, nino, taxYear, request, correlationId, response)
   }
 
-  private def auditSubmission(details: CrystallisationAuditDetail)
-                             (implicit hc: HeaderCarrier,
-                              ec: ExecutionContext): Future[AuditResult] = {
+  private def auditSubmission(details: CrystallisationAuditDetail)(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[AuditResult] = {
     val event = AuditEvent("submitCrystallisation", "crystallisation", details)
     auditService.auditEvent(event)
   }
