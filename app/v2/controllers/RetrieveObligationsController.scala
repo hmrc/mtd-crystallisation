@@ -18,25 +18,25 @@ package v2.controllers
 
 import java.util.UUID
 
-import javax.inject.{Inject, Singleton}
+import javax.inject.{ Inject, Singleton }
 import play.api.Logger
 import play.api.http.MimeTypes
 import play.api.libs.json.Json
-import play.api.mvc.{Action, AnyContent, ControllerComponents}
+import play.api.mvc.{ Action, AnyContent, ControllerComponents }
 import v2.controllers.requestParsers.RetrieveObligationsRequestDataParser
 import v2.models.errors._
 import v2.models.requestData.RetrieveObligationsRawData
-import v2.services.{CrystallisationService, EnrolmentsAuthService, MtdIdLookupService}
+import v2.services.{ CrystallisationService, EnrolmentsAuthService, MtdIdLookupService }
 
-import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.Future
+import scala.concurrent.{ ExecutionContext, Future }
 
 @Singleton
 class RetrieveObligationsController @Inject()(val authService: EnrolmentsAuthService,
                                               val lookupService: MtdIdLookupService,
                                               retrieveObligationsRequestDataParser: RetrieveObligationsRequestDataParser,
                                               crystallisationService: CrystallisationService,
-                                              cc: ControllerComponents) extends AuthorisedController(cc) {
+                                              cc: ControllerComponents)(implicit ec: ExecutionContext)
+    extends AuthorisedController(cc) {
 
   val logger: Logger = Logger(this.getClass)
 
@@ -48,7 +48,7 @@ class RetrieveObligationsController @Inject()(val authService: EnrolmentsAuthSer
             case Right(desResponse) if desResponse.responseData.nonEmpty =>
               logger.info(
                 s"[RetrieveObligationsController][retrieveObligations] - Success response received with CorrelationId: ${desResponse.correlationId}")
-              Ok(Json.obj("obligations"-> desResponse.responseData)).withHeaders("X-CorrelationId" -> desResponse.correlationId).as(MimeTypes.JSON)
+              Ok(Json.obj("obligations" -> desResponse.responseData)).withHeaders("X-CorrelationId" -> desResponse.correlationId).as(MimeTypes.JSON)
             case Right(desResponse) if desResponse.responseData.isEmpty =>
               logger.info(
                 s"[RetrieveObligationsController][retrieveObligations] - Empty obligations response received with CorrelationId: ${desResponse.correlationId}")
@@ -67,17 +67,11 @@ class RetrieveObligationsController @Inject()(val authService: EnrolmentsAuthSer
 
   private def processError(errorWrapper: ErrorWrapper) = {
     errorWrapper.error match {
-      case BadRequestError          |
-           NinoFormatError          |
-           MissingFromDateError     |
-           MissingToDateError       |
-           InvalidToDateError       |
-           InvalidFromDateError     |
-           RangeDateTooLongError    |
-           RuleFromDateNotSupported |
-           RangeEndDateBeforeStartDateError => BadRequest(Json.toJson(errorWrapper))
-      case NotFoundError         => NotFound(Json.toJson(errorWrapper))
-      case DownstreamError       => InternalServerError(Json.toJson(errorWrapper))
+      case BadRequestError | NinoFormatError | MissingFromDateError | MissingToDateError | InvalidToDateError | InvalidFromDateError |
+          RangeDateTooLongError | RuleFromDateNotSupported | RangeEndDateBeforeStartDateError =>
+        BadRequest(Json.toJson(errorWrapper))
+      case NotFoundError   => NotFound(Json.toJson(errorWrapper))
+      case DownstreamError => InternalServerError(Json.toJson(errorWrapper))
     }
   }
 
