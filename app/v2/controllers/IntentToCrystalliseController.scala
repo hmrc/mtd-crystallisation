@@ -40,7 +40,7 @@ class IntentToCrystalliseController @Inject()(val authService: EnrolmentsAuthSer
                                               crystallisationService: CrystallisationService,
                                               auditService: AuditService,
                                               cc: ControllerComponents)(implicit ec: ExecutionContext)
-    extends AuthorisedController(cc) with BaseController {
+  extends AuthorisedController(cc) with BaseController {
 
   implicit val endpointLogContext: EndpointLogContext =
     EndpointLogContext(controllerName = "IntentToCrystalliseController", endpointName = "intentToCrystallise")

@@ -16,12 +16,9 @@
 
 package v2.controllers
 
-import java.util.UUID
-
 import cats.data.EitherT
 import cats.implicits._
 import javax.inject.{Inject, Singleton}
-import play.api.Logger
 import play.api.http.MimeTypes
 import play.api.libs.json.{JsValue, Json}
 import play.api.mvc.{Action, AnyContentAsJson, ControllerComponents}
@@ -48,7 +45,7 @@ class CrystallisationController @Inject()(val authService: EnrolmentsAuthService
   implicit val endpointLogContext: EndpointLogContext =
     EndpointLogContext(controllerName = "CrystallisationController", endpointName = "create")
 
-  def handleRequest(nino: String, taxYear: String): Action[JsValue] =
+  def create(nino: String, taxYear: String): Action[JsValue] =
     authorisedAction(nino).async(parse.json) { implicit request =>
       val rawData = CrystallisationRawData(nino, taxYear, AnyContentAsJson(request.body))
       val result =
@@ -60,7 +57,7 @@ class CrystallisationController @Inject()(val authService: EnrolmentsAuthService
             s"[${endpointLogContext.controllerName}][${endpointLogContext.endpointName}] - " +
               s"Success response received with CorrelationId: ${vendorResponse.correlationId}")
           auditSubmission(createAuditDetails(nino, taxYear, CREATED, request.request.body, vendorResponse.correlationId, request.userDetails))
-          Created(Json.toJson(vendorResponse.responseData))
+          Created
             .withApiHeaders(vendorResponse.correlationId)
             .as(MimeTypes.JSON)
         }
@@ -72,30 +69,6 @@ class CrystallisationController @Inject()(val authService: EnrolmentsAuthService
         result
       }.merge
     }
-
-  def create(nino: String, taxYear: String): Action[JsValue] = authorisedAction(nino).async(parse.json) { implicit request =>
-    crystallisationRequestDataParser.parseRequest(CrystallisationRawData(nino, taxYear, AnyContentAsJson(request.body))) match {
-      case Right(crystallisationRequestData) =>
-        crystallisationService.createCrystallisation(crystallisationRequestData).map {
-          case Right(desResponse) =>
-            logger.info(s"[CrystallisationController][create] - Success response received with CorrelationId: ${desResponse.correlationId}")
-            auditSubmission(createAuditDetails(nino, taxYear, CREATED, request.request.body, desResponse.correlationId, request.userDetails))
-            Created.withHeaders("X-CorrelationId" -> desResponse.correlationId).as(MimeTypes.JSON)
-          case Left(errorWrapper) =>
-            val correlationId = getCorrelationId(errorWrapper)
-            val result        = errorResult(errorWrapper).withHeaders("X-CorrelationId" -> correlationId)
-            auditSubmission(
-              createAuditDetails(nino, taxYear, result.header.status, request.request.body, correlationId, request.userDetails, Some(errorWrapper)))
-            result
-        }
-      case Left(errorWrapper) =>
-        val correlationId = getCorrelationId(errorWrapper)
-        val result        = errorResult(errorWrapper).withHeaders("X-CorrelationId" -> correlationId)
-        auditSubmission(
-          createAuditDetails(nino, taxYear, result.header.status, request.request.body, correlationId, request.userDetails, Some(errorWrapper)))
-        Future.successful(result)
-    }
-  }
 
   private def errorResult(errorWrapper: ErrorWrapper) = {
     errorWrapper.error match {
