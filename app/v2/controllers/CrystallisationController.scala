@@ -64,7 +64,7 @@ class CrystallisationController @Inject()(val authService: EnrolmentsAuthService
 
       result.leftMap { errorWrapper =>
         val correlationId = getCorrelationId(errorWrapper)
-        val result        = errorResult(errorWrapper).withHeaders("X-CorrelationId" -> correlationId)
+        val result        = errorResult(errorWrapper).withApiHeaders(correlationId)
         auditSubmission(createAuditDetails(nino, taxYear, result.header.status, request.request.body, correlationId, request.userDetails, Some(errorWrapper)))
         result
       }.merge
