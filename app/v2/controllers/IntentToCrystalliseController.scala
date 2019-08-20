@@ -59,7 +59,7 @@ class IntentToCrystalliseController @Inject()(val authService: EnrolmentsAuthSer
               s"Success response received with CorrelationId: ${vendorResponse.correlationId}")
           auditSubmission(createAuditDetails(nino, taxYear, SEE_OTHER, vendorResponse.correlationId, request.userDetails, Some(vendorResponse.responseData)))
           val url = s"/self-assessment/ni/$nino/calculations/${vendorResponse.responseData}"
-          SeeOther(url).withHeaders(LOCATION -> url, "X-CorrelationId" -> vendorResponse.correlationId).as(MimeTypes.JSON)
+          SeeOther(url).withApiHeaders(vendorResponse.correlationId, LOCATION -> url).as(MimeTypes.JSON)
         }
 
       result.leftMap { errorWrapper =>
