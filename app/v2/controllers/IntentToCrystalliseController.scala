@@ -16,23 +16,22 @@
 
 package v2.controllers
 
-import java.util.UUID
-
-import javax.inject.{ Inject, Singleton }
-import play.api.Logger
+import cats.data.EitherT
+import cats.implicits._
+import javax.inject.{Inject, Singleton}
 import play.api.http.MimeTypes
 import play.api.libs.json.Json
-import play.api.mvc.{ Action, AnyContent, ControllerComponents }
+import play.api.mvc.{Action, AnyContent, ControllerComponents}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.audit.http.connector.AuditResult
 import v2.controllers.requestParsers.IntentToCrystalliseRequestDataParser
-import v2.models.audit.{ AuditError, AuditEvent, IntentToCrystalliseAuditDetail, IntentToCrystalliseAuditResponse }
+import v2.models.audit.{AuditError, AuditEvent, IntentToCrystalliseAuditDetail, IntentToCrystalliseAuditResponse}
 import v2.models.auth.UserDetails
 import v2.models.errors._
 import v2.models.requestData.IntentToCrystalliseRawData
-import v2.services.{ AuditService, CrystallisationService, EnrolmentsAuthService, MtdIdLookupService }
+import v2.services.{AuditService, CrystallisationService, EnrolmentsAuthService, MtdIdLookupService}
 
-import scala.concurrent.{ ExecutionContext, Future }
+import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
 class IntentToCrystalliseController @Inject()(val authService: EnrolmentsAuthService,
@@ -41,59 +40,47 @@ class IntentToCrystalliseController @Inject()(val authService: EnrolmentsAuthSer
                                               crystallisationService: CrystallisationService,
                                               auditService: AuditService,
                                               cc: ControllerComponents)(implicit ec: ExecutionContext)
-    extends AuthorisedController(cc) {
+    extends AuthorisedController(cc) with BaseController {
 
-  val logger: Logger = Logger(this.getClass)
+  implicit val endpointLogContext: EndpointLogContext =
+    EndpointLogContext(controllerName = "IntentToCrystalliseController", endpointName = "intentToCrystallise")
+
 
   def intentToCrystallise(nino: String, taxYear: String): Action[AnyContent] =
     authorisedAction(nino).async { implicit request =>
-      intentToCrystalliseRequestDataParser.parseRequest(IntentToCrystalliseRawData(nino, taxYear)) match {
-        case Right(intentToCrystalliseRequestData) =>
-          crystallisationService.performIntentToCrystallise(intentToCrystalliseRequestData).map {
-            case Right(desResponse) =>
-              logger.info(
-                s"[IntentToCrystalliseController][intentToCrystallise] - Success response received with CorrelationId: ${desResponse.correlationId}")
-              val url = s"/self-assessment/ni/$nino/calculations/${desResponse.responseData}"
-              auditSubmission(
-                createAuditDetails(nino, taxYear, SEE_OTHER, desResponse.correlationId, request.userDetails, Some(desResponse.responseData)))
-              SeeOther(url).withHeaders(LOCATION -> url, "X-CorrelationId" -> desResponse.correlationId).as(MimeTypes.JSON)
-            case Left(errorWrapper) =>
-              val correlationId = getCorrelationId(errorWrapper)
-              val result        = processError(errorWrapper).withHeaders("X-CorrelationId" -> correlationId)
-              auditSubmission(createAuditDetails(nino, taxYear, result.header.status, correlationId, request.userDetails, None, Some(errorWrapper)))
-              result
-          }
-        case Left(errorWrapper) =>
-          val correlationId = getCorrelationId(errorWrapper)
-          val result        = processError(errorWrapper).withHeaders("X-CorrelationId" -> correlationId)
-          auditSubmission(createAuditDetails(nino, taxYear, result.header.status, correlationId, request.userDetails, None, Some(errorWrapper)))
-          Future.successful(result)
-      }
+      val rawData = IntentToCrystalliseRawData(nino, taxYear)
+      val result =
+        for {
+          parsedRequest <- EitherT.fromEither[Future](intentToCrystalliseRequestDataParser.parseRequest(rawData))
+          vendorResponse <- EitherT(crystallisationService.performIntentToCrystallise(parsedRequest))
+        } yield {
+          logger.info(
+            s"[${endpointLogContext.controllerName}][${endpointLogContext.endpointName}] - " +
+              s"Success response received with CorrelationId: ${vendorResponse.correlationId}")
+          auditSubmission(createAuditDetails(nino, taxYear, SEE_OTHER, vendorResponse.correlationId, request.userDetails, Some(vendorResponse.responseData)))
+          val url = s"/self-assessment/ni/$nino/calculations/${vendorResponse.responseData}"
+          SeeOther(url).withHeaders(LOCATION -> url, "X-CorrelationId" -> vendorResponse.correlationId).as(MimeTypes.JSON)
+        }
+
+      result.leftMap { errorWrapper =>
+        val correlationId = getCorrelationId(errorWrapper)
+        val result        = errorResult(errorWrapper).withApiHeaders(correlationId)
+        auditSubmission(createAuditDetails(nino, taxYear, result.header.status, correlationId, request.userDetails, None, Some(errorWrapper)))
+        result
+      }.merge
     }
 
-  private def processError(errorWrapper: ErrorWrapper) = {
+
+  private def errorResult(errorWrapper: ErrorWrapper) = {
     errorWrapper.error match {
-      case BadRequestError | NinoFormatError | TaxYearFormatError | RuleTaxYearNotSupportedError | RuleTaxYearRangeExceededError =>
-        BadRequest(Json.toJson(errorWrapper))
+      case BadRequestError
+           | NinoFormatError
+           | TaxYearFormatError
+           | RuleTaxYearNotSupportedError
+           | RuleTaxYearRangeExceededError => BadRequest(Json.toJson(errorWrapper))
       case NoSubmissionsExistError | FinalDeclarationReceivedError => Forbidden(Json.toJson(errorWrapper))
-      case NotFoundError                                           => NotFound(Json.toJson(errorWrapper))
-      case DownstreamError                                         => InternalServerError(Json.toJson(errorWrapper))
-    }
-  }
-
-  private def getCorrelationId(errorWrapper: ErrorWrapper): String = {
-    errorWrapper.correlationId match {
-      case Some(correlationId) =>
-        logger.info(
-          "[IntentToCrystalliseController][getCorrelationId] - " +
-            s"Error received from DES ${Json.toJson(errorWrapper)} with CorrelationId: $correlationId")
-        correlationId
-      case None =>
-        val correlationId = UUID.randomUUID().toString
-        logger.info(
-          "[IntentToCrystalliseController][getCorrelationId] - " +
-            s"Validation error: ${Json.toJson(errorWrapper)} with CorrelationId: $correlationId")
-        correlationId
+      case NotFoundError => NotFound(Json.toJson(errorWrapper))
+      case DownstreamError => InternalServerError(Json.toJson(errorWrapper))
     }
   }
 
