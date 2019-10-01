@@ -63,6 +63,7 @@ class RetrieveObligationsISpec extends IntegrationBaseSpec {
         val response: WSResponse = await(request().get())
         response.status shouldBe Status.OK
         response.json shouldBe Json.toJson(Fixtures.CrystallisationObligationFixture.fulfilledObligationsJsonArray)
+        response.header("Content-Type") shouldBe Some("application/json")
       }
     }
 
@@ -79,6 +80,7 @@ class RetrieveObligationsISpec extends IntegrationBaseSpec {
         val response: WSResponse = await(request().get())
         response.status shouldBe Status.NOT_FOUND
         response.json shouldBe Json.toJson(NotFoundError)
+        response.header("Content-Type") shouldBe Some("application/json")
       }
     }
 
@@ -115,6 +117,7 @@ class RetrieveObligationsISpec extends IntegrationBaseSpec {
         val response: WSResponse = await(request().get())
         response.status shouldBe expectedStatus
         response.json shouldBe Json.toJson(expectedBody)
+        response.header("Content-Type") shouldBe Some("application/json")
       }
     }
 
@@ -145,6 +148,7 @@ class RetrieveObligationsISpec extends IntegrationBaseSpec {
         val response: WSResponse = await(request().get())
         response.status shouldBe expectedStatus
         response.json shouldBe Json.toJson(expectedBody)
+        response.header("Content-Type") shouldBe Some("application/json")
       }
     }
   }

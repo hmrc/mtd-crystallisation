@@ -70,7 +70,6 @@ class CrystallisationISpec extends IntegrationBaseSpec {
 
         val response: WSResponse = await(request().post(Json.parse(requestJson)))
         response.status shouldBe Status.CREATED
-        response.header("Content-Type") shouldBe Some("application/json")
       }
     }
 
@@ -107,6 +106,7 @@ class CrystallisationISpec extends IntegrationBaseSpec {
         val response: WSResponse = await(request().post(Json.parse(requestJson)))
         response.status shouldBe expectedStatus
         response.json shouldBe Json.toJson(expectedBody)
+        response.header("Content-Type") shouldBe Some("application/json")
       }
     }
 
@@ -131,6 +131,7 @@ class CrystallisationISpec extends IntegrationBaseSpec {
         val response: WSResponse = await(request().post(Json.parse(requestJson)))
         response.status shouldBe expectedStatus
         response.json shouldBe Json.toJson(expectedBody)
+        response.header("Content-Type") shouldBe Some("application/json")
       }
     }
 
@@ -150,6 +151,7 @@ class CrystallisationISpec extends IntegrationBaseSpec {
       val response: WSResponse = await(request().post(requestBody))
       response.status shouldBe Status.BAD_REQUEST
       response.json shouldBe Json.toJson(ErrorWrapper(None, InvalidCalcIdError, None))
+      response.header("Content-Type") shouldBe Some("application/json")
     }
 
     s"empty body is supplied" in new CreateTest {
@@ -168,6 +170,7 @@ class CrystallisationISpec extends IntegrationBaseSpec {
       val response: WSResponse = await(request().post(requestBody))
       response.status shouldBe Status.BAD_REQUEST
       response.json shouldBe Json.toJson(ErrorWrapper(None, RuleIncorrectOrEmptyBodyError, None))
+      response.header("Content-Type") shouldBe Some("application/json")
     }
   }
 
