@@ -99,6 +99,7 @@ class IntentToCrystalliseISpec extends IntegrationBaseSpec {
         val response: WSResponse = await(request().post(EmptyBody))
         response.status shouldBe expectedStatus
         response.json shouldBe Json.toJson(expectedBody)
+        response.header("Content-Type") shouldBe Some("application/json")
       }
     }
 
@@ -123,6 +124,7 @@ class IntentToCrystalliseISpec extends IntegrationBaseSpec {
         val response: WSResponse = await(request().post(EmptyBody))
         response.status shouldBe expectedStatus
         response.json shouldBe Json.toJson(expectedBody)
+        response.header("Content-Type") shouldBe Some("application/json")
       }
     }
   }
