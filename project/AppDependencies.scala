@@ -24,16 +24,16 @@ object AppDependencies {
     ws,
     "uk.gov.hmrc"   %% "bootstrap-play-26" % "1.3.0",
     "uk.gov.hmrc"   %% "domain"            % "5.6.0-play-26",
-    "org.typelevel" %% "cats-core"         % "1.6.0"
+    "org.typelevel" %% "cats-core"         % "2.0.0"
   )
 
   def test(scope: String = "test, it"): Seq[sbt.ModuleID] = Seq(
-    "org.scalatest"          %% "scalatest"          % "3.0.5"             % scope,
-    "org.scalamock"          %% "scalamock"          % "4.1.0"             % scope,
+    "org.scalatest"          %% "scalatest"          % "3.0.8"             % scope,
+    "org.scalamock"          %% "scalamock"          % "4.4.0"             % scope,
     "org.pegdown"            % "pegdown"             % "1.6.0"             % scope,
     "com.typesafe.play"      %% "play-test"          % PlayVersion.current % scope,
     "org.scalatestplus.play" %% "scalatestplus-play" % "3.1.2"             % scope,
-    "com.github.tomakehurst" % "wiremock"            % "2.22.0"            % scope
+    "com.github.tomakehurst" % "wiremock"            % "2.25.1"            % scope
   )
 
   // Fixes a transitive dependency clash between wiremock and scalatestplus-play
