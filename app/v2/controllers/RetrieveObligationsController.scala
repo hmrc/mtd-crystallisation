@@ -74,7 +74,7 @@ class RetrieveObligationsController @Inject()(val authService: EnrolmentsAuthSer
     }
 
   private def errorResult(errorWrapper: ErrorWrapper) = {
-    errorWrapper.error match {
+    (errorWrapper.error: @unchecked)  match {
       case BadRequestError
            | NinoFormatError
            | MissingFromDateError

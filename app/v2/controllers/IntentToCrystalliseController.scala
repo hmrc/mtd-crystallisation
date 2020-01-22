@@ -72,7 +72,7 @@ class IntentToCrystalliseController @Inject()(val authService: EnrolmentsAuthSer
 
 
   private def errorResult(errorWrapper: ErrorWrapper) = {
-    errorWrapper.error match {
+    (errorWrapper.error: @unchecked) match {
       case BadRequestError
            | NinoFormatError
            | TaxYearFormatError
@@ -89,7 +89,7 @@ class IntentToCrystalliseController @Inject()(val authService: EnrolmentsAuthSer
                                  statusCode: Int,
                                  correlationId: String,
                                  userDetails: UserDetails,
-                                 calculationId: Option[String] = None,
+                                 calculationId: Option[String],
                                  errorWrapper: Option[ErrorWrapper] = None): IntentToCrystalliseAuditDetail = {
     val response = errorWrapper
       .map { wrapper =>
