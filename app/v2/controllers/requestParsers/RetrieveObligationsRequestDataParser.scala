@@ -26,13 +26,13 @@ import v2.models.requestData.{RetrieveObligationsRawData, RetrieveObligationsReq
 
 class RetrieveObligationsRequestDataParser @Inject()(validator: RetrieveObligationsValidator) {
 
-  def parseRequest(data: RetrieveObligationsRawData): Either[ErrorWrapper, RetrieveObligationsRequestData] = {
+  def parseRequest(data: RetrieveObligationsRawData)(implicit correlationId: String): Either[ErrorWrapper, RetrieveObligationsRequestData] = {
 
     validator.validate(data) match {
       case Nil =>
         Right(RetrieveObligationsRequestData(Nino(data.nino), LocalDate.parse(data.from), LocalDate.parse(data.to)))
-      case err :: Nil => Left(ErrorWrapper(None, err, None))
-      case errs       => Left(ErrorWrapper(None, BadRequestError, Some(errs)))
+      case err :: Nil => Left(ErrorWrapper(correlationId, err, None))
+      case errs       => Left(ErrorWrapper(correlationId, BadRequestError, Some(errs)))
     }
   }
 }

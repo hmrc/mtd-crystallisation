@@ -28,7 +28,7 @@ trait MockIntentToCrystalliseRequestDataParser extends MockFactory {
 
   object MockIntentToCrystalliseRequestDataParser {
     def parse(data: IntentToCrystalliseRawData): CallHandler[Either[ErrorWrapper, IntentToCrystalliseRequestData]] = {
-      (mockIntentToCrystalliseRequestDataParser.parseRequest(_: IntentToCrystalliseRawData)).expects(data)
+      (mockIntentToCrystalliseRequestDataParser.parseRequest(_: IntentToCrystalliseRawData)(_: String)).expects(data, *)
     }
   }
 

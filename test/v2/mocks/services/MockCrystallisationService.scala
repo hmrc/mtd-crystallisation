@@ -30,18 +30,18 @@ trait MockCrystallisationService extends MockFactory {
 
   object MockCrystallisationService {
     def create(crystallisationRequestData: CrystallisationRequestData): CallHandler[Future[CrystallisationOutcome]] = {
-      (mockCrystallisationService.createCrystallisation(_: CrystallisationRequestData)(_: HeaderCarrier, _: ExecutionContext))
-        .expects(crystallisationRequestData, *, *)
+      (mockCrystallisationService.createCrystallisation(_: CrystallisationRequestData)(_: HeaderCarrier, _: ExecutionContext, _: String))
+        .expects(crystallisationRequestData, *, *, *)
     }
 
     def intent(intentToCrystalliseRequestData: IntentToCrystalliseRequestData): CallHandler[Future[IntentToCrystalliseOutcome]] = {
-      (mockCrystallisationService.performIntentToCrystallise(_: IntentToCrystalliseRequestData)(_: HeaderCarrier, _: ExecutionContext))
-        .expects(intentToCrystalliseRequestData, *, *)
+      (mockCrystallisationService.performIntentToCrystallise(_: IntentToCrystalliseRequestData)(_: HeaderCarrier, _: ExecutionContext, _: String))
+        .expects(intentToCrystalliseRequestData, *, *, *)
     }
 
     def retrieve(data: RetrieveObligationsRequestData): CallHandler[Future[RetrieveObligationsOutcome]] = {
-      (mockCrystallisationService.retrieveObligations(_: RetrieveObligationsRequestData)(_: HeaderCarrier, _: ExecutionContext))
-        .expects(data, *, *)
+      (mockCrystallisationService.retrieveObligations(_: RetrieveObligationsRequestData)(_: HeaderCarrier, _: ExecutionContext, _: String))
+        .expects(data, *, *, *)
     }
   }
 

@@ -28,7 +28,7 @@ trait MockRetrieveObligationsRequestDataParser extends MockFactory {
 
   object MockRetrieveObligationsRequestDataParser {
     def parse(data: RetrieveObligationsRawData): CallHandler[Either[ErrorWrapper, RetrieveObligationsRequestData]] = {
-      (mockRetrieveObligationsRequestDataParser.parseRequest(_: RetrieveObligationsRawData)).expects(data)
+      (mockRetrieveObligationsRequestDataParser.parseRequest(_: RetrieveObligationsRawData)(_: String)).expects(data, *)
     }
   }
 

@@ -23,7 +23,8 @@ import play.api.mvc.Result
 import uk.gov.hmrc.domain.Nino
 import uk.gov.hmrc.http.HeaderCarrier
 import v2.mocks.requestParsers.MockRetrieveObligationsRequestDataParser
-import v2.mocks.services.{ MockCrystallisationService, MockEnrolmentsAuthService, MockMtdIdLookupService }
+import v2.mocks.services.{MockCrystallisationService, MockEnrolmentsAuthService, MockMtdIdLookupService}
+import v2.mocks.utils.MockIdGenerator
 import v2.models.errors._
 import v2.models.fixtures.Fixtures
 import v2.models.outcomes.DesResponse
@@ -37,7 +38,13 @@ class RetrieveObligationsControllerSpec
     with MockEnrolmentsAuthService
     with MockMtdIdLookupService
     with MockRetrieveObligationsRequestDataParser
-    with MockCrystallisationService {
+    with MockCrystallisationService
+    with MockIdGenerator {
+
+  private val nino          = "AA123456A"
+  private val from          = "2018-04-06"
+  private val to            = "2019-04-05"
+  private val correlationId = "X-123"
 
   trait Test {
     val hc = HeaderCarrier()
@@ -47,17 +54,14 @@ class RetrieveObligationsControllerSpec
       lookupService = mockMtdIdLookupService,
       retrieveObligationsRequestDataParser = mockRetrieveObligationsRequestDataParser,
       crystallisationService = mockCrystallisationService,
-      cc = cc
+      cc = cc,
+      idGenerator = mockIdGenerator
     )
 
     MockedMtdIdLookupService.lookup(nino).returns(Future.successful(Right("test-mtd-id")))
     MockedEnrolmentsAuthService.authoriseUser()
+    MockIdGenerator.generateCorrelationId.returns(correlationId)
   }
-
-  private val nino          = "AA123456A"
-  private val from          = "2018-04-06"
-  private val to            = "2019-04-05"
-  private val correlationId = "X-123"
 
   private val retrieveObligationsRequestData = RetrieveObligationsRequestData(Nino(nino), LocalDate.parse(from), LocalDate.parse(to))
 
@@ -105,11 +109,11 @@ class RetrieveObligationsControllerSpec
 
         MockRetrieveObligationsRequestDataParser
           .parse(retrieveObligationsRawData)
-          .returns(Left(ErrorWrapper(None, NinoFormatError, None)))
+          .returns(Left(ErrorWrapper(correlationId, NinoFormatError, None)))
 
         val result: Future[Result] = controller.retrieveObligations(nino, from, to)(fakeRequest)
         status(result) shouldBe BAD_REQUEST
-        contentAsJson(result) shouldBe Json.toJson(ErrorWrapper(None, NinoFormatError, None))
+        contentAsJson(result) shouldBe Json.toJson(ErrorWrapper(correlationId, NinoFormatError, None))
         header("X-CorrelationId", result).nonEmpty shouldBe true
       }
     }
@@ -118,12 +122,12 @@ class RetrieveObligationsControllerSpec
       "more than one validations exist" in new Test() {
         MockRetrieveObligationsRequestDataParser
           .parse(retrieveObligationsRawData)
-          .returns(Left(ErrorWrapper(None, BadRequestError, Some(Seq(NinoFormatError, InvalidFromDateError)))))
+          .returns(Left(ErrorWrapper(correlationId, BadRequestError, Some(Seq(NinoFormatError, InvalidFromDateError)))))
 
         val result: Future[Result] = controller.retrieveObligations(nino, from, to)(fakeRequest)
 
         status(result) shouldBe BAD_REQUEST
-        contentAsJson(result) shouldBe Json.toJson(ErrorWrapper(None, BadRequestError, Some(Seq(NinoFormatError, InvalidFromDateError))))
+        contentAsJson(result) shouldBe Json.toJson(ErrorWrapper(correlationId, BadRequestError, Some(Seq(NinoFormatError, InvalidFromDateError))))
         header("X-CorrelationId", result).nonEmpty shouldBe true
       }
     }
@@ -175,7 +179,7 @@ class RetrieveObligationsControllerSpec
 
         MockRetrieveObligationsRequestDataParser
           .parse(retrieveObligationsRawData)
-          .returns(Left(ErrorWrapper(Some(correlationId), error, None)))
+          .returns(Left(ErrorWrapper(correlationId, error, None)))
 
         val result: Future[Result] = controller.retrieveObligations(nino, from, to)(fakeRequest)
 
@@ -194,7 +198,7 @@ class RetrieveObligationsControllerSpec
 
         MockCrystallisationService
           .retrieve(retrieveObligationsRequestData)
-          .returns(Future.successful(Left(ErrorWrapper(Some(correlationId), error, None))))
+          .returns(Future.successful(Left(ErrorWrapper(correlationId, error, None))))
 
         val result: Future[Result] = controller.retrieveObligations(nino, from, to)(fakeRequest)
 

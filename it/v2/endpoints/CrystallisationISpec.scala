@@ -150,7 +150,7 @@ class CrystallisationISpec extends IntegrationBaseSpec {
 
       val response: WSResponse = await(request().post(requestBody))
       response.status shouldBe Status.BAD_REQUEST
-      response.json shouldBe Json.toJson(ErrorWrapper(None, InvalidCalcIdError, None))
+      response.json shouldBe Json.toJson(ErrorWrapper(correlationId, InvalidCalcIdError, None))
       response.header("Content-Type") shouldBe Some("application/json")
     }
 
@@ -169,7 +169,7 @@ class CrystallisationISpec extends IntegrationBaseSpec {
 
       val response: WSResponse = await(request().post(requestBody))
       response.status shouldBe Status.BAD_REQUEST
-      response.json shouldBe Json.toJson(ErrorWrapper(None, RuleIncorrectOrEmptyBodyError, None))
+      response.json shouldBe Json.toJson(ErrorWrapper(correlationId, RuleIncorrectOrEmptyBodyError, None))
       response.header("Content-Type") shouldBe Some("application/json")
     }
   }

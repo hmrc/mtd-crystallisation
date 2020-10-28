@@ -25,13 +25,13 @@ import v2.models.requestData.{CrystallisationRawData, CrystallisationRequestData
 
 class CrystallisationRequestDataParser @Inject()(validator: CrystallisationValidator) {
 
-  def parseRequest(data: CrystallisationRawData): Either[ErrorWrapper, CrystallisationRequestData] = {
+  def parseRequest(data: CrystallisationRawData)(implicit correlationId: String): Either[ErrorWrapper, CrystallisationRequestData] = {
     validator.validate(data) match {
       case Nil =>
         //Validation passed.  Request data is ok to transform.
         Right(CrystallisationRequestData(Nino(data.nino), DesTaxYear.fromMtd(data.taxYear), data.body.json.as[CrystallisationRequest]))
-      case err :: Nil => Left(ErrorWrapper(None, err, None))
-      case errs => Left(ErrorWrapper(None, BadRequestError, Some(errs)))
+      case err :: Nil => Left(ErrorWrapper(correlationId, err, None))
+      case errs => Left(ErrorWrapper(correlationId, BadRequestError, Some(errs)))
     }
   }
 
