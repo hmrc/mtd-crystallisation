@@ -14,22 +14,17 @@
  * limitations under the License.
  */
 
-package v2.mocks.requestParsers
+package v2.mocks.utils
 
 import org.scalamock.handlers.CallHandler
 import org.scalamock.scalatest.MockFactory
-import v2.controllers.requestParsers.CrystallisationRequestDataParser
-import v2.models.errors.ErrorWrapper
-import v2.models.requestData.{CrystallisationRawData, CrystallisationRequestData}
+import v2.utils.IdGenerator
 
-trait MockCrystallisationRequestDataParser extends MockFactory {
+trait MockIdGenerator extends MockFactory {
 
-  val mockCrystallisationRequestDataParser = mock[CrystallisationRequestDataParser]
+  val mockIdGenerator: IdGenerator = mock[IdGenerator]
 
-  object MockCrystallisationRequestDataParser {
-    def parse(data: CrystallisationRawData): CallHandler[Either[ErrorWrapper, CrystallisationRequestData]] = {
-      (mockCrystallisationRequestDataParser.parseRequest(_: CrystallisationRawData)(_: String)).expects(data, *)
-    }
+  object MockIdGenerator {
+    def generateCorrelationId: CallHandler[String] = (mockIdGenerator.generateCorrelationId _).expects()
   }
-
 }

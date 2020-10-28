@@ -22,6 +22,7 @@ import uk.gov.hmrc.domain.Nino
 import uk.gov.hmrc.http.HeaderCarrier
 import v2.mocks.requestParsers.MockIntentToCrystalliseRequestDataParser
 import v2.mocks.services.{MockAuditService, MockCrystallisationService, MockEnrolmentsAuthService, MockMtdIdLookupService}
+import v2.mocks.utils.MockIdGenerator
 import v2.models.audit.{AuditError, AuditEvent, IntentToCrystalliseAuditDetail, IntentToCrystalliseAuditResponse}
 import v2.models.errors._
 import v2.models.outcomes.DesResponse
@@ -36,7 +37,13 @@ class IntentToCrystalliseControllerSpec
     with MockMtdIdLookupService
     with MockIntentToCrystalliseRequestDataParser
     with MockCrystallisationService
-    with MockAuditService {
+    with MockAuditService
+    with MockIdGenerator {
+
+  private val nino          = "AA123456A"
+  private val taxYear       = "2017-18"
+  private val correlationId = "X-123"
+  private val calculationId = "041f7e4d-87b9-4d4a-a296-3cfbdf92f7e2"
 
   trait Test {
     val hc = HeaderCarrier()
@@ -47,17 +54,14 @@ class IntentToCrystalliseControllerSpec
       intentToCrystalliseRequestDataParser = mockIntentToCrystalliseRequestDataParser,
       crystallisationService = mockCrystallisationService,
       auditService = mockAuditService,
-      cc = cc
+      cc = cc,
+      idGenerator = mockIdGenerator
     )
 
     MockedMtdIdLookupService.lookup(nino).returns(Future.successful(Right("test-mtd-id")))
     MockedEnrolmentsAuthService.authoriseUser()
+    MockIdGenerator.generateCorrelationId.returns(correlationId)
   }
-
-  private val nino          = "AA123456A"
-  private val taxYear       = "2017-18"
-  private val correlationId = "X-123"
-  private val calculationId = "041f7e4d-87b9-4d4a-a296-3cfbdf92f7e2"
 
   private val intentToCrystalliseRequestData = IntentToCrystalliseRequestData(Nino(nino), DesTaxYear.fromMtd(taxYear))
 
@@ -93,11 +97,11 @@ class IntentToCrystalliseControllerSpec
 
         MockIntentToCrystalliseRequestDataParser
           .parse(intentToCrystalliseRawData)
-          .returns(Left(ErrorWrapper(None, NinoFormatError, None)))
+          .returns(Left(ErrorWrapper(correlationId, NinoFormatError, None)))
 
         val result: Future[Result] = controller.intentToCrystallise(nino, taxYear)(fakeRequest)
         status(result) shouldBe BAD_REQUEST
-        contentAsJson(result) shouldBe Json.toJson(ErrorWrapper(None, NinoFormatError, None))
+        contentAsJson(result) shouldBe Json.toJson(ErrorWrapper(correlationId, NinoFormatError, None))
 
         val detail = IntentToCrystalliseAuditDetail("Individual", None, nino, taxYear, header("X-CorrelationId", result).get, None,
           IntentToCrystalliseAuditResponse(BAD_REQUEST, Some(Seq(AuditError(NinoFormatError.code)))))
@@ -111,12 +115,12 @@ class IntentToCrystalliseControllerSpec
       "more than one validations exist" in new Test() {
         MockIntentToCrystalliseRequestDataParser
           .parse(intentToCrystalliseRawData)
-          .returns(Left(ErrorWrapper(None, BadRequestError, Some(Seq(NinoFormatError, TaxYearFormatError)))))
+          .returns(Left(ErrorWrapper(correlationId, BadRequestError, Some(Seq(NinoFormatError, TaxYearFormatError)))))
 
         val result: Future[Result] = controller.intentToCrystallise(nino, taxYear)(fakeRequest)
 
         status(result) shouldBe BAD_REQUEST
-        contentAsJson(result) shouldBe Json.toJson(ErrorWrapper(None, BadRequestError, Some(Seq(NinoFormatError, TaxYearFormatError))))
+        contentAsJson(result) shouldBe Json.toJson(ErrorWrapper(correlationId, BadRequestError, Some(Seq(NinoFormatError, TaxYearFormatError))))
         header("X-CorrelationId", result).nonEmpty shouldBe true
 
         val detail = IntentToCrystalliseAuditDetail("Individual", None, nino, taxYear, header("X-CorrelationId", result).get, None,
@@ -183,7 +187,7 @@ class IntentToCrystalliseControllerSpec
 
         MockIntentToCrystalliseRequestDataParser
           .parse(intentToCrystalliseRawData)
-          .returns(Left(ErrorWrapper(Some(correlationId), error, None)))
+          .returns(Left(ErrorWrapper(correlationId, error, None)))
 
         val result: Future[Result] = controller.intentToCrystallise(nino, taxYear)(fakeRequest)
 
@@ -208,7 +212,7 @@ class IntentToCrystalliseControllerSpec
 
         MockCrystallisationService
           .intent(intentToCrystalliseRequestData)
-          .returns(Future.successful(Left(ErrorWrapper(Some(correlationId), error, None))))
+          .returns(Future.successful(Left(ErrorWrapper(correlationId, error, None))))
 
         val result: Future[Result] = controller.intentToCrystallise(nino, taxYear)(fakeRequest)
 

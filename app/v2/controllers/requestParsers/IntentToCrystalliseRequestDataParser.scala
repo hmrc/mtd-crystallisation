@@ -24,12 +24,12 @@ import v2.models.requestData.{DesTaxYear, IntentToCrystalliseRawData, IntentToCr
 
 class IntentToCrystalliseRequestDataParser @Inject()(validator: IntentToCrystalliseValidator) {
 
-  def parseRequest(data: IntentToCrystalliseRawData): Either[ErrorWrapper, IntentToCrystalliseRequestData] = {
+  def parseRequest(data: IntentToCrystalliseRawData)(implicit correlationId: String): Either[ErrorWrapper, IntentToCrystalliseRequestData] = {
     validator.validate(data) match {
       case Nil =>
         Right(IntentToCrystalliseRequestData(Nino(data.nino), DesTaxYear.fromMtd(data.taxYear)))
-      case err :: Nil => Left(ErrorWrapper(None, err, None))
-      case errs => Left(ErrorWrapper(None, BadRequestError, Some(errs)))
+      case err :: Nil => Left(ErrorWrapper(correlationId, err, None))
+      case errs => Left(ErrorWrapper(correlationId, BadRequestError, Some(errs)))
     }
   }
 

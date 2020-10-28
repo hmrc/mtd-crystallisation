@@ -33,7 +33,8 @@ class CrystallisationService @Inject()(connector: DesConnector) extends DesServi
   override val serviceName: String = this.getClass.getSimpleName
 
   def performIntentToCrystallise(request: IntentToCrystalliseRequestData)(implicit hc: HeaderCarrier,
-                                                                          ec: ExecutionContext): Future[IntentToCrystalliseOutcome] = {
+                                                                          ec: ExecutionContext,
+                                                                          correlationId: String): Future[IntentToCrystalliseOutcome] = {
     connector.performIntentToCrystallise(request).map {
       mapToVendor("intentToCrystallise", desErrorToMtdErrorIntent) { desResponse =>
         Right(DesResponse(desResponse.correlationId, desResponse.responseData.id))
@@ -41,14 +42,18 @@ class CrystallisationService @Inject()(connector: DesConnector) extends DesServi
     }
   }
 
-  def createCrystallisation(request: CrystallisationRequestData)(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[CrystallisationOutcome] = {
+  def createCrystallisation(request: CrystallisationRequestData)(implicit hc: HeaderCarrier,
+                                                                 ec: ExecutionContext,
+                                                                 correlationId: String): Future[CrystallisationOutcome] = {
     connector.createCrystallisation(request).map {
       mapToVendorDirect("createCrystallisation", desErrorToMtdErrorCreate)
     }
   }
 
   def retrieveObligations(request: RetrieveObligationsRequestData)
-                         (implicit hc: HeaderCarrier, ec: ExecutionContext): Future[RetrieveObligationsOutcome] = {
+                         (implicit hc: HeaderCarrier,
+                          ec: ExecutionContext,
+                          correlationId: String): Future[RetrieveObligationsOutcome] = {
     connector.retrieveObligations(request).map {
       mapToVendor("retrieveObligations", desErrorToMtdErrorRetrieve) { desResponse =>
         Right(DesResponse(desResponse.correlationId, desResponse.responseData.toMtd))

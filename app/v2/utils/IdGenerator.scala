@@ -14,27 +14,14 @@
  * limitations under the License.
  */
 
-package v2.controllers
+package v2.utils
 
-import play.api.Logger
-import play.api.mvc.Result
+import java.util.UUID
 
-trait BaseController {
+import javax.inject.{Inject, Singleton}
 
-  protected val logger = Logger(this.getClass)
+@Singleton
+class IdGenerator @Inject()() {
 
-  implicit class Response(result: Result) {
-
-    def withApiHeaders(correlationId: String, responseHeaders: (String, String)*): Result = {
-
-      val newHeaders: Seq[(String, String)] = responseHeaders ++ Seq(
-        "X-CorrelationId"        -> correlationId,
-        "X-Content-Type-Options" -> "nosniff"
-      )
-
-      result.copy(header = result.header.copy(headers = result.header.headers ++ newHeaders))
-    }
-  }
+  def generateCorrelationId: String = UUID.randomUUID().toString
 }
-
-

@@ -30,6 +30,7 @@ import v2.models.auth.UserDetails
 import v2.models.errors._
 import v2.models.requestData.IntentToCrystalliseRawData
 import v2.services.{AuditService, CrystallisationService, EnrolmentsAuthService, MtdIdLookupService}
+import v2.utils.IdGenerator
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -39,7 +40,8 @@ class IntentToCrystalliseController @Inject()(val authService: EnrolmentsAuthSer
                                               intentToCrystalliseRequestDataParser: IntentToCrystalliseRequestDataParser,
                                               crystallisationService: CrystallisationService,
                                               auditService: AuditService,
-                                              cc: ControllerComponents)(implicit ec: ExecutionContext)
+                                              cc: ControllerComponents,
+                                              val idGenerator: IdGenerator)(implicit ec: ExecutionContext)
   extends AuthorisedController(cc) with BaseController {
 
   implicit val endpointLogContext: EndpointLogContext =
@@ -48,6 +50,12 @@ class IntentToCrystalliseController @Inject()(val authService: EnrolmentsAuthSer
 
   def intentToCrystallise(nino: String, taxYear: String): Action[AnyContent] =
     authorisedAction(nino).async { implicit request =>
+
+      implicit val correlationId: String = idGenerator.generateCorrelationId
+      logger.info(
+        s"[${endpointLogContext.controllerName}][${endpointLogContext.endpointName}] " +
+          s"with CorrelationId: $correlationId")
+
       val rawData = IntentToCrystalliseRawData(nino, taxYear)
       val result =
         for {
@@ -63,8 +71,14 @@ class IntentToCrystalliseController @Inject()(val authService: EnrolmentsAuthSer
         }
 
       result.leftMap { errorWrapper =>
-        val correlationId = getCorrelationId(errorWrapper)
-        val result        = errorResult(errorWrapper).withApiHeaders(correlationId)
+
+        val resCorrelationId = errorWrapper.correlationId
+        val result = errorResult(errorWrapper).withApiHeaders(resCorrelationId)
+        logger.info(
+          s"[${endpointLogContext.controllerName}][${endpointLogContext.endpointName}] - " +
+            s"Error response received with CorrelationId: $resCorrelationId")
+
+
         auditSubmission(createAuditDetails(nino, taxYear, result.header.status, correlationId, request.userDetails, None, Some(errorWrapper)))
         result
       }.merge

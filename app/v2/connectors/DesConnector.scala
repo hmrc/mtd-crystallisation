@@ -34,12 +34,13 @@ class DesConnector @Inject()(http: HttpClient, appConfig: AppConfig) {
 
   val logger = Logger(this.getClass)
 
-  private[connectors] def desHeaderCarrier(implicit hc: HeaderCarrier): HeaderCarrier =
+  private[connectors] def desHeaderCarrier(implicit hc: HeaderCarrier, correlationId: String): HeaderCarrier =
     hc.copy(authorization = Some(Authorization(s"Bearer ${appConfig.desToken}")))
-      .withExtraHeaders("Environment" -> appConfig.desEnv)
+      .withExtraHeaders("Environment" -> appConfig.desEnv, "CorrelationId" -> correlationId)
 
   def performIntentToCrystallise(requestData: IntentToCrystalliseRequestData)(implicit hc: HeaderCarrier,
-                                                                              ec: ExecutionContext): Future[IntentToCrystalliseConnectorOutcome] = {
+                                                                              ec: ExecutionContext,
+                                                                              correlationId: String): Future[IntentToCrystalliseConnectorOutcome] = {
 
     val nino    = requestData.nino.nino
     val taxYear = requestData.desTaxYear
@@ -51,7 +52,8 @@ class DesConnector @Inject()(http: HttpClient, appConfig: AppConfig) {
 
   def createCrystallisation(crystallisationRequestData: CrystallisationRequestData)(
       implicit hc: HeaderCarrier,
-      ec: ExecutionContext): Future[CreateCrystallisationConnectorOutcome] = {
+      ec: ExecutionContext,
+      correlationId: String): Future[CreateCrystallisationConnectorOutcome] = {
 
     val nino    = crystallisationRequestData.nino.nino
     val taxYear = crystallisationRequestData.desTaxYear
@@ -64,7 +66,8 @@ class DesConnector @Inject()(http: HttpClient, appConfig: AppConfig) {
 
   def retrieveObligations(request: RetrieveObligationsRequestData)(
     implicit hc: HeaderCarrier,
-    ec: ExecutionContext): Future[RetrieveObligationsConnectorOutcome] = {
+    ec: ExecutionContext,
+    correlationId: String): Future[RetrieveObligationsConnectorOutcome] = {
 
     val nino = request.nino.nino
     val from = request.from

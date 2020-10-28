@@ -32,20 +32,20 @@ trait MockDesConnector extends MockFactory {
     def performIntentToCrystallise(
         intentToCrystalliseRequestData: IntentToCrystalliseRequestData): CallHandler[Future[IntentToCrystalliseConnectorOutcome]] = {
       (connector
-        .performIntentToCrystallise(_: IntentToCrystalliseRequestData)(_: HeaderCarrier, _: ExecutionContext))
-        .expects(intentToCrystalliseRequestData, *, *)
+        .performIntentToCrystallise(_: IntentToCrystalliseRequestData)(_: HeaderCarrier, _: ExecutionContext, _: String))
+        .expects(intentToCrystalliseRequestData, *, *, *)
     }
 
     def createCrystallisation(crystallisationRequestData: CrystallisationRequestData): CallHandler[Future[CreateCrystallisationConnectorOutcome]] = {
       (connector
-        .createCrystallisation(_: CrystallisationRequestData)(_: HeaderCarrier, _: ExecutionContext))
-        .expects(crystallisationRequestData, *, *)
+        .createCrystallisation(_: CrystallisationRequestData)(_: HeaderCarrier, _: ExecutionContext, _: String))
+        .expects(crystallisationRequestData, *, *, *)
     }
 
     def retrieveObligations(request: RetrieveObligationsRequestData): CallHandler[Future[RetrieveObligationsConnectorOutcome]] = {
       (connector
-        .retrieveObligations(_: RetrieveObligationsRequestData)(_: HeaderCarrier, _: ExecutionContext))
-        .expects(request, *, *)
+        .retrieveObligations(_: RetrieveObligationsRequestData)(_: HeaderCarrier, _: ExecutionContext, _: String))
+        .expects(request, *, *, *)
     }
   }
 
