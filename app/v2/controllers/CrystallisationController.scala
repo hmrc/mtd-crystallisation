@@ -78,7 +78,8 @@ class CrystallisationController @Inject()(val authService: EnrolmentsAuthService
           s"[${endpointLogContext.controllerName}][${endpointLogContext.endpointName}] - " +
             s"Error response received with CorrelationId: $resCorrelationId")
 
-        auditSubmission(createAuditDetails(nino, taxYear, result.header.status, request.request.body, correlationId, request.userDetails, Some(errorWrapper)))
+        auditSubmission(createAuditDetails(nino, taxYear, result.header.status,
+          request.request.body, resCorrelationId, request.userDetails, Some(errorWrapper)))
         result
       }.merge
     }

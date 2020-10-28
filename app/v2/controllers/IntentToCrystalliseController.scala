@@ -79,7 +79,7 @@ class IntentToCrystalliseController @Inject()(val authService: EnrolmentsAuthSer
             s"Error response received with CorrelationId: $resCorrelationId")
 
 
-        auditSubmission(createAuditDetails(nino, taxYear, result.header.status, correlationId, request.userDetails, None, Some(errorWrapper)))
+        auditSubmission(createAuditDetails(nino, taxYear, result.header.status, resCorrelationId, request.userDetails, None, Some(errorWrapper)))
         result
       }.merge
     }
