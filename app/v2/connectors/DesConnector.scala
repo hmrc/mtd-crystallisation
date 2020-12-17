@@ -18,14 +18,13 @@ package v2.connectors
 
 import javax.inject.{Inject, Singleton}
 import play.api.Logger
-import uk.gov.hmrc.http.HeaderCarrier
+import uk.gov.hmrc.http.{HeaderCarrier, HttpClient}
 import uk.gov.hmrc.http.logging.Authorization
-import uk.gov.hmrc.play.bootstrap.http.HttpClient
 import v2.config.AppConfig
 import v2.connectors.httpparsers.StandardDesHttpParser
 import v2.models.des.{DesCalculationIdResponse, DesObligationsResponse}
 import v2.models.domain.EmptyJsonBody
-import v2.models.requestData.{ RetrieveObligationsRequestData, CrystallisationRequestData, IntentToCrystalliseRequestData}
+import v2.models.requestData.{CrystallisationRequestData, IntentToCrystalliseRequestData, RetrieveObligationsRequestData}
 
 import scala.concurrent.{ExecutionContext, Future}
 
