@@ -52,7 +52,7 @@ class StandardDesHttpParserSpec extends UnitSpec {
     val httpReads: HttpReads[DesConnectorOutcome[DummyModel]] = implicitly
 
     "return a Right DES response containing the model object if the response json corresponds to a model object" in {
-      val httpResponse = HttpResponse(OK, Some(desExpectedJson), Map("CorrelationId" -> Seq(correlationId)))
+      val httpResponse = HttpResponse(OK, desExpectedJson.toString(), Map("CorrelationId" -> Seq(correlationId)))
 
       httpReads.read(method, url, httpResponse) shouldBe Right(desResponse)
     }
