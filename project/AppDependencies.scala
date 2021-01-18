@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 HM Revenue & Customs
+ * Copyright 2021 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,33 +30,12 @@ object AppDependencies {
   )
 
   def test(scope: String = "test, it"): Seq[sbt.ModuleID] = Seq(
-    "org.scalatest"          %% "scalatest"          % "3.2.2"             % scope,
-    "com.vladsch.flexmark"   % "flexmark-all"        % "0.35.10"           % scope,
-    "org.scalamock"          %% "scalamock"          % "5.0.0"             % scope,
+    "org.scalatest"          %% "scalatest"          % "3.2.3"             % scope,
+    "com.vladsch.flexmark"   % "flexmark-all"        % "0.36.8"            % scope,
+    "org.scalamock"          %% "scalamock"          % "5.1.0"             % scope,
     "org.pegdown"            % "pegdown"             % "1.6.0"             % scope,
     "com.typesafe.play"      %% "play-test"          % PlayVersion.current % scope,
-    "org.scalatestplus.play" %% "scalatestplus-play" % "3.1.2"             % scope,
-    "com.github.tomakehurst" % "wiremock"            % "2.27.2"            % scope
+    "org.scalatestplus.play" %% "scalatestplus-play" % "3.1.3"             % scope,
+    "com.github.tomakehurst" % "wiremock-jre8"       % "2.27.2"            % scope
   )
-
-  // Fixes a transitive dependency clash between wiremock and scalatestplus-play
-  val overrides: Seq[ModuleID] = {
-    val jettyFromWiremockVersion = "9.2.24.v20180105"
-    Seq(
-      "org.eclipse.jetty"           % "jetty-client"       % jettyFromWiremockVersion,
-      "org.eclipse.jetty"           % "jetty-continuation" % jettyFromWiremockVersion,
-      "org.eclipse.jetty"           % "jetty-http"         % jettyFromWiremockVersion,
-      "org.eclipse.jetty"           % "jetty-io"           % jettyFromWiremockVersion,
-      "org.eclipse.jetty"           % "jetty-security"     % jettyFromWiremockVersion,
-      "org.eclipse.jetty"           % "jetty-server"       % jettyFromWiremockVersion,
-      "org.eclipse.jetty"           % "jetty-servlet"      % jettyFromWiremockVersion,
-      "org.eclipse.jetty"           % "jetty-servlets"     % jettyFromWiremockVersion,
-      "org.eclipse.jetty"           % "jetty-util"         % jettyFromWiremockVersion,
-      "org.eclipse.jetty"           % "jetty-webapp"       % jettyFromWiremockVersion,
-      "org.eclipse.jetty"           % "jetty-xml"          % jettyFromWiremockVersion,
-      "org.eclipse.jetty.websocket" % "websocket-api"      % jettyFromWiremockVersion,
-      "org.eclipse.jetty.websocket" % "websocket-client"   % jettyFromWiremockVersion,
-      "org.eclipse.jetty.websocket" % "websocket-common"   % jettyFromWiremockVersion
-    )
-  }
 }
