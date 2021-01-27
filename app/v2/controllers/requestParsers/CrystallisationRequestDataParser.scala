@@ -33,7 +33,6 @@ class CrystallisationRequestDataParser @Inject()(validator: CrystallisationValid
           "[RequestParser][parseRequest] " +
             s"Validation successful for the request with CorrelationId: $correlationId")
         Right(CrystallisationRequestData(Nino(data.nino), DesTaxYear.fromMtd(data.taxYear), data.body.json.as[CrystallisationRequest]))
-        //Validation passed.  Request data is ok to transform.
       case err :: Nil =>
         logger.warn(
           "[RequestParser][parseRequest] " +
