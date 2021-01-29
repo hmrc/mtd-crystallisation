@@ -68,7 +68,9 @@ class RetrieveObligationsController @Inject()(val authService: EnrolmentsAuthSer
               s"[${endpointLogContext.controllerName}][${endpointLogContext.endpointName}] - " +
                 s"Success response received with CorrelationId: ${vendorResponse.correlationId}")
 
-            Ok(Json.obj("obligations" -> vendorResponse.responseData))
+            val response = Json.obj("obligations" -> vendorResponse.responseData)
+
+            Ok(response)
               .withApiHeaders(vendorResponse.correlationId)
           }
         }
@@ -77,7 +79,7 @@ class RetrieveObligationsController @Inject()(val authService: EnrolmentsAuthSer
 
         val resCorrelationId = errorWrapper.correlationId
         val result = errorResult(errorWrapper).withApiHeaders(resCorrelationId)
-        logger.info(
+        logger.warn(
           s"[${endpointLogContext.controllerName}][${endpointLogContext.endpointName}] - " +
             s"Error response received with CorrelationId: $resCorrelationId")
 

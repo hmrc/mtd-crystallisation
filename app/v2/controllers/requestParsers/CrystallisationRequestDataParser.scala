@@ -18,6 +18,7 @@ package v2.controllers.requestParsers
 
 import javax.inject.Inject
 import uk.gov.hmrc.domain.Nino
+import play.api.Logger.logger
 import v2.controllers.requestParsers.validators.CrystallisationValidator
 import v2.models.domain.CrystallisationRequest
 import v2.models.errors.{BadRequestError, ErrorWrapper}
@@ -28,10 +29,20 @@ class CrystallisationRequestDataParser @Inject()(validator: CrystallisationValid
   def parseRequest(data: CrystallisationRawData)(implicit correlationId: String): Either[ErrorWrapper, CrystallisationRequestData] = {
     validator.validate(data) match {
       case Nil =>
-        //Validation passed.  Request data is ok to transform.
+        logger.info(
+          "[RequestParser][parseRequest] " +
+            s"Validation successful for the request with CorrelationId: $correlationId")
         Right(CrystallisationRequestData(Nino(data.nino), DesTaxYear.fromMtd(data.taxYear), data.body.json.as[CrystallisationRequest]))
-      case err :: Nil => Left(ErrorWrapper(correlationId, err, None))
-      case errs => Left(ErrorWrapper(correlationId, BadRequestError, Some(errs)))
+      case err :: Nil =>
+        logger.warn(
+          "[RequestParser][parseRequest] " +
+            s"Validation failed with ${err.code} error for the request with CorrelationId: $correlationId")
+        Left(ErrorWrapper(correlationId, err, None))
+      case errs =>
+        logger.warn(
+          "[RequestParser][parseRequest] " +
+            s"Validation failed with ${errs.map(_.code).mkString(",")} error for the request with CorrelationId: $correlationId")
+        Left(ErrorWrapper(correlationId, BadRequestError, Some(errs)))
     }
   }
 

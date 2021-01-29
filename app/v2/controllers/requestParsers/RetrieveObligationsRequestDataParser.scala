@@ -19,6 +19,7 @@ package v2.controllers.requestParsers
 import java.time.LocalDate
 
 import javax.inject.Inject
+import play.api.Logger.logger
 import uk.gov.hmrc.domain.Nino
 import v2.controllers.requestParsers.validators.RetrieveObligationsValidator
 import v2.models.errors.{BadRequestError, ErrorWrapper}
@@ -30,9 +31,22 @@ class RetrieveObligationsRequestDataParser @Inject()(validator: RetrieveObligati
 
     validator.validate(data) match {
       case Nil =>
+        logger.info(
+          "[RequestParser][parseRequest] " +
+            s"Validation successful for the request with CorrelationId: $correlationId")
         Right(RetrieveObligationsRequestData(Nino(data.nino), LocalDate.parse(data.from), LocalDate.parse(data.to)))
-      case err :: Nil => Left(ErrorWrapper(correlationId, err, None))
-      case errs       => Left(ErrorWrapper(correlationId, BadRequestError, Some(errs)))
+
+      case err :: Nil =>
+        logger.warn(
+          "[RequestParser][parseRequest] " +
+            s"Validation failed with ${err.code} error for the request with CorrelationId: $correlationId")
+        Left(ErrorWrapper(correlationId, err, None))
+
+      case errs =>
+        logger.warn(
+          "[RequestParser][parseRequest] " +
+            s"Validation failed with ${errs.map(_.code).mkString(",")} error for the request with CorrelationId: $correlationId")
+        Left(ErrorWrapper(correlationId, BadRequestError, Some(errs)))
     }
   }
 }
