@@ -29,6 +29,7 @@ class CrystallisationRequestDataParserSpec extends UnitSpec {
   val nino = "AA123456B"
   val taxYear = "2017-18"
   val calcId = "someCalcId"
+  implicit val correlationId: String = "a1e8057e-fbbc-47a8-a8b4-78d9f015c253"
 
   val json =
     s"""
@@ -63,7 +64,7 @@ class CrystallisationRequestDataParserSpec extends UnitSpec {
           .returns(List(NinoFormatError))
 
         parser.parseRequest(inputData) shouldBe
-          Left(ErrorWrapper(None, NinoFormatError, None))
+          Left(ErrorWrapper(correlationId, NinoFormatError, None))
       }
 
       "multiple validation errors occur" in new Test {
@@ -71,7 +72,7 @@ class CrystallisationRequestDataParserSpec extends UnitSpec {
           .returns(List(NinoFormatError, InvalidCalcIdError))
 
         parser.parseRequest(inputData) shouldBe
-          Left(ErrorWrapper(None, BadRequestError, Some(Seq(NinoFormatError, InvalidCalcIdError))))
+          Left(ErrorWrapper(correlationId, BadRequestError, Some(Seq(NinoFormatError, InvalidCalcIdError))))
       }
     }
   }

@@ -17,6 +17,7 @@
 package v2.controllers.requestParsers
 
 import javax.inject.Inject
+import play.api.Logger.logger
 import uk.gov.hmrc.domain.Nino
 import v2.controllers.requestParsers.validators.IntentToCrystalliseValidator
 import v2.models.errors.{BadRequestError, ErrorWrapper}
@@ -24,12 +25,25 @@ import v2.models.requestData.{DesTaxYear, IntentToCrystalliseRawData, IntentToCr
 
 class IntentToCrystalliseRequestDataParser @Inject()(validator: IntentToCrystalliseValidator) {
 
-  def parseRequest(data: IntentToCrystalliseRawData): Either[ErrorWrapper, IntentToCrystalliseRequestData] = {
+  def parseRequest(data: IntentToCrystalliseRawData)(implicit correlationId: String): Either[ErrorWrapper, IntentToCrystalliseRequestData] = {
     validator.validate(data) match {
       case Nil =>
+        logger.info(
+          "[RequestParser][parseRequest] " +
+            s"Validation successful for the request with CorrelationId: $correlationId")
         Right(IntentToCrystalliseRequestData(Nino(data.nino), DesTaxYear.fromMtd(data.taxYear)))
-      case err :: Nil => Left(ErrorWrapper(None, err, None))
-      case errs => Left(ErrorWrapper(None, BadRequestError, Some(errs)))
+
+      case err :: Nil =>
+        logger.warn(
+          "[RequestParser][parseRequest] " +
+            s"Validation failed with ${err.code} error for the request with CorrelationId: $correlationId")
+        Left(ErrorWrapper(correlationId, err, None))
+
+      case errs =>
+        logger.warn(
+          "[RequestParser][parseRequest] " +
+            s"Validation failed with ${errs.map(_.code).mkString(",")} error for the request with CorrelationId: $correlationId")
+        Left(ErrorWrapper(correlationId, BadRequestError, Some(errs)))
     }
   }
 

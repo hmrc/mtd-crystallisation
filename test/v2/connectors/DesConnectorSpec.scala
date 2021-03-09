@@ -32,7 +32,7 @@ import scala.concurrent.Future
 class DesConnectorSpec extends ConnectorSpec {
 
   lazy val baseUrl  = "test-BaseUrl"
-  val correlationId = "a1e8057e-fbbc-47a8-a8b4-78d9f015c253"
+  implicit val correlationId: String = "a1e8057e-fbbc-47a8-a8b4-78d9f015c253"
 
   val taxYear = DesTaxYear("2018")
   val nino    = Nino("AA123456A")

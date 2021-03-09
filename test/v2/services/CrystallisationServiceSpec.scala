@@ -29,7 +29,7 @@ import scala.concurrent.Future
 
 class CrystallisationServiceSpec extends ServiceSpec {
 
-  val correlationId = "a1e8057e-fbbc-47a8-a8b4-78d9f015c253"
+  implicit val correlationId: String = "a1e8057e-fbbc-47a8-a8b4-78d9f015c253"
 
   val taxYear = DesTaxYear("2018")
   val nino    = Nino("AA123456A")
@@ -68,7 +68,7 @@ class CrystallisationServiceSpec extends ServiceSpec {
               .performIntentToCrystallise(request)
               .returns(Future.successful(Left(DesResponse(correlationId, SingleError(Error(k, "MESSAGE"))))))
 
-            await(service.performIntentToCrystallise(request)) shouldBe Left(ErrorWrapper(Some(correlationId), v, None))
+            await(service.performIntentToCrystallise(request)) shouldBe Left(ErrorWrapper(correlationId, v, None))
           }
         }
     }
@@ -106,7 +106,7 @@ class CrystallisationServiceSpec extends ServiceSpec {
         s"a $k error is received from the connector" should {
           s"return a $v MTD error" in new Test {
             val desResponse = DesResponse(correlationId, SingleError(Error(k, "MESSAGE")))
-            val expected    = Left(ErrorWrapper(Some(correlationId), v, None))
+            val expected    = Left(ErrorWrapper(correlationId, v, None))
 
             MockedDesConnector.createCrystallisation(request).returns(Future.successful(Left(desResponse)))
 
@@ -169,7 +169,7 @@ class CrystallisationServiceSpec extends ServiceSpec {
         s"a $k error is received from the connector" should {
           s"return a $v MTD error" in new Test {
             val desResponse = DesResponse(correlationId, SingleError(Error(k, "MESSAGE")))
-            val expected    = Left(ErrorWrapper(Some(correlationId), v, None))
+            val expected    = Left(ErrorWrapper(correlationId, v, None))
 
             MockedDesConnector.retrieveObligations(request).returns(Future.successful(Left(desResponse)))
 

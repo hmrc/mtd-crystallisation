@@ -25,6 +25,7 @@ import v2.controllers.requestParsers.RetrieveObligationsRequestDataParser
 import v2.models.errors._
 import v2.models.requestData.RetrieveObligationsRawData
 import v2.services.{CrystallisationService, EnrolmentsAuthService, MtdIdLookupService}
+import v2.utils.IdGenerator
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -33,7 +34,8 @@ class RetrieveObligationsController @Inject()(val authService: EnrolmentsAuthSer
                                               val lookupService: MtdIdLookupService,
                                               retrieveObligationsRequestDataParser: RetrieveObligationsRequestDataParser,
                                               crystallisationService: CrystallisationService,
-                                              cc: ControllerComponents)(implicit ec: ExecutionContext)
+                                              cc: ControllerComponents,
+                                              val idGenerator: IdGenerator)(implicit ec: ExecutionContext)
   extends AuthorisedController(cc) with BaseController {
 
   implicit val endpointLogContext: EndpointLogContext =
@@ -42,6 +44,11 @@ class RetrieveObligationsController @Inject()(val authService: EnrolmentsAuthSer
 
   def retrieveObligations(nino: String, from: String, to: String): Action[AnyContent] =
     authorisedAction(nino).async { implicit request =>
+
+      implicit val correlationId: String = idGenerator.generateCorrelationId
+      logger.info(
+        s"[${endpointLogContext.controllerName}][${endpointLogContext.endpointName}] " +
+          s"with CorrelationId: $correlationId")
 
       val rawData = RetrieveObligationsRawData(nino, from, to)
       val result =
@@ -61,14 +68,21 @@ class RetrieveObligationsController @Inject()(val authService: EnrolmentsAuthSer
               s"[${endpointLogContext.controllerName}][${endpointLogContext.endpointName}] - " +
                 s"Success response received with CorrelationId: ${vendorResponse.correlationId}")
 
-            Ok(Json.obj("obligations" -> vendorResponse.responseData))
+            val response = Json.obj("obligations" -> vendorResponse.responseData)
+
+            Ok(response)
               .withApiHeaders(vendorResponse.correlationId)
           }
         }
 
       result.leftMap { errorWrapper =>
-        val correlationId = getCorrelationId(errorWrapper)
-        val result = errorResult(errorWrapper).withApiHeaders(correlationId)
+
+        val resCorrelationId = errorWrapper.correlationId
+        val result = errorResult(errorWrapper).withApiHeaders(resCorrelationId)
+        logger.warn(
+          s"[${endpointLogContext.controllerName}][${endpointLogContext.endpointName}] - " +
+            s"Error response received with CorrelationId: $resCorrelationId")
+
         result
       }.merge
     }

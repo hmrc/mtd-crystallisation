@@ -14,22 +14,14 @@
  * limitations under the License.
  */
 
-package v2.connectors
+package v2.utils
+
+import java.util.UUID
 
 import javax.inject.{Inject, Singleton}
-import uk.gov.hmrc.http.HeaderCarrier
-import uk.gov.hmrc.http.HttpClient
-import v2.config.AppConfig
-
-import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
-class MtdIdLookupConnector @Inject()(http: HttpClient,
-                                     appConfig: AppConfig) {
+class IdGenerator @Inject()() {
 
-  def getMtdId(nino: String)(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[MtdIdLookupOutcome] = {
-    import v2.connectors.httpparsers.MtdIdLookupHttpParser.mtdIdLookupHttpReads
-
-    http.GET[MtdIdLookupOutcome](s"${appConfig.mtdIdBaseUrl}/mtd-identifier-lookup/nino/$nino")
-  }
+  def generateCorrelationId: String = UUID.randomUUID().toString
 }
