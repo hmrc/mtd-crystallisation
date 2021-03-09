@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 HM Revenue & Customs
+ * Copyright 2021 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,7 +18,9 @@ package v2.config
 
 import java.time.LocalDate
 
-import javax.inject.{ Inject, Singleton }
+import com.typesafe.config.Config
+import javax.inject.{Inject, Singleton}
+import play.api.{ConfigLoader, Configuration}
 import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
 
 trait AppConfig {
@@ -29,15 +31,18 @@ trait AppConfig {
   def desEnv: String
 
   def desToken: String
+
+  def confidenceLevelConfig: ConfidenceLevelConfig
 }
 
 @Singleton
-class AppConfigImpl @Inject()(config: ServicesConfig) extends AppConfig {
+class AppConfigImpl @Inject()(config: ServicesConfig, configuration: Configuration) extends AppConfig {
 
   val mtdIdBaseUrl: String = config.baseUrl("mtd-id-lookup")
   val desBaseUrl: String   = config.baseUrl("des")
   val desEnv: String       = config.getString("microservice.services.des.env")
   val desToken: String     = config.getString("microservice.services.des.token")
+  val confidenceLevelConfig: ConfidenceLevelConfig = configuration.get[ConfidenceLevelConfig](s"api.confidence-level-check")
 
 }
 
@@ -47,4 +52,15 @@ trait FixedConfig {
 
   // Minimum date for MTD
   val minDate: LocalDate = LocalDate.parse("2018-04-06")
+}
+
+case class ConfidenceLevelConfig(definitionEnabled: Boolean, authValidationEnabled: Boolean)
+object ConfidenceLevelConfig {
+  implicit val configLoader: ConfigLoader[ConfidenceLevelConfig] = (rootConfig: Config, path: String) => {
+    val config = rootConfig.getConfig(path)
+    ConfidenceLevelConfig(
+      definitionEnabled = config.getBoolean("definition.enabled"),
+      authValidationEnabled = config.getBoolean("auth-validation.enabled")
+    )
+  }
 }
