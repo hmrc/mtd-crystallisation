@@ -39,13 +39,13 @@ trait ConnectorSpec extends UnitSpec
     HeaderCarrier.Config(
       Seq("^not-test-BaseUrl?$".r),
       Seq.empty[String],
-      Some("insolvent-vat-api")
+      Some("mtd-crystallisation")
     )
 
   val requiredDesHeaders: Seq[(String, String)] = Seq(
     "Environment" -> "des-environment",
     "Authorization" -> s"Bearer des-token",
-    "User-Agent" -> "insolvent-vat-api",
+    "User-Agent" -> "mtd-crystallisation",
     "OriginatorID" -> "SCAN",
     "CorrelationId" -> correlationId,
     "Gov-Test-Scenario" -> "DEFAULT"
