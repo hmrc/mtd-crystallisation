@@ -30,11 +30,12 @@ trait AppConfig {
 
   def desEnv: String
 
+  def desEnvironmentHeaders: Option[Seq[String]]
+
   def desToken: String
 
   def confidenceLevelConfig: ConfidenceLevelConfig
 
-  def desEnvironmentHeaders: Option[Seq[String]]
 }
 
 @Singleton
@@ -43,9 +44,9 @@ class AppConfigImpl @Inject()(config: ServicesConfig, configuration: Configurati
   val mtdIdBaseUrl: String = config.baseUrl("mtd-id-lookup")
   val desBaseUrl: String   = config.baseUrl("des")
   val desEnv: String       = config.getString("microservice.services.des.env")
+  val desEnvironmentHeaders: Option[Seq[String]] = configuration.getOptional[Seq[String]]("microservice.services.des.environmentHeaders")
   val desToken: String     = config.getString("microservice.services.des.token")
   val confidenceLevelConfig: ConfidenceLevelConfig = configuration.get[ConfidenceLevelConfig](s"api.confidence-level-check")
-  val desEnvironmentHeaders: Option[Seq[String]] = configuration.getOptional[Seq[String]]("microservice.services.des.environmentHeaders")
 }
 
 trait FixedConfig {

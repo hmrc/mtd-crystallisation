@@ -28,12 +28,12 @@ import v2.services.{EnrolmentsAuthService, MtdIdLookupService}
 
 import scala.concurrent.{ExecutionContext, Future}
 
-case class UserRequest[A](userDetails: UserDetails, request: Request[A]) extends WrappedRequest[A](request)
-
 abstract class AuthorisedController(cc: ControllerComponents)(implicit ec: ExecutionContext) extends BackendController(cc) {
 
   val authService: EnrolmentsAuthService
   val lookupService: MtdIdLookupService
+
+  case class UserRequest[A](userDetails: UserDetails, request: Request[A]) extends WrappedRequest[A](request)
 
   def authorisedAction(nino: String): ActionBuilder[UserRequest, AnyContent] = new ActionBuilder[UserRequest, AnyContent] {
 

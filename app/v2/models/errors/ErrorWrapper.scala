@@ -26,16 +26,18 @@ case class ErrorWrapper(correlationId: String, error: Error, errors: Option[Seq[
 }
 
 object ErrorWrapper {
-  implicit val writes: Writes[ErrorWrapper] = (errorResponse: ErrorWrapper) => {
+  implicit val writes: Writes[ErrorWrapper] = new Writes[ErrorWrapper] {
+    override def writes(errorResponse: ErrorWrapper): JsValue = {
 
-    val json = Json.obj(
-      "code" -> errorResponse.error.code,
-      "message" -> errorResponse.error.message
-    )
+      val json = Json.obj(
+        "code" -> errorResponse.error.code,
+        "message" -> errorResponse.error.message
+      )
 
-    errorResponse.errors match {
-      case Some(errors) if errors.nonEmpty => json + ("errors" -> Json.toJson(errors))
-      case _ => json
+      errorResponse.errors match {
+        case Some(errors) if errors.nonEmpty => json + ("errors" -> Json.toJson(errors))
+        case _ => json
+      }
     }
   }
 }
