@@ -16,7 +16,7 @@
 
 package v2.models.requestData
 
-import uk.gov.hmrc.domain.Nino
+import v2.models.domain.Nino
 import v2.models.domain.CrystallisationRequest
 
 case class CrystallisationRequestData(nino: Nino, desTaxYear: DesTaxYear, crystallisation: CrystallisationRequest)

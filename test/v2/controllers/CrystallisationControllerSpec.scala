@@ -18,7 +18,7 @@ package v2.controllers
 
 import play.api.libs.json.Json
 import play.api.mvc.{AnyContentAsJson, Result}
-import uk.gov.hmrc.domain.Nino
+import v2.models.domain.Nino
 import uk.gov.hmrc.http.HeaderCarrier
 import v2.mocks.requestParsers.MockCrystallisationRequestDataParser
 import v2.mocks.services.{MockAuditService, MockCrystallisationService, MockEnrolmentsAuthService, MockMtdIdLookupService}
@@ -47,7 +47,7 @@ class CrystallisationControllerSpec
   val correlationId = "X-123"
 
   trait Test {
-    val hc = HeaderCarrier()
+    val hc: HeaderCarrier = HeaderCarrier()
 
     val controller = new CrystallisationController(
       authService = mockEnrolmentsAuthService,
@@ -71,11 +71,11 @@ class CrystallisationControllerSpec
        |}
     """.stripMargin
 
-  val crystallisationRequest = CrystallisationRequest(calculationId)
+  val crystallisationRequest: CrystallisationRequest = CrystallisationRequest(calculationId)
 
-  val crystallisationRequestData = CrystallisationRequestData(Nino(nino), DesTaxYear.fromMtd(taxYear), crystallisationRequest)
+  val crystallisationRequestData: CrystallisationRequestData = CrystallisationRequestData(Nino(nino), DesTaxYear.fromMtd(taxYear), crystallisationRequest)
 
-  val crystallisationRawData = CrystallisationRawData(nino, taxYear, AnyContentAsJson(Json.parse(request)))
+  val crystallisationRawData: CrystallisationRawData = CrystallisationRawData(nino, taxYear, AnyContentAsJson(Json.parse(request)))
 
   "create" should {
     "return 201" when {
@@ -92,7 +92,7 @@ class CrystallisationControllerSpec
         val result: Future[Result] = controller.create(nino, taxYear)(fakePostRequest(Json.parse(request)))
         status(result) shouldBe CREATED
 
-        val detail = CrystallisationAuditDetail("Individual", None, nino, taxYear, Json.parse(request), correlationId,
+        val detail: CrystallisationAuditDetail = CrystallisationAuditDetail("Individual", None, nino, taxYear, Json.parse(request), correlationId,
           CrystallisationAuditResponse(CREATED, None))
         val event: AuditEvent[CrystallisationAuditDetail] = AuditEvent[CrystallisationAuditDetail]("submitCrystallisation",
           "crystallisation", detail)
@@ -112,7 +112,7 @@ class CrystallisationControllerSpec
         contentAsJson(result) shouldBe Json.toJson(ErrorWrapper(correlationId, NinoFormatError, None))
         header("X-CorrelationId", result).nonEmpty shouldBe true
 
-        val detail = CrystallisationAuditDetail("Individual", None, nino, taxYear, Json.parse(request), header("X-CorrelationId", result).get,
+        val detail: CrystallisationAuditDetail = CrystallisationAuditDetail("Individual", None, nino, taxYear, Json.parse(request), header("X-CorrelationId", result).get,
           CrystallisationAuditResponse(BAD_REQUEST, Some(Seq(AuditError(NinoFormatError.code)))))
         val event: AuditEvent[CrystallisationAuditDetail] = AuditEvent[CrystallisationAuditDetail]("submitCrystallisation",
           "crystallisation", detail)
@@ -132,7 +132,7 @@ class CrystallisationControllerSpec
         contentAsJson(result) shouldBe Json.toJson(ErrorWrapper(correlationId, BadRequestError, Some(Seq(NinoFormatError, TaxYearFormatError))))
         header("X-CorrelationId", result).nonEmpty shouldBe true
 
-        val detail = CrystallisationAuditDetail("Individual", None, nino, taxYear, Json.parse(request), header("X-CorrelationId", result).get,
+        val detail: CrystallisationAuditDetail = CrystallisationAuditDetail("Individual", None, nino, taxYear, Json.parse(request), header("X-CorrelationId", result).get,
           CrystallisationAuditResponse(BAD_REQUEST, Some(Seq(AuditError(NinoFormatError.code), AuditError(TaxYearFormatError.code)))))
         val event: AuditEvent[CrystallisationAuditDetail] = AuditEvent[CrystallisationAuditDetail]("submitCrystallisation",
           "crystallisation", detail)
@@ -211,7 +211,7 @@ class CrystallisationControllerSpec
         contentAsJson(result) shouldBe Json.toJson(error)
         header("X-CorrelationId", result) shouldBe Some(correlationId)
 
-        val detail = CrystallisationAuditDetail("Individual", None, nino, taxYear, Json.parse(request), correlationId,
+        val detail: CrystallisationAuditDetail = CrystallisationAuditDetail("Individual", None, nino, taxYear, Json.parse(request), correlationId,
           CrystallisationAuditResponse(expectedStatus, Some(Seq(AuditError(error.code)))))
         val event: AuditEvent[CrystallisationAuditDetail] = AuditEvent[CrystallisationAuditDetail]("submitCrystallisation",
           "crystallisation", detail)
@@ -236,7 +236,7 @@ class CrystallisationControllerSpec
         contentAsJson(result) shouldBe Json.toJson(error)
         header("X-CorrelationId", result) shouldBe Some(correlationId)
 
-        val detail = CrystallisationAuditDetail("Individual", None, nino, taxYear, Json.parse(request), correlationId,
+        val detail: CrystallisationAuditDetail = CrystallisationAuditDetail("Individual", None, nino, taxYear, Json.parse(request), correlationId,
           CrystallisationAuditResponse(expectedStatus, Some(Seq(AuditError(error.code)))))
         val event: AuditEvent[CrystallisationAuditDetail] = AuditEvent[CrystallisationAuditDetail]("submitCrystallisation",
           "crystallisation", detail)

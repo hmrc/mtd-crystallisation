@@ -17,6 +17,6 @@
 package v2.models.requestData
 import java.time.LocalDate
 
-import uk.gov.hmrc.domain.Nino
+import v2.models.domain.Nino
 
 case class RetrieveObligationsRequestData(nino: Nino, from: LocalDate, to: LocalDate)

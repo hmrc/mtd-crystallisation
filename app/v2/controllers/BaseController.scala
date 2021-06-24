@@ -21,7 +21,7 @@ import play.api.mvc.Result
 
 trait BaseController {
 
-  protected val logger = Logger(this.getClass)
+  protected val logger: Logger = Logger(this.getClass)
 
   implicit class Response(result: Result) {
 

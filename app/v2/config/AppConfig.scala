@@ -33,6 +33,8 @@ trait AppConfig {
   def desToken: String
 
   def confidenceLevelConfig: ConfidenceLevelConfig
+
+  def desEnvironmentHeaders: Option[Seq[String]]
 }
 
 @Singleton
@@ -43,7 +45,7 @@ class AppConfigImpl @Inject()(config: ServicesConfig, configuration: Configurati
   val desEnv: String       = config.getString("microservice.services.des.env")
   val desToken: String     = config.getString("microservice.services.des.token")
   val confidenceLevelConfig: ConfidenceLevelConfig = configuration.get[ConfidenceLevelConfig](s"api.confidence-level-check")
-
+  val desEnvironmentHeaders: Option[Seq[String]] = configuration.getOptional[Seq[String]]("microservice.services.des.environmentHeaders")
 }
 
 trait FixedConfig {

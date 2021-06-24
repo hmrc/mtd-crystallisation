@@ -16,7 +16,7 @@
 
 package v2.services
 
-import uk.gov.hmrc.domain.Nino
+import v2.models.domain.Nino
 import v2.mocks.connectors.MockDesConnector
 import v2.models.des.{DesCalculationIdResponse, DesObligationsResponse, FulfilledObligation}
 import v2.models.domain.{CrystallisationRequest, Obligation}
@@ -31,8 +31,8 @@ class CrystallisationServiceSpec extends ServiceSpec {
 
   implicit val correlationId: String = "a1e8057e-fbbc-47a8-a8b4-78d9f015c253"
 
-  val taxYear = DesTaxYear("2018")
-  val nino    = Nino("AA123456A")
+  val taxYear: DesTaxYear = DesTaxYear("2018")
+  val nino: Nino    = Nino("AA123456A")
   val calcId  = "041f7e4d-87b9-4d4a-a296-3cfbdf92f7e2"
 
   trait Test extends MockDesConnector {
@@ -105,7 +105,7 @@ class CrystallisationServiceSpec extends ServiceSpec {
       case (k, v) =>
         s"a $k error is received from the connector" should {
           s"return a $v MTD error" in new Test {
-            val desResponse = DesResponse(correlationId, SingleError(Error(k, "MESSAGE")))
+            val desResponse: DesResponse[SingleError] = DesResponse(correlationId, SingleError(Error(k, "MESSAGE")))
             val expected    = Left(ErrorWrapper(correlationId, v, None))
 
             MockedDesConnector.createCrystallisation(request).returns(Future.successful(Left(desResponse)))
@@ -168,7 +168,7 @@ class CrystallisationServiceSpec extends ServiceSpec {
       case (k, v) =>
         s"a $k error is received from the connector" should {
           s"return a $v MTD error" in new Test {
-            val desResponse = DesResponse(correlationId, SingleError(Error(k, "MESSAGE")))
+            val desResponse: DesResponse[SingleError] = DesResponse(correlationId, SingleError(Error(k, "MESSAGE")))
             val expected    = Left(ErrorWrapper(correlationId, v, None))
 
             MockedDesConnector.retrieveObligations(request).returns(Future.successful(Left(desResponse)))

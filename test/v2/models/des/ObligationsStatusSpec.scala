@@ -54,14 +54,14 @@ class ObligationsStatusSpec extends UnitSpec {
   "Writing Json to represent the obligation status" when {
     "the obligation is open" should {
       "generate the correct Json" in {
-        val json = Json.toJson(OpenObligation)
+        val json = Json.toJson(OpenObligation.asInstanceOf[ObligationStatus])
         json shouldBe JsString("Open")
       }
     }
 
     "the obligation is fulfilled" should {
       "generate the correct Json" in {
-        val json = Json.toJson(FulfilledObligation)
+        val json = Json.toJson(FulfilledObligation.asInstanceOf[ObligationStatus])
         json shouldBe JsString("Fulfilled")
       }
     }

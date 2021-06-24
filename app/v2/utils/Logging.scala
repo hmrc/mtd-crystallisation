@@ -14,21 +14,10 @@
  * limitations under the License.
  */
 
-package v2.models.errors
+package v2.utils
 
-import play.api.libs.functional.syntax._
-import play.api.libs.json._
+import play.api.Logger
 
-case class Error(code: String, message: String)
-
-object Error {
-  implicit val writes: OWrites[Error] = Json.writes[Error]
-
-  implicit def genericWrites[T <: Error]: OWrites[T] =
-    writes.contramap[T](c => c: Error)
-
-  implicit val reads: Reads[Error] = (
-    (__ \ "code").read[String] and
-      (__ \ "reason").read[String]
-    ) (Error.apply _)
+trait Logging {
+  lazy val logger: Logger = Logger(this.getClass)
 }

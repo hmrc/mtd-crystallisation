@@ -19,7 +19,6 @@ package v2.connectors
 import javax.inject.{Inject, Singleton}
 import play.api.Logger
 import uk.gov.hmrc.http.{HeaderCarrier, HttpClient}
-import uk.gov.hmrc.http.logging.Authorization
 import v2.config.AppConfig
 import v2.connectors.httpparsers.StandardDesHttpParser
 import v2.models.des.{DesCalculationIdResponse, DesObligationsResponse}
@@ -31,11 +30,21 @@ import scala.concurrent.{ExecutionContext, Future}
 @Singleton
 class DesConnector @Inject()(http: HttpClient, appConfig: AppConfig) {
 
-  val logger = Logger(this.getClass)
+  val logger: Logger = Logger(this.getClass)
 
-  private[connectors] def desHeaderCarrier(implicit hc: HeaderCarrier, correlationId: String): HeaderCarrier =
-    hc.copy(authorization = Some(Authorization(s"Bearer ${appConfig.desToken}")))
-      .withExtraHeaders("Environment" -> appConfig.desEnv, "CorrelationId" -> correlationId)
+  private def desHeaderCarrier(additionalHeaders: Seq[String] = Seq.empty)(implicit hc: HeaderCarrier, correlationId: String): HeaderCarrier = {
+    HeaderCarrier(
+      extraHeaders = hc.extraHeaders ++
+        // Contract headers
+        Seq(
+          "Authorization" -> s"Bearer ${appConfig.desToken}",
+          "Environment" -> appConfig.desEnv,
+          "CorrelationId" -> correlationId
+        ) ++
+        // Other headers (i.e Gov-Test-Scenario, Content-Type)
+        hc.headers(additionalHeaders ++ appConfig.desEnvironmentHeaders.getOrElse(Seq.empty))
+    )
+  }
 
   def performIntentToCrystallise(requestData: IntentToCrystalliseRequestData)(implicit hc: HeaderCarrier,
                                                                               ec: ExecutionContext,
@@ -46,7 +55,7 @@ class DesConnector @Inject()(http: HttpClient, appConfig: AppConfig) {
 
     val url = s"${appConfig.desBaseUrl}/income-tax/nino/$nino/taxYear/$taxYear/tax-calculation?crystallise=true"
 
-    http.POST(url, EmptyJsonBody)(EmptyJsonBody.writes, StandardDesHttpParser.reads[DesCalculationIdResponse], desHeaderCarrier, implicitly)
+    http.POST(url, EmptyJsonBody)(EmptyJsonBody.writes, StandardDesHttpParser.reads[DesCalculationIdResponse], desHeaderCarrier(Seq("Content-Type")), implicitly)
   }
 
   def createCrystallisation(crystallisationRequestData: CrystallisationRequestData)(
@@ -60,7 +69,7 @@ class DesConnector @Inject()(http: HttpClient, appConfig: AppConfig) {
 
     val url = s"${appConfig.desBaseUrl}/income-tax/calculation/nino/$nino/$taxYear/$calcId/crystallise"
 
-    http.POST(url, EmptyJsonBody)(EmptyJsonBody.writes, StandardDesHttpParser.readsEmpty, desHeaderCarrier, implicitly)
+    http.POST(url, EmptyJsonBody)(EmptyJsonBody.writes, StandardDesHttpParser.readsEmpty, desHeaderCarrier(Seq("Content-Type")), implicitly)
   }
 
   def retrieveObligations(request: RetrieveObligationsRequestData)(
@@ -73,6 +82,6 @@ class DesConnector @Inject()(http: HttpClient, appConfig: AppConfig) {
     val to   = request.to
     val url = s"${appConfig.desBaseUrl}/enterprise/obligation-data/nino/$nino/ITSA?from=$from&to=$to"
 
-    http.GET(url)(StandardDesHttpParser.reads[DesObligationsResponse], desHeaderCarrier, implicitly)
+    http.GET(url)(StandardDesHttpParser.reads[DesObligationsResponse], desHeaderCarrier(), implicitly)
   }
 }

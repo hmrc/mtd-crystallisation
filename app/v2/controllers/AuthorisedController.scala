@@ -26,15 +26,14 @@ import v2.models.auth.UserDetails
 import v2.models.errors._
 import v2.services.{EnrolmentsAuthService, MtdIdLookupService}
 
-import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.{ExecutionContext, Future}
 
-abstract class AuthorisedController(cc: ControllerComponents) extends BackendController(cc) {
+case class UserRequest[A](userDetails: UserDetails, request: Request[A]) extends WrappedRequest[A](request)
+
+abstract class AuthorisedController(cc: ControllerComponents)(implicit ec: ExecutionContext) extends BackendController(cc) {
 
   val authService: EnrolmentsAuthService
   val lookupService: MtdIdLookupService
-
-  case class UserRequest[A](userDetails: UserDetails, request: Request[A]) extends WrappedRequest[A](request)
 
   def authorisedAction(nino: String): ActionBuilder[UserRequest, AnyContent] = new ActionBuilder[UserRequest, AnyContent] {
 
@@ -43,9 +42,10 @@ abstract class AuthorisedController(cc: ControllerComponents) extends BackendCon
     override protected def executionContext: ExecutionContext = cc.executionContext
 
 
-    def predicate(mtdId: String): Predicate = Enrolment("HMRC-MTD-IT")
-      .withIdentifier("MTDITID", mtdId)
-      .withDelegatedAuthRule("mtd-it-auth")
+    def predicate(mtdId: String): Predicate =
+      Enrolment("HMRC-MTD-IT")
+        .withIdentifier("MTDITID", mtdId)
+        .withDelegatedAuthRule("mtd-it-auth")
 
     def invokeBlockWithAuthCheck[A](mtdId: String,
                                     request: Request[A],

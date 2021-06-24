@@ -19,7 +19,7 @@ package v2.controllers.requestParsers
 import java.time.LocalDate
 
 import support.UnitSpec
-import uk.gov.hmrc.domain.Nino
+import v2.models.domain.Nino
 import v2.mocks.validators.MockRetrieveObligationsValidator
 import v2.models.errors.{BadRequestError, ErrorWrapper, InvalidToDateError, NinoFormatError}
 import v2.models.requestData.{RetrieveObligationsRawData, RetrieveObligationsRequestData}

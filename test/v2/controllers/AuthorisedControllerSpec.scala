@@ -25,12 +25,13 @@ import v2.mocks.services.{MockEnrolmentsAuthService, MockMtdIdLookupService}
 import v2.models.errors._
 import v2.services.{EnrolmentsAuthService, MtdIdLookupService}
 
+import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
 class AuthorisedControllerSpec extends ControllerBaseSpec {
 
   trait Test extends MockEnrolmentsAuthService with MockMtdIdLookupService {
-    val hc = HeaderCarrier()
+    val hc: HeaderCarrier = HeaderCarrier()
 
     class TestController extends AuthorisedController(cc) {
       override val authService: EnrolmentsAuthService = mockEnrolmentsAuthService
