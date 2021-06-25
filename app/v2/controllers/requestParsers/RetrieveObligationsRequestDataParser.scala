@@ -20,8 +20,8 @@ import java.time.LocalDate
 
 import javax.inject.Inject
 import v2.utils.Logging
-import v2.models.domain.Nino
 import v2.controllers.requestParsers.validators.RetrieveObligationsValidator
+import v2.models.domain.Nino
 import v2.models.errors.{BadRequestError, ErrorWrapper}
 import v2.models.requestData.{RetrieveObligationsRawData, RetrieveObligationsRequestData}
 

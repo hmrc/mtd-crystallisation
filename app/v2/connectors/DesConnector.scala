@@ -22,8 +22,8 @@ import uk.gov.hmrc.http.{HeaderCarrier, HttpClient}
 import v2.config.AppConfig
 import v2.connectors.httpparsers.StandardDesHttpParser
 import v2.models.des.{DesCalculationIdResponse, DesObligationsResponse}
-import v2.models.domain.EmptyJsonBody
-import v2.models.requestData.{CrystallisationRequestData, IntentToCrystalliseRequestData, RetrieveObligationsRequestData}
+import v2.models.domain._
+import v2.models.requestData._
 
 import scala.concurrent.{ExecutionContext, Future}
 

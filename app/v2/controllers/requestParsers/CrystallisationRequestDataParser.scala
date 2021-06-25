@@ -17,10 +17,10 @@
 package v2.controllers.requestParsers
 
 import javax.inject.Inject
-import v2.models.domain.Nino
 import v2.utils.Logging
 import v2.controllers.requestParsers.validators.CrystallisationValidator
 import v2.models.domain.CrystallisationRequest
+import v2.models.domain.Nino
 import v2.models.errors.{BadRequestError, ErrorWrapper}
 import v2.models.requestData.{CrystallisationRawData, CrystallisationRequestData, DesTaxYear}
 
