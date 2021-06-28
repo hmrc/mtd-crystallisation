@@ -58,5 +58,10 @@ trait MockHttpClient extends MockFactory {
             excludedHeaders.forall(h => !headersForUrl.contains(h))
         }})
     }
+
+    def postEmpty[T](url: String): CallHandler[Future[T]] = {
+      (mockHttpClient.POSTEmpty[T](_: String, _: Seq[(String, String)])(_: HttpReads[T], _: HeaderCarrier, _: ExecutionContext))
+        .expects(url, *, *, *, *)
+    }
   }
 }

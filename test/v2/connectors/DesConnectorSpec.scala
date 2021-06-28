@@ -18,15 +18,13 @@ package v2.connectors
 
 import java.time.LocalDate
 
-import uk.gov.hmrc.http.HeaderCarrier
-import v2.models.domain.Nino
 import v2.mocks.{MockAppConfig, MockHttpClient}
 import v2.models.des.{DesCalculationIdResponse, DesObligationsResponse}
-import v2.models.domain.{CrystallisationRequest, EmptyJsonBody}
+import v2.models.domain.{CrystallisationRequest, Nino}
 import v2.models.errors._
 import v2.models.fixtures.Fixtures.CrystallisationObligationFixture._
 import v2.models.outcomes.DesResponse
-import v2.models.requestData.{ RetrieveObligationsRequestData, CrystallisationRequestData, DesTaxYear, IntentToCrystalliseRequestData}
+import v2.models.requestData.{CrystallisationRequestData, DesTaxYear, IntentToCrystalliseRequestData, RetrieveObligationsRequestData}
 
 import scala.concurrent.Future
 
@@ -36,31 +34,23 @@ class DesConnectorSpec extends ConnectorSpec {
   val nino: Nino    = Nino("AA123456A")
   val calcId  = "041f7e4d-87b9-4d4a-a296-3cfbdf92f7e2"
 
-  class Test extends MockHttpClient with MockAppConfig {
-
+  class Test(desEnvironmentHeaders: Option[Seq[String]]) extends MockHttpClient with MockAppConfig {
     val connector: DesConnector = new DesConnector(http = mockHttpClient, appConfig = mockAppConfig)
 
-    val desRequestHeaders: Seq[(String, String)] = Seq("Environment" -> "des-environment", "Authorization" -> s"Bearer des-token")
     MockedAppConfig.desBaseUrl returns baseUrl
     MockedAppConfig.desToken returns "des-token"
     MockedAppConfig.desEnvironment returns "des-environment"
-    MockedAppConfig.desEnvironmentHeaders returns Some(allowedDesHeaders)
+    MockedAppConfig.desEnvironmentHeaders returns desEnvironmentHeaders
   }
 
   "intent to crystallise" when {
     "a valid request is supplied" should {
-      "return a successful response with the correct correlationId" in new Test {
+      "return a successful response with the correct correlationId" in new Test(Some(allowedDesHeaders)) {
         val expected = Right(DesResponse(correlationId, DesCalculationIdResponse(calcId)))
-        implicit val hc: HeaderCarrier = HeaderCarrier(otherHeaders = otherHeaders ++ Seq("Content-Type" -> "application/json"))
-        val requiredDesHeadersPost: Seq[(String, String)] = requiredDesHeaders ++ Seq("Content-Type" -> "application/json")
 
         MockedHttpClient
-          .post(
-            s"$baseUrl/income-tax/nino/$nino/taxYear/$taxYear/tax-calculation?crystallise=true",
-            config = dummyDesHeaderCarrierConfig,
-            EmptyJsonBody,
-            requiredHeaders = requiredDesHeadersPost,
-            excludedHeaders = Seq("AnotherHeader" -> "HeaderValue"))
+          .postEmpty(
+            s"$baseUrl/income-tax/nino/${nino.nino}/taxYear/$taxYear/tax-calculation?crystallise=true")
           .returns(Future.successful(expected))
 
         performIntentToCrystalliseResult(connector) shouldBe expected
@@ -68,18 +58,12 @@ class DesConnectorSpec extends ConnectorSpec {
     }
 
     "a request returning a single error" should {
-      "return an unsuccessful response with the correct correlationId and a single error" in new Test {
+      "return an unsuccessful response with the correct correlationId and a single error" in new Test(Some(allowedDesHeaders)) {
         val expected = Left(DesResponse(correlationId, SingleError(NoSubmissionsExistError)))
-        implicit val hc: HeaderCarrier = HeaderCarrier(otherHeaders = otherHeaders ++ Seq("Content-Type" -> "application/json"))
-        val requiredDesHeadersPost: Seq[(String, String)] = requiredDesHeaders ++ Seq("Content-Type" -> "application/json")
 
         MockedHttpClient
-          .post(
-            s"$baseUrl/income-tax/nino/$nino/taxYear/$taxYear/tax-calculation?crystallise=true",
-            config = dummyDesHeaderCarrierConfig,
-            EmptyJsonBody,
-            requiredHeaders = requiredDesHeadersPost,
-            excludedHeaders = Seq("AnotherHeader" -> "HeaderValue"))
+          .postEmpty(
+            s"$baseUrl/income-tax/nino/${nino.nino}/taxYear/$taxYear/tax-calculation?crystallise=true")
           .returns(Future.successful(expected))
 
         performIntentToCrystalliseResult(connector) shouldBe expected
@@ -87,18 +71,12 @@ class DesConnectorSpec extends ConnectorSpec {
     }
 
     "a request returning multiple errors" should {
-      "return an unsuccessful response with the correct correlationId and multiple errors" in new Test {
+      "return an unsuccessful response with the correct correlationId and multiple errors" in new Test(Some(allowedDesHeaders)) {
         val expected = Left(DesResponse(correlationId, MultipleErrors(Seq(RecentSubmissionsExistError, ResidencyChangedError))))
-        implicit val hc: HeaderCarrier = HeaderCarrier(otherHeaders = otherHeaders ++ Seq("Content-Type" -> "application/json"))
-        val requiredDesHeadersPost: Seq[(String, String)] = requiredDesHeaders ++ Seq("Content-Type" -> "application/json")
 
         MockedHttpClient
-          .post(
-            s"$baseUrl/income-tax/nino/$nino/taxYear/$taxYear/tax-calculation?crystallise=true",
-            config = dummyDesHeaderCarrierConfig,
-            EmptyJsonBody,
-            requiredHeaders = requiredDesHeadersPost,
-            excludedHeaders = Seq("AnotherHeader" -> "HeaderValue"))
+          .postEmpty(
+            s"$baseUrl/income-tax/nino/${nino.nino}/taxYear/$taxYear/tax-calculation?crystallise=true")
           .returns(Future.successful(expected))
 
         performIntentToCrystalliseResult(connector) shouldBe expected
@@ -116,18 +94,12 @@ class DesConnectorSpec extends ConnectorSpec {
 
   "createCrystallisation" when {
     "a valid request is supplied" should {
-      "return a successful response with the correct correlationId" in new Test {
+      "return a successful response with the correct correlationId" in new Test(Some(allowedDesHeaders)) {
         val expected = Right(DesResponse(correlationId, ()))
-        implicit val hc: HeaderCarrier = HeaderCarrier(otherHeaders = otherHeaders ++ Seq("Content-Type" -> "application/json"))
-        val requiredDesHeadersPost: Seq[(String, String)] = requiredDesHeaders ++ Seq("Content-Type" -> "application/json")
 
         MockedHttpClient
-          .post(
-            s"$baseUrl/income-tax/calculation/nino/$nino/$taxYear/$calcId/crystallise",
-            config = dummyDesHeaderCarrierConfig,
-            EmptyJsonBody,
-            requiredHeaders = requiredDesHeadersPost,
-            excludedHeaders = Seq("AnotherHeader" -> "HeaderValue"))
+          .postEmpty(
+            s"$baseUrl/income-tax/calculation/nino/${nino.nino}/$taxYear/$calcId/crystallise")
           .returns(Future.successful(expected))
 
         val result: CreateCrystallisationConnectorOutcome = createCrystallisationResult(connector)
@@ -137,18 +109,12 @@ class DesConnectorSpec extends ConnectorSpec {
     }
 
     "a request returning a single error" should {
-      "return an unsuccessful response with the correct correlationId and a single error" in new Test {
+      "return an unsuccessful response with the correct correlationId and a single error" in new Test(Some(allowedDesHeaders)) {
         val expected = Left(DesResponse(correlationId, SingleError(RecentSubmissionsExistError)))
-        implicit val hc: HeaderCarrier = HeaderCarrier(otherHeaders = otherHeaders ++ Seq("Content-Type" -> "application/json"))
-        val requiredDesHeadersPost: Seq[(String, String)] = requiredDesHeaders ++ Seq("Content-Type" -> "application/json")
 
         MockedHttpClient
-          .post(
-            s"$baseUrl/income-tax/calculation/nino/$nino/$taxYear/$calcId/crystallise",
-            config = dummyDesHeaderCarrierConfig,
-            EmptyJsonBody,
-            requiredHeaders = requiredDesHeadersPost,
-            excludedHeaders = Seq("AnotherHeader" -> "HeaderValue"))
+          .postEmpty(
+            s"$baseUrl/income-tax/calculation/nino/${nino.nino}/$taxYear/$calcId/crystallise")
           .returns(Future.successful(expected))
 
         val result: CreateCrystallisationConnectorOutcome = createCrystallisationResult(connector)
@@ -158,18 +124,12 @@ class DesConnectorSpec extends ConnectorSpec {
     }
 
     "a request returning multiple errors" should {
-      "return an unsuccessful response with the correct correlationId and multiple errors" in new Test {
+      "return an unsuccessful response with the correct correlationId and multiple errors" in new Test(Some(allowedDesHeaders)) {
         val expected = Left(DesResponse(correlationId, MultipleErrors(Seq(RecentSubmissionsExistError, ResidencyChangedError))))
-        implicit val hc: HeaderCarrier = HeaderCarrier(otherHeaders = otherHeaders ++ Seq("Content-Type" -> "application/json"))
-        val requiredDesHeadersPost: Seq[(String, String)] = requiredDesHeaders ++ Seq("Content-Type" -> "application/json")
 
         MockedHttpClient
-          .post(
-            s"$baseUrl/income-tax/calculation/nino/$nino/$taxYear/$calcId/crystallise",
-            config = dummyDesHeaderCarrierConfig,
-            EmptyJsonBody,
-            requiredHeaders = requiredDesHeadersPost,
-            excludedHeaders = Seq("AnotherHeader" -> "HeaderValue"))
+          .postEmpty(
+            s"$baseUrl/income-tax/calculation/nino/${nino.nino}/$taxYear/$calcId/crystallise")
           .returns(Future.successful(expected))
 
         val result: CreateCrystallisationConnectorOutcome = createCrystallisationResult(connector)
@@ -194,13 +154,13 @@ class DesConnectorSpec extends ConnectorSpec {
     val to = "2018-02-28"
 
     "a valid request is supplied" should {
-      "return a successful response" in new Test {
+      "return a successful response" in new Test(Some(allowedDesHeaders)) {
 
         val expected = Right(DesResponse(correlationId, DesObligationsResponse.reads.reads(openCrystallisationObligationJsonDes).get))
 
         MockedHttpClient
           .get(
-            s"$baseUrl/enterprise/obligation-data/nino/$nino/ITSA?from=$from&to=$to",
+            s"$baseUrl/enterprise/obligation-data/nino/${nino.nino}/ITSA?from=$from&to=$to",
             config = dummyDesHeaderCarrierConfig,
             requiredHeaders = requiredDesHeaders,
             excludedHeaders = Seq("AnotherHeader" -> "HeaderValue"))
@@ -211,12 +171,12 @@ class DesConnectorSpec extends ConnectorSpec {
     }
 
     "a request returning a single error" should {
-      "return an unsuccessful response with the correct correlationId and a single error" in new Test {
+      "return an unsuccessful response with the correct correlationId and a single error" in new Test(Some(allowedDesHeaders)) {
         val expected = Left(DesResponse(correlationId, SingleError(NinoFormatError)))
 
         MockedHttpClient
           .get(
-            s"$baseUrl/enterprise/obligation-data/nino/$nino/ITSA?from=$from&to=$to",
+            s"$baseUrl/enterprise/obligation-data/nino/${nino.nino}/ITSA?from=$from&to=$to",
             config = dummyDesHeaderCarrierConfig,
             requiredHeaders = requiredDesHeaders,
             excludedHeaders = Seq("AnotherHeader" -> "HeaderValue"))
@@ -228,12 +188,12 @@ class DesConnectorSpec extends ConnectorSpec {
     }
 
     "a request returning multiple errors" should {
-      "return an unsuccessful response with the correct correlationId and multiple errors" in new Test {
+      "return an unsuccessful response with the correct correlationId and multiple errors" in new Test(Some(allowedDesHeaders)) {
         val expected = Left(DesResponse(correlationId, MultipleErrors(Seq(NinoFormatError, InvalidFromDateError))))
 
         MockedHttpClient
           .get(
-            s"$baseUrl/enterprise/obligation-data/nino/$nino/ITSA?from=$from&to=$to",
+            s"$baseUrl/enterprise/obligation-data/nino/${nino.nino}/ITSA?from=$from&to=$to",
             config = dummyDesHeaderCarrierConfig,
             requiredHeaders = requiredDesHeaders,
             excludedHeaders = Seq("AnotherHeader" -> "HeaderValue"))
