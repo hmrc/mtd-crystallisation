@@ -17,19 +17,17 @@
 package v2.connectors
 
 import javax.inject.{Inject, Singleton}
-import play.api.Logger
 import uk.gov.hmrc.http.{HeaderCarrier, HttpClient}
 import v2.config.AppConfig
 import v2.connectors.httpparsers.StandardDesHttpParser
 import v2.models.des.{DesCalculationIdResponse, DesObligationsResponse}
 import v2.models.requestData._
+import v2.utils.Logging
 
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
-class DesConnector @Inject()(http: HttpClient, appConfig: AppConfig) {
-
-  val logger: Logger = Logger(this.getClass)
+class DesConnector @Inject()(http: HttpClient, appConfig: AppConfig) extends Logging {
 
   private def desHeaderCarrier(additionalHeaders: Seq[String] = Seq.empty)(implicit hc: HeaderCarrier, correlationId: String): HeaderCarrier = {
     HeaderCarrier(

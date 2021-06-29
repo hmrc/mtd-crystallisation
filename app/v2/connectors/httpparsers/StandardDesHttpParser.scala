@@ -22,9 +22,8 @@ import uk.gov.hmrc.http.{HttpReads, HttpResponse}
 import v2.connectors.DesConnectorOutcome
 import v2.models.errors.{DownstreamError, OutboundError}
 import v2.models.outcomes.DesResponse
-import v2.utils.Logging
 
-object StandardDesHttpParser extends HttpParser with Logging {
+object StandardDesHttpParser extends HttpParser {
 
   // Return Right[DesResponse[Unit]] as success response has no body - no need to assign it a value
   implicit val readsEmpty: HttpReads[DesConnectorOutcome[Unit]] =

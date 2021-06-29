@@ -18,6 +18,7 @@ package v2.connectors
 
 import java.time.LocalDate
 
+import uk.gov.hmrc.http.HeaderCarrier
 import v2.mocks.{MockAppConfig, MockHttpClient}
 import v2.models.des.{DesCalculationIdResponse, DesObligationsResponse}
 import v2.models.domain.{CrystallisationRequest, Nino}
@@ -44,13 +45,14 @@ class DesConnectorSpec extends ConnectorSpec {
   }
 
   "intent to crystallise" when {
+    implicit val hc: HeaderCarrier = HeaderCarrier(otherHeaders = otherHeaders ++ Seq("Content-Type" -> "application/json"))
     "a valid request is supplied" should {
       "return a successful response with the correct correlationId" in new Test(Some(allowedDesHeaders)) {
         val expected = Right(DesResponse(correlationId, DesCalculationIdResponse(calcId)))
 
         MockedHttpClient
           .postEmpty(
-            s"$baseUrl/income-tax/nino/${nino.nino}/taxYear/$taxYear/tax-calculation?crystallise=true")
+            url = s"$baseUrl/income-tax/nino/${nino.nino}/taxYear/$taxYear/tax-calculation?crystallise=true")
           .returns(Future.successful(expected))
 
         performIntentToCrystalliseResult(connector) shouldBe expected
@@ -63,7 +65,7 @@ class DesConnectorSpec extends ConnectorSpec {
 
         MockedHttpClient
           .postEmpty(
-            s"$baseUrl/income-tax/nino/${nino.nino}/taxYear/$taxYear/tax-calculation?crystallise=true")
+            url = s"$baseUrl/income-tax/nino/${nino.nino}/taxYear/$taxYear/tax-calculation?crystallise=true")
           .returns(Future.successful(expected))
 
         performIntentToCrystalliseResult(connector) shouldBe expected
@@ -76,7 +78,7 @@ class DesConnectorSpec extends ConnectorSpec {
 
         MockedHttpClient
           .postEmpty(
-            s"$baseUrl/income-tax/nino/${nino.nino}/taxYear/$taxYear/tax-calculation?crystallise=true")
+            url = s"$baseUrl/income-tax/nino/${nino.nino}/taxYear/$taxYear/tax-calculation?crystallise=true")
           .returns(Future.successful(expected))
 
         performIntentToCrystalliseResult(connector) shouldBe expected
@@ -93,13 +95,14 @@ class DesConnectorSpec extends ConnectorSpec {
   }
 
   "createCrystallisation" when {
+    implicit val hc: HeaderCarrier = HeaderCarrier(otherHeaders = otherHeaders ++ Seq("Content-Type" -> "application/json"))
     "a valid request is supplied" should {
       "return a successful response with the correct correlationId" in new Test(Some(allowedDesHeaders)) {
         val expected = Right(DesResponse(correlationId, ()))
 
         MockedHttpClient
           .postEmpty(
-            s"$baseUrl/income-tax/calculation/nino/${nino.nino}/$taxYear/$calcId/crystallise")
+            url = s"$baseUrl/income-tax/calculation/nino/${nino.nino}/$taxYear/$calcId/crystallise")
           .returns(Future.successful(expected))
 
         val result: CreateCrystallisationConnectorOutcome = createCrystallisationResult(connector)
@@ -114,7 +117,7 @@ class DesConnectorSpec extends ConnectorSpec {
 
         MockedHttpClient
           .postEmpty(
-            s"$baseUrl/income-tax/calculation/nino/${nino.nino}/$taxYear/$calcId/crystallise")
+            url = s"$baseUrl/income-tax/calculation/nino/${nino.nino}/$taxYear/$calcId/crystallise")
           .returns(Future.successful(expected))
 
         val result: CreateCrystallisationConnectorOutcome = createCrystallisationResult(connector)
@@ -129,7 +132,7 @@ class DesConnectorSpec extends ConnectorSpec {
 
         MockedHttpClient
           .postEmpty(
-            s"$baseUrl/income-tax/calculation/nino/${nino.nino}/$taxYear/$calcId/crystallise")
+            url = s"$baseUrl/income-tax/calculation/nino/${nino.nino}/$taxYear/$calcId/crystallise")
           .returns(Future.successful(expected))
 
         val result: CreateCrystallisationConnectorOutcome = createCrystallisationResult(connector)
@@ -160,7 +163,7 @@ class DesConnectorSpec extends ConnectorSpec {
 
         MockedHttpClient
           .get(
-            s"$baseUrl/enterprise/obligation-data/nino/${nino.nino}/ITSA?from=$from&to=$to",
+            url = s"$baseUrl/enterprise/obligation-data/nino/${nino.nino}/ITSA?from=$from&to=$to",
             config = dummyDesHeaderCarrierConfig,
             requiredHeaders = requiredDesHeaders,
             excludedHeaders = Seq("AnotherHeader" -> "HeaderValue"))
@@ -176,7 +179,7 @@ class DesConnectorSpec extends ConnectorSpec {
 
         MockedHttpClient
           .get(
-            s"$baseUrl/enterprise/obligation-data/nino/${nino.nino}/ITSA?from=$from&to=$to",
+            url = s"$baseUrl/enterprise/obligation-data/nino/${nino.nino}/ITSA?from=$from&to=$to",
             config = dummyDesHeaderCarrierConfig,
             requiredHeaders = requiredDesHeaders,
             excludedHeaders = Seq("AnotherHeader" -> "HeaderValue"))
@@ -193,7 +196,7 @@ class DesConnectorSpec extends ConnectorSpec {
 
         MockedHttpClient
           .get(
-            s"$baseUrl/enterprise/obligation-data/nino/${nino.nino}/ITSA?from=$from&to=$to",
+            url = s"$baseUrl/enterprise/obligation-data/nino/${nino.nino}/ITSA?from=$from&to=$to",
             config = dummyDesHeaderCarrierConfig,
             requiredHeaders = requiredDesHeaders,
             excludedHeaders = Seq("AnotherHeader" -> "HeaderValue"))
