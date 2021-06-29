@@ -19,13 +19,13 @@ package v2.controllers.requestParsers
 import java.time.LocalDate
 
 import javax.inject.Inject
-import play.api.Logger.logger
-import uk.gov.hmrc.domain.Nino
+import v2.utils.Logging
 import v2.controllers.requestParsers.validators.RetrieveObligationsValidator
+import v2.models.domain.Nino
 import v2.models.errors.{BadRequestError, ErrorWrapper}
 import v2.models.requestData.{RetrieveObligationsRawData, RetrieveObligationsRequestData}
 
-class RetrieveObligationsRequestDataParser @Inject()(validator: RetrieveObligationsValidator) {
+class RetrieveObligationsRequestDataParser @Inject()(validator: RetrieveObligationsValidator) extends Logging {
 
   def parseRequest(data: RetrieveObligationsRawData)(implicit correlationId: String): Either[ErrorWrapper, RetrieveObligationsRequestData] = {
 

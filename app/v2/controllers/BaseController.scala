@@ -16,12 +16,10 @@
 
 package v2.controllers
 
-import play.api.Logger
 import play.api.mvc.Result
+import v2.utils.Logging
 
-trait BaseController {
-
-  protected val logger = Logger(this.getClass)
+trait BaseController extends Logging {
 
   implicit class Response(result: Result) {
 

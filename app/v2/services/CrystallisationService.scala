@@ -21,7 +21,7 @@ import uk.gov.hmrc.http.HeaderCarrier
 import v2.connectors.DesConnector
 import v2.models.errors._
 import v2.models.outcomes.DesResponse
-import v2.models.requestData.{ RetrieveObligationsRequestData, CrystallisationRequestData, IntentToCrystalliseRequestData}
+import v2.models.requestData.{RetrieveObligationsRequestData, CrystallisationRequestData, IntentToCrystalliseRequestData}
 
 import scala.concurrent.{ExecutionContext, Future}
 

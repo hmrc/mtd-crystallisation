@@ -24,26 +24,32 @@ import play.api.{ConfigLoader, Configuration}
 import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
 
 trait AppConfig {
-  def desBaseUrl: String
-
+  // MTD ID Lookup Config
   def mtdIdBaseUrl: String
 
+  // DES Config
+  def desBaseUrl: String
   def desEnv: String
-
+  def desEnvironmentHeaders: Option[Seq[String]]
   def desToken: String
 
+  // API Config
   def confidenceLevelConfig: ConfidenceLevelConfig
 }
 
 @Singleton
 class AppConfigImpl @Inject()(config: ServicesConfig, configuration: Configuration) extends AppConfig {
-
+  // MTD ID Lookup Config
   val mtdIdBaseUrl: String = config.baseUrl("mtd-id-lookup")
+
+  // DES Config
   val desBaseUrl: String   = config.baseUrl("des")
   val desEnv: String       = config.getString("microservice.services.des.env")
+  val desEnvironmentHeaders: Option[Seq[String]] = configuration.getOptional[Seq[String]]("microservice.services.des.environmentHeaders")
   val desToken: String     = config.getString("microservice.services.des.token")
-  val confidenceLevelConfig: ConfidenceLevelConfig = configuration.get[ConfidenceLevelConfig](s"api.confidence-level-check")
 
+  // API Config
+  val confidenceLevelConfig: ConfidenceLevelConfig = configuration.get[ConfidenceLevelConfig](s"api.confidence-level-check")
 }
 
 trait FixedConfig {

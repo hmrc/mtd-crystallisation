@@ -17,9 +17,9 @@
 package v2.connectors.httpparsers
 
 import play.api.http.Status._
-import play.api.libs.json.{ JsValue, Json, Reads }
+import play.api.libs.json.{JsValue, Json, Reads}
 import support.UnitSpec
-import uk.gov.hmrc.http.{ HttpReads, HttpResponse }
+import uk.gov.hmrc.http.{HttpReads, HttpResponse}
 import v2.connectors.DesConnectorOutcome
 import v2.models.errors._
 import v2.models.outcomes.DesResponse
@@ -45,8 +45,8 @@ class StandardDesHttpParserSpec extends UnitSpec {
   val data                     = "someData"
   val desExpectedJson: JsValue = Json.obj("data" -> data)
 
-  val desModel    = DummyModel(data)
-  val desResponse = DesResponse(correlationId, desModel)
+  val desModel: DummyModel    = DummyModel(data)
+  val desResponse: DesResponse[DummyModel] = DesResponse(correlationId, desModel)
 
   "The generic HTTP parser" when {
     val httpReads: HttpReads[DesConnectorOutcome[DummyModel]] = implicitly
@@ -86,7 +86,7 @@ class StandardDesHttpParserSpec extends UnitSpec {
     handleUnexpectedResponse(httpReads)
   }
 
-  val singleErrorJson = Json.parse(
+  val singleErrorJson: JsValue = Json.parse(
     """
       |{
       |   "code": "CODE",
@@ -95,7 +95,7 @@ class StandardDesHttpParserSpec extends UnitSpec {
     """.stripMargin
   )
 
-  val multipleErrorsJson = Json.parse(
+  val multipleErrorsJson: JsValue = Json.parse(
     """
       |{
       |   "failures": [
@@ -112,7 +112,7 @@ class StandardDesHttpParserSpec extends UnitSpec {
     """.stripMargin
   )
 
-  val malformedErrorJson = Json.parse(
+  val malformedErrorJson: JsValue = Json.parse(
     """
       |{
       |   "coed": "CODE",

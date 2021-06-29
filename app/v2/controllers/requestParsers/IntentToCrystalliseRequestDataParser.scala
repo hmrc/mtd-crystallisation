@@ -17,13 +17,13 @@
 package v2.controllers.requestParsers
 
 import javax.inject.Inject
-import play.api.Logger.logger
-import uk.gov.hmrc.domain.Nino
+import v2.utils.Logging
 import v2.controllers.requestParsers.validators.IntentToCrystalliseValidator
+import v2.models.domain.Nino
 import v2.models.errors.{BadRequestError, ErrorWrapper}
 import v2.models.requestData.{DesTaxYear, IntentToCrystalliseRawData, IntentToCrystalliseRequestData}
 
-class IntentToCrystalliseRequestDataParser @Inject()(validator: IntentToCrystalliseValidator) {
+class IntentToCrystalliseRequestDataParser @Inject()(validator: IntentToCrystalliseValidator) extends Logging {
 
   def parseRequest(data: IntentToCrystalliseRawData)(implicit correlationId: String): Either[ErrorWrapper, IntentToCrystalliseRequestData] = {
     validator.validate(data) match {

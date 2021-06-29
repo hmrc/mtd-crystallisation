@@ -18,7 +18,7 @@ package v2.controllers
 
 import play.api.libs.json.Json
 import play.api.mvc.Result
-import uk.gov.hmrc.domain.Nino
+import v2.models.domain.Nino
 import uk.gov.hmrc.http.HeaderCarrier
 import v2.mocks.requestParsers.MockIntentToCrystalliseRequestDataParser
 import v2.mocks.services.{MockAuditService, MockCrystallisationService, MockEnrolmentsAuthService, MockMtdIdLookupService}
@@ -46,7 +46,7 @@ class IntentToCrystalliseControllerSpec
   private val calculationId = "041f7e4d-87b9-4d4a-a296-3cfbdf92f7e2"
 
   trait Test {
-    val hc = HeaderCarrier()
+    val hc: HeaderCarrier = HeaderCarrier()
 
     val controller = new IntentToCrystalliseController(
       authService = mockEnrolmentsAuthService,
@@ -84,7 +84,7 @@ class IntentToCrystalliseControllerSpec
         header("Location", result).isEmpty shouldBe false
         header("Location", result) shouldBe Some(s"/self-assessment/ni/$nino/calculations/$calculationId")
 
-        val detail = IntentToCrystalliseAuditDetail("Individual", None, nino, taxYear, correlationId, Some(calculationId),
+        val detail: IntentToCrystalliseAuditDetail = IntentToCrystalliseAuditDetail("Individual", None, nino, taxYear, correlationId, Some(calculationId),
           IntentToCrystalliseAuditResponse(SEE_OTHER, None))
         val event: AuditEvent[IntentToCrystalliseAuditDetail] = AuditEvent[IntentToCrystalliseAuditDetail]("submitIntentToCrystallise",
           "intent-to-crystallise", detail)
@@ -103,7 +103,7 @@ class IntentToCrystalliseControllerSpec
         status(result) shouldBe BAD_REQUEST
         contentAsJson(result) shouldBe Json.toJson(ErrorWrapper(correlationId, NinoFormatError, None))
 
-        val detail = IntentToCrystalliseAuditDetail("Individual", None, nino, taxYear, header("X-CorrelationId", result).get, None,
+        val detail: IntentToCrystalliseAuditDetail = IntentToCrystalliseAuditDetail("Individual", None, nino, taxYear, header("X-CorrelationId", result).get, None,
           IntentToCrystalliseAuditResponse(BAD_REQUEST, Some(Seq(AuditError(NinoFormatError.code)))))
         val event: AuditEvent[IntentToCrystalliseAuditDetail] = AuditEvent[IntentToCrystalliseAuditDetail]("submitIntentToCrystallise",
           "intent-to-crystallise", detail)
@@ -123,7 +123,7 @@ class IntentToCrystalliseControllerSpec
         contentAsJson(result) shouldBe Json.toJson(ErrorWrapper(correlationId, BadRequestError, Some(Seq(NinoFormatError, TaxYearFormatError))))
         header("X-CorrelationId", result).nonEmpty shouldBe true
 
-        val detail = IntentToCrystalliseAuditDetail("Individual", None, nino, taxYear, header("X-CorrelationId", result).get, None,
+        val detail: IntentToCrystalliseAuditDetail = IntentToCrystalliseAuditDetail("Individual", None, nino, taxYear, header("X-CorrelationId", result).get, None,
           IntentToCrystalliseAuditResponse(BAD_REQUEST, Some(Seq(AuditError(NinoFormatError.code), AuditError(TaxYearFormatError.code)))))
         val event: AuditEvent[IntentToCrystalliseAuditDetail] = AuditEvent[IntentToCrystalliseAuditDetail]("submitIntentToCrystallise",
           "intent-to-crystallise", detail)
@@ -195,7 +195,7 @@ class IntentToCrystalliseControllerSpec
         contentAsJson(result) shouldBe Json.toJson(error)
         header("X-CorrelationId", result) shouldBe Some(correlationId)
 
-        val detail = IntentToCrystalliseAuditDetail("Individual", None, nino, taxYear, header("X-CorrelationId", result).get, None,
+        val detail: IntentToCrystalliseAuditDetail = IntentToCrystalliseAuditDetail("Individual", None, nino, taxYear, header("X-CorrelationId", result).get, None,
           IntentToCrystalliseAuditResponse(expectedStatus, Some(Seq(AuditError(error.code)))))
         val event: AuditEvent[IntentToCrystalliseAuditDetail] = AuditEvent[IntentToCrystalliseAuditDetail]("submitIntentToCrystallise",
           "intent-to-crystallise", detail)
@@ -220,7 +220,7 @@ class IntentToCrystalliseControllerSpec
         contentAsJson(result) shouldBe Json.toJson(error)
         header("X-CorrelationId", result) shouldBe Some(correlationId)
 
-        val detail = IntentToCrystalliseAuditDetail("Individual", None, nino, taxYear, header("X-CorrelationId", result).get, None,
+        val detail: IntentToCrystalliseAuditDetail = IntentToCrystalliseAuditDetail("Individual", None, nino, taxYear, header("X-CorrelationId", result).get, None,
           IntentToCrystalliseAuditResponse(expectedStatus, Some(Seq(AuditError(error.code)))))
         val event: AuditEvent[IntentToCrystalliseAuditDetail] = AuditEvent[IntentToCrystalliseAuditDetail]("submitIntentToCrystallise",
           "intent-to-crystallise", detail)

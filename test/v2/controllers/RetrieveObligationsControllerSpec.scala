@@ -20,7 +20,7 @@ import java.time.LocalDate
 
 import play.api.libs.json.Json
 import play.api.mvc.Result
-import uk.gov.hmrc.domain.Nino
+import v2.models.domain.Nino
 import uk.gov.hmrc.http.HeaderCarrier
 import v2.mocks.requestParsers.MockRetrieveObligationsRequestDataParser
 import v2.mocks.services.{MockCrystallisationService, MockEnrolmentsAuthService, MockMtdIdLookupService}
@@ -47,7 +47,7 @@ class RetrieveObligationsControllerSpec
   private val correlationId = "X-123"
 
   trait Test {
-    val hc = HeaderCarrier()
+    val hc: HeaderCarrier = HeaderCarrier()
 
     val controller = new RetrieveObligationsController(
       authService = mockEnrolmentsAuthService,
